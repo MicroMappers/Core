@@ -1,0 +1,7 @@
+{
+    "name": "Image Clicker",
+    "short_name": "MM_ImageClicker",
+    "thumbnail": "https://lh5.googleusercontent.com/-yA3GKpjQCtw/UdudH_9C9-I/AAAAAAAAH40/pyck-g7Bp5E/s512/topictagimage.png",
+    "description": "Categorize images with its tweet or SMS",
+    "question": "Please tag the following pictures based on the category or categories that best describes the pictures included in the tweet"
+}

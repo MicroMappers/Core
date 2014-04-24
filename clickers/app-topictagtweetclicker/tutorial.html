@@ -1,0 +1,60 @@
+<div class="row">
+    <div class="span12">
+        <div id="modal" class="modal hide fade">
+            <div class="modal-header">
+                <h3>Tweet Clicker Tutorial</h3>
+            </div>
+            <div id="0" class="modal-body" style="display:none">
+                <p>Thank you for volunteering!</p>
+                <p><strong>Hi!</strong> The United Nations in the Philippines needs your help! Please join our efforts to tag tweets related to the devastating typhoon Yolanda so the UN can gain a better understanding of the situation. This is only the second time that MicroMappers is being tested, so the platform is not perfect. Thanks for your patience and kind assistance. More info at <a href="http://MicroMappers.com" target="_blank">http://MicroMappers.com</a>
+               </p>
+            </div>
+            <div id="1" class="modal-body" style="display:none">
+                <p>Simply read a tweet and select click on the one category that best describes the tweet:
+                <ul>
+                    <li><strong>Not Relevant / Skip / RTs: tweet is not relevant to disaster response.</strong></li>
+                    <li><strong>Needs / Requests for Help: tweet refers to needs and requests for help, for information, food, water, money, etc.</strong></li>
+                    <li><strong>Infrastructure Damage: tweet refers to building damage, road damage, etc.</strong></li>
+                    <li><strong>Population Displacement: tweet refers to the displacement of individuals due to Typhoon.</strong></li>
+                    <li><strong>Relevant but Other: tweet is relevant to disaster response but not related to Needs / Damage.</strong></li>
+                    <li><strong>Not in English: the tweet is not in English.</strong></li>
+                </ul>
+                </p>
+                <p>While a tweet may fall in more than one category, simply click on the one category that best describes the tweet.</p>
+                <p>If you want to keep track of your progress, make sure to login.</p>
+            </div>
+            <div class="modal-footer">
+                <a id="prevBtn" href="#" onclick="showStep('prev')" class="btn">Previous</a>
+                <a id="nextBtn" href="#" onclick="showStep('next')" class="btn btn-success">Next</a>
+                <a id="startContrib" href="../MM_TextClicker/newtask" class="btn btn-primary" style="display:none"><i class="icon-thumbs-up"></i> Start clicking!</a>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var step = -1;
+    function showStep(action) {
+        $("#" + step).hide();
+        if (action == 'next') {
+            step = step + 1;
+        }
+        if (action == 'prev') {
+            step = step - 1;
+        }
+        if (step == 0) {
+            $("#prevBtn").hide();
+        }
+        else {
+            $("#prevBtn").show();
+        }
+
+        if (step == 2 ) {
+            $("#nextBtn").hide();
+            $("#startContrib").show();
+        }
+        $("#" + step).show();
+    }
+
+    showStep('next');
+    $("#modal").modal('show');
+</script>

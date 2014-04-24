@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Micromappers - Tweet Clicker</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Bootstrap -->
+<link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
+<style type="text/css">
+	   .container {min-height: 600px}
+
+	   h1,h2,h3,h4,h5,h6 {font-family: 'Museo Slab', Arial, Helvetica, sans-serif;font-weight: normal;}
+	   h1 {font-size: 24px; line-height: 26px;}
+	   h2 {font-size: 18px; line-height: normal;}
+	   h3 {font-size: 15px; line-height: normal;}
+     .alignright {float: right!important;}
+     .alignleft {float: left!important;}
+     .aligncenter {display: block; margin: 0 auto; clear: both}
+     .textright {text-align: right!important;}
+     .textleft {text-align: left!important;}
+     .clearleft {clear: left;}
+     .clearright {clear: right;}
+     .clearboth {clear: both;}
+     .smalltxt {font-size: 11px}
+
+       #iphone {
+       max-width: 100%;
+       background: url(img/iphone.png) right top no-repeat;
+       width: 270px; /*880px*/ 
+       height: 404px; /*713px*/
+       margin-top: 0;
+       float:left;
+       padding:46px 279px 200px 331px; 
+       }
+
+       #tweet {
+       max-width: 100%;
+       background-color: #fff;
+       width:254px;
+       height:170px;
+       float: :left;
+       padding: 8px;
+       }
+
+      #tweet .avatar {
+        max-width: 100%;
+        width: 38px;
+        height: 38px;
+        float: left;
+        padding-right: 5px;
+      }
+
+      #tweet .tweettxt {
+        font-size: 15px;
+        line-height: 20px;
+      }
+
+      #tweet .dateTime {
+        clear: left;
+        font-size: 11px!important;
+        float: left;
+      }
+
+       #tweetDescription {
+       max-width: 100%;
+       background-color: #ddd;
+       width:250px;
+       height:262px;
+       float: :left;        
+       padding: 10px;
+       }
+
+       #tweetDescription {font-size: 15px!important; line-height: 24px;}
+
+       #tweetDescription ul {margin: 0; padding: 0 10px 10px;}
+       #tweetDescription ul li{background: url(img/radio-btn.png) left center no-repeat; padding: 0 0 0 36px; list-style: none; line-height: 36px;}
+       #tweetDescription ul li:hover{background: url(img/radio-btn_hover.png) left center no-repeat; cursor: pointer;}
+
+       #tweetDescription .radio {padding-left: 30px;}
+
+       #tweetDescription .radioBtn {
+       background: url(img/radio-button.png) left top no-repeat;
+       width: 24px;
+       height: 24px;
+       float: left;
+       }
+
+       #tweetDescription .radioBtn:hover {
+       background: url(img/radio-button-hover.png) left top no-repeat;
+       width: 24px;
+       height: 24px;
+       float: left;
+       }
+    
+  	   input {
+           max-width: 100%;
+       }
+       .btn {
+           margin: 0 6px 0 0;
+       }
+</style>
+</head>
+<body>
+	<div class="container">
+	<div class="row skeleton">
+    <div class="span12">
+          <h1>Tweet Clicker</h1>
+    </div>
+
+       <div class="span11">
+         <div id="iphone">    
+
+			      <div id="tweet">
+                 <div class="tweettxt">Tweet goes here. #disaster #2013 dwagnlwenprwanbreoambeianri  mniewnabnewipabn</div>
+				    </div>
+
+            <div id="tweetDescription">
+               <p><strong>What does this tweet refer to?</strong></p>
+                  <ul>
+                     <li>Caution or Advice.</li>
+                     <li>Infrastructure Damage.</li>
+                     <li>Casualties or Injuries.</li>
+                     <li>Needs or Requests for Help.</li>
+                     <li>Offers of Help.</li>
+                     <li>None of the above.</li>
+                  </ul>
+            </div>
+			   </div>
+       </div>
+
+     <div class="span12">
+     <div class="span11 well well-small" style="margin-top:20px;">
+        <p>You are working now on task: <span id="task-id" class="label label-warning">#</span></p>
+          <p>You have completed: <span id="done" class="label label-info"></span> tweets from
+          <span id="total" class="label label-inverse"></span></p>
+          
+          <div class="progress progress-striped">
+             <div id="progress" rel="tooltip" title="#" class="bar" style="width: 0%;"></div>
+          </div>
+
+          <span class="label label-warning"><i class="icon-bullhorn"></i> Tip</span> If you need help, check the 
+             <div style="padding-top:5px; text-align:left;"><a class="btn btn-primary" href="#"><i class="icon-question-sign"></i> Tutorial</a></div>
+      </div>
+     </div>
+
+	</div>
+  </div>	
+<script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+</body>
+</html>

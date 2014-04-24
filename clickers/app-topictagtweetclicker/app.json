@@ -1,0 +1,9 @@
+{
+    "name": "Text Clicker",
+    "short_name": "MM_TextClicker",
+    "thumbnail": "https://lh4.googleusercontent.com/-5xX_873TFSk/Udylmx0ITjI/AAAAAAAAH5I/PBhna-lJeLE/s421/topictagtweet.png",
+    "description": "Classifying tweets and SMSs",
+    "question": "Please tag the following tweet or SMS based on the category or categories that best describes the link(s) included in the tweet/Sms",
+    "cat":"answer1, answer2, answer3, answer4, answer5, answer6",
+    "datasourceURL":"PabloPh_latest_UN_051212_5_38PM.csv"
+}

@@ -1,0 +1,476 @@
+<style type="text/css">
+
+       h1,h2,h3,h4,h5,h6 {font-family: 'Museo Slab', Arial, Helvetica, sans-serif;font-weight: normal;}
+       h1 {font-size: 24px; line-height: 26px;}
+       h2 {font-size: 18px; line-height: normal;}
+       h3 {font-size: 15px; line-height: normal;}
+       .alignright {float: right;}
+       .alignleft {float: left;}
+       .aligncenter {display: block; margin: 0 auto; clear: both}
+       .clearleft {clear: left;}
+       .clearright {clear: right;}
+       .clearboth {clear: both;}
+       .subheader {
+           margin: 10px 0 0 200px;
+       }
+       #iphone {
+           max-width: 100%;
+           background: url(../../../static/img/micromappers/videoClicker/iep1Ph2.png) left top no-repeat;
+           width: 618px; 
+           height: 455px;
+           margin-top: 0px;
+           float:left;
+       }
+       #player {
+           max-width: 100%;
+           width: 355px;
+           height: 280px;
+           padding: 59px 0 0 175px;
+           float:left;
+       }
+       ul#damage {
+           padding: 59px 0 0 10px;
+           margin:0;
+           float:left;
+       }
+       ul#damage>a>li {
+           padding: 0 0 36px 0;
+           list-style: none;
+       }
+       ul#damage>a>li.none {
+           background: url(../../../static/img/micromappers/videoClicker/HwDqdCo.png) left top no-repeat;
+           width: 58px;
+           height: 69px;
+       }
+       ul#damage>a>li.mild {
+           background: url(../../../static/img/micromappers/videoClicker/eoW18FR.png) left top no-repeat;
+           width: 57px;
+           height: 71px;
+       }
+       ul#damage>a>li.severe {
+           background: url(../../../static/img/micromappers/videoClicker/XweIk21.png) left top no-repeat;
+           width: 57px;
+           height: 67px;
+       }
+	   ul#damage>a>li:hover.none {
+            background: url(../../../static/img/micromappers/videoClicker/kjhztpj.png) left top no-repeat;
+            width: 58px;
+            height: 69px;
+            filter: brightness(0.8);
+            -webkit-filter: brightness(0.8);
+            -moz-filter: brightness(0.8);
+            -o-filter: brightness(0.8);
+            -ms-filter: brightness(0.8);
+	   }
+	   ul#damage>a>li:hover.mild {
+	       background: url(../../../static/img/micromappers/videoClicker/dMPYuJC.png) left top no-repeat;
+		   width: 57px;
+		   height: 71px;
+           filter: brightness(0.8);
+            -webkit-filter: brightness(0.8);
+            -moz-filter: brightness(0.8);
+            -o-filter: brightness(0.8);
+            -ms-filter: brightness(0.8);
+	   }
+	   ul#damage>a>li:hover.severe {
+	       background: url(../../../static/img/micromappers/videoClicker/kZDwZMK.png) left top no-repeat;
+		   width: 57px;
+		   height: 67px;
+           filter: brightness(0.8);
+            -webkit-filter: brightness(0.8);
+            -moz-filter: brightness(0.8);
+            -o-filter: brightness(0.8);
+            -ms-filter: brightness(0.8);
+	   }
+
+       ul#damage>a>li:active.none {
+            background: url(../../../static/img/micromappers/videoClicker/kjhztpj.png) left top no-repeat;
+            width: 58px;
+            height: 69px;
+            filter: brightness(0.4);
+            -webkit-filter: brightness(0.4);
+            -moz-filter: brightness(0.4);
+            -o-filter: brightness(0.4);
+            -ms-filter: brightness(0.4);
+	   }
+
+       ul#damage>a>li:active.mild {
+	       background: url(../../../static/img/micromappers/videoClicker/dMPYuJC.png) left top no-repeat;
+		   width: 57px;
+		   height: 71px;
+           filter: brightness(0.4);
+            -webkit-filter: brightness(0.4);
+            -moz-filter: brightness(0.4);
+            -o-filter: brightness(0.4);
+            -ms-filter: brightness(0.4);
+	   }
+	   ul#damage>a>li:active.severe {
+	       background: url(../../../static/img/micromappers/videoClicker/kZDwZMK.png) left top no-repeat;
+		   width: 57px;
+		   height: 67px;
+           filter: brightness(0.4);
+            -webkit-filter: brightness(0.4);
+            -moz-filter: brightness(0.4);
+            -o-filter: brightness(0.4);
+            -ms-filter: brightness(0.4);
+	   }
+       #tagged {
+           margin: -90px 0 0 324px;
+           float:left;
+       }
+       input {
+           max-width: 100%;
+       }
+       .btn {
+           margin: 0 6px 0 0;
+       }
+    </style>
+
+
+
+<div class="row">
+    <!-- Success and Error Messages for the user -->
+    <div class="span6 offset2" style="height:50px">
+        <div id="success" style="display:none;">
+
+        </div>
+        <div id="loading"  style="display:none;">
+
+        </div>
+        <div id="taskcompleted" class="alert alert-info" style="display:none;">
+            <strong>The task has been completed!</strong> Thanks a lot!
+        </div>
+        <div id="finish" class="alert alert-success" style="display:none;">
+            <strong>Congratulations!</strong> You have participated in all available tasks!
+            <br/>
+            <div class="alert-actions">
+                <a class="btn small" href="/">Go back</a>
+                <a class="btn small" href="/app">or, Check other applications</a>
+            </div>
+        </div>
+        <div id="error" class="alert alert-error" style="display:none;">
+            <a class="close">×</a>
+            <strong>Error!</strong> Something went wrong, please contact the site administrators
+        </div>
+    </div> <!-- End Success and Error Messages for the user -->
+</div> <!-- End of Row -->
+
+<!--
+    Task DOM for loading the Tweets
+    It uses the class="skeleton" to identify the elements that belong to the
+    task.
+-->
+<div class="row">
+    <div class="span12" style="background-color: #ffffff; border: 0px;padding-bottom: 10px;margin-top: -100px;">
+         <h1><a href="/app/MM_VideoClicker/">Video Clicker</a> : MicroMappers</h1>
+     </div>
+</div>
+<div class="row"> <!-- Start Skeleton Row-->
+    <div class="span12" style="margin-top:-40px;"><!-- Start of Question and Submission DIV (column) -->
+        <div class="row">
+            <div class="span3">
+                <div style="text-align:center;margin-right:120px;padding-bottom: 10px;">
+                        <a class="btn btn-primary" href="../tutorial" ><i class="icon-question-sign"></i> Tutorial</a>
+                </div>
+
+                <div style="
+    margin-right: 4px;
+    /* right: 5px; */
+    padding: 7px;
+    background-color: #B2D57A;
+    /* border-color: #292828; */
+    border: 1px solid #D5CECE;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px; border-radius: 4px; -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05); -moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05); box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
+">
+                    <input type="hidden" id="task-id">
+                    <p>Completed: <span id="done" class="label label-info"></span> out of
+                    <span id="total" class="label label-inverse"></span> Clicks</p>
+                    <p><span id="remain" class="label label-info"></span> Clicks remaining!</p>
+                    <p><b>Rank : <span id="rank"></span></b></p>
+                </div>
+            </div>
+            <div class="span9">
+                <h2 class="subheader">How much damage do you see in this video:</h2>
+                <div id="iphone">
+                    <div id="player"></div>
+                       <ul id="damage">
+                          <a href="#"><li class="none btn-answer" value="severe"></li></a>
+                          <a href="#"><li class="mild btn-answer" value="mild"></li></a>
+                          <a href="#"><li class="severe btn-answer" value="none"></li></a>
+                       </ul>
+
+                </div>
+                <br/>
+                <div class="clearboth"></div>
+            </div>
+
+        </div>
+    </div>
+
+        <!-- Feedback items for the user -->
+
+    <!--
+        This application uses Disqus to allow users to provide some feedback.
+        The next section includes a button that when a user clicks on it will
+        load the comments, if any, for the given task
+    -->
+    <div class="span12" style="bottom: 0px;">
+    <div style="margin-top:100px;width: 0%;color: #ffffff">
+
+     </div>
+</div>
+
+
+    <div id="disqus_show_btn" style="margin-top:5px;display:none">
+        <button class="btn btn-primary btn-large btn-disqus" onclick="loadDisqus()"><i class="icon-comments"></i> Show comments</button>
+        <button class="btn btn-large btn-disqus" onclick="loadDisqus()" style="display:none"><i class="icon-comments"></i> Hide comments</button>
+    </div><!-- End of Disqus Button section -->
+        <!-- Disqus thread for the given task -->
+    <div id="disqus_thread" style="margin-top:5px;display:none"></div>
+</div><!-- End of Skeleton Row -->
+
+<script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    function loadDisqus() {
+    $("#disqus_thread").toggle();
+    $(".btn-disqus").toggle();
+    var disqus_shortname = 'pybossa'; // required: replace example with your forum shortname
+    //var disqus_identifier = taskId;
+    var disqus_developer = 1;
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+    }
+
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+<script>
+    var currentDefer ;
+    var severerRec = "";
+    var mildRec = "";
+    var localTask;
+    var tag = document.createElement('script');
+    var player;
+    var videoId;
+    tag.src = "https://www.youtube.com/iframe_api";
+    var firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+      // 3. This function creates an <iframe> (and YouTube player)
+      //    after the API code downloads.
+
+
+
+      function onYouTubeIframeAPIReady() {
+         if(typeof(videoId) != "undefined"){
+             player = new YT.Player('player', {
+                      height: '260',
+                      width: '260',
+                      videoId: videoId,
+                      events: {
+                        'onStateChange': onPlayerStateChange
+                      }
+                    });
+         }
+          else{
+             setTimeout(onYouTubeIframeAPIReady, 1000);
+         }
+      }
+
+  // 5. The API calls this function when the player's state changes.
+  //    The function indicates that when playing a video (state=1),
+  //    the player should play for six seconds and then stop.
+  var done = false;
+  function onPlayerStateChange(event) {
+    if (event.data == YT.PlayerState.PLAYING && !done) {
+    //  setTimeout(stopVideo, 6000);
+      done = true;
+    }
+
+      if(event.data == YT.PlayerState.PAUSED){
+            recordTimeStamp(event)
+
+      }
+
+      if(event.data == YT.PlayerState.ENDED){
+            // go to next task
+          doFinalSubmit();
+      }
+  }
+
+  function recordTimeStamp(event){
+        if(localTask.damage =="severe" ){
+            if(severerRec !=""){
+                severerRec = severerRec + ","
+            }
+            severerRec = severerRec +  player.getCurrentTime() ;
+
+        }
+      if(localTask.damage =="mild" ){
+          if(mildRec !=""){
+                mildRec = mildRec + ","
+            }
+            mildRec = mildRec + player.getCurrentTime();
+
+        }
+  }
+
+  function stopVideo() {
+        player.stopVideo();
+  }
+function doFinalSubmit(){
+          if(severerRec=="" && mildRec ==""){
+            finalAnswer = "";
+          }
+          else{
+            severerRec = "\"severe\": \"" + severerRec + "\"";
+            mildRec = "\"mild\":\"" + mildRec + "\"";
+            finalAnswer = "{" + severerRec + "," +mildRec+"}";
+          }
+
+          localTask.damage = finalAnswer;
+          player.stopVideo();
+          player.clearVideo();
+
+    pybossa.saveTask(localTask.taskid, localTask).done(function() {
+                        severerRec = "";
+                        mildRec = "";
+                        currentDefer.resolve();
+                         player.loadVideoById(videoId);
+                    });
+}
+
+function loadUserProgress() {
+    pybossa.userProgress('MM_VideoClicker').done(function(data){
+        var pct = Math.round((data.done*100)/data.total);
+        $("#progress").css("width", pct.toString() +"%");
+        $("#progress").attr("title", pct.toString() + "% completed!");
+        $("#progress").tooltip({'placement': 'left'});
+        $("#total").text(data.total);
+        $("#done").text(data.done);
+
+                var remaining = data.total - data.done;
+        $("#total").text(data.total);
+        $("#done").text(data.done);
+        $("#remain").text(remaining);
+
+        var completed = data.done;
+        var rankTitle = "Volunteer";
+
+        if(completed>10 && completed <= 29){
+            rankTitle = "Red Cross Intern";
+        }
+        else if(completed>30 && completed <= 59){
+            rankTitle = "New FEMA Recruit";
+        }
+        else if(completed>60 && completed <= 99){
+            rankTitle = "UN Humanitarian";
+        }
+        else if(completed>100 && completed <= 299){
+            rankTitle = "Senior UN Official";
+        }
+        else if(completed>300 && completed <= 499){
+            rankTitle = "UN Country Director";
+        }
+        else if(completed>500 && completed <= 999){
+            rankTitle = "Head of UN OCHA";
+        }
+        else if(completed>1000 ){
+            rankTitle = "UN Secretary General";
+        }
+
+         $("#rank").text(rankTitle);
+    });
+}
+
+pybossa.taskLoaded(function(task, deferred) {
+    if ( !$.isEmptyObject(task) ) {
+
+        task.answer = {'damage': null,
+                        'tweet': task.info.tweet,
+                        'taskid': task.id,
+                        'tweetid': task.info.tweetid,
+                        'author': task.info.author,
+                        'url': task.info.url,
+                        'timestamp': task.info.timestamp,
+                        'lon': task.info.lon,
+                        'lat': task.info.lat,
+                        'videourl': task.info.videourl
+                    };
+        localTask = task.answer;
+        videoId = task.info.url;
+
+       // currentDefer = deferred;
+
+        deferred.resolve(task);
+    }
+    else {
+        deferred.resolve(task);
+    }
+});
+
+pybossa.presentTask(function(task, deferred) {
+    if ( !$.isEmptyObject(task) ) {
+        loadUserProgress();
+        $('#tweet').text(task.info.tweet);
+       // $("#videoclip").attr("src", task.info.videourl);
+        $('#task-id').html(task.id);
+        videoId = task.info.url;
+
+        currentDefer = deferred;
+        $(window).one('keydown', function(e) {
+            if (e.type == "keydown") {
+                if(e.keyCode == 83) {
+                    task.answer.damage = 'severe';
+                    localTask.damage = 'severe';
+                    player.pauseVideo();
+
+                }
+                if (e.keyCode == 77) {
+                    task.answer.damage = 'mild';
+                    localTask.damage = 'mild';
+                    player.pauseVideo();
+
+                }
+                if (e.keyCode == 78) {
+                    doFinalSubmit();
+                }
+            }
+        });
+        $('.btn-answer').off('click').on('click', function(evt) {
+            var selectedValue = $(evt.target).attr("class");
+            selectedValue = selectedValue.replace("btn-answer","");
+            console.log(selectedValue);
+            task.answer.damage = selectedValue.trim();
+
+            localTask.damage =  selectedValue.trim();
+            if (typeof task.answer.damage != 'undefined') {
+                if(selectedValue.trim() != "none"){
+                    player.pauseVideo();}
+                else{
+                    doFinalSubmit();
+                }
+            } else {
+                $("#error").show();
+            }
+        });
+        $("#loading").hide();
+    }
+    else {
+        $(".skeleton").hide();
+        $("#loading").hide();
+        $("#finish").fadeIn(500);
+    }
+});
+
+pybossa.run('MM_VideoClicker');
+
+
+</script>

@@ -1,0 +1,90 @@
+[
+  {
+    "features": {
+      "type": "Feature",
+      "geometry": {
+        "distance": 0.4,
+        "type": "Point",
+        "coordinates": [
+          125.933333,
+          8.49999999999999
+        ]
+      }
+    },
+    "info": {
+      "author": "SRuutana",
+      "created": "2013-11-13 01:08:45",
+      "tweetID": "400429995585437696",
+      "updated": "2014-04-08 08:24:43.0",
+      "tweet": "Those are coconut trees! *shocked #World #Typhoon #Haiyan #Philippines #Disaster http://t.co/A4QD94pS7W",
+      "answer": "mild ",
+      "url": "http://distilleryimage10.ak.instagram.com/da04f44c4bff11e39584123223ad70da_8.jpg"
+    }
+  },
+  {
+    "features": {
+      "type": "Feature",
+      "geometry": {
+        "distance": 0.2,
+        "type": "Point",
+        "coordinates": [
+          120.9370878,
+          14.327082399999993
+        ]
+      }
+    },
+    "info": {
+      "author": "hh_koh",
+      "created": "2013-11-13 01:12:20",
+      "tweetID": "400430897083600896",
+      "updated": "2014-04-08 08:24:43.0",
+      "tweet": "RT @TODAYonline: 3 ways you can help the survivors of Typhoon #Haiyan in the Philippines http://t.co/5YAq4ZVNwr http://t.co/hez3QiNt3q",
+      "answer": "none ",
+      "url": "https://pbs.twimg.com/media/BY4MNPpCIAAMs--.jpg"
+    }
+  },
+  {
+    "features": {
+      "type": "Feature",
+      "geometry": {
+        "distance": 0,
+        "type": "Point",
+        "coordinates": [
+          121.07551516934001,
+          14.298073550000005
+        ]
+      }
+    },
+    "info": {
+      "author": "XguitarXgypsyX",
+      "created": "2013-11-13 01:14:48",
+      "tweetID": "400431519703236608",
+      "updated": "2014-04-08 08:24:43.0",
+      "tweet": "$1 of water will be donated to the people suffering in the Philippines for every #repost thanks to? http://t.co/h2XVi3tO5P",
+      "answer": "severe ",
+      "url": "http://distilleryimage3.ak.instagram.com/df19af124c0011e38ea20e70ef7cb86e_8.jpg"
+    }
+  },
+  {
+    "features": {
+      "type": "Feature",
+      "geometry": {
+        "distance": 0.7,
+        "type": "Point",
+        "coordinates": [
+          121.07551516934001,
+          14.298073550000005
+        ]
+      }
+    },
+    "info": {
+      "author": "flawsandstars",
+      "created": "2013-11-13 01:13:23",
+      "tweetID": "400431163287683073",
+      "updated": "2014-04-08 08:24:43.0",
+      "tweet": "RT @shxhilx: Typhoon in Philippines http://t.co/OZN5WvtIeK",
+      "answer": "mild ",
+      "url": "https://pbs.twimg.com/media/BYhXXL0CIAIdmst.jpg"
+    }
+  }
+]

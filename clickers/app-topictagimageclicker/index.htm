@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Micromappers - Topic Tag Image Clicker</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Bootstrap -->
+<link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
+<style type="text/css">
+	   .container {min-height: 600px}
+
+	   h1,h2,h3,h4,h5,h6 {font-family: 'Museo Slab', Arial, Helvetica, sans-serif;font-weight: normal;}
+	   h1 {font-size: 24px; line-height: 26px;}
+	   h2 {font-size: 18px; line-height: normal;}
+	   h3 {font-size: 15px; line-height: normal;}
+	   .alignright {float: right;}
+	   .alignleft {float: left;}
+	   .aligncenter {display: block; margin: 0 auto; clear: both}
+	   .clearleft {clear: left;}
+	   .clearright {clear: right;}
+	   .clearboth {clear: both;}
+       .subheader {
+           margin: 10px 0 0 200px;
+       }
+       #iphone {
+           max-width: 100%;
+		   background: url(img/holding-iphone.png) left top no-repeat;
+		   width: 618px; 
+		   height: 455px;
+		   margin-top: -28px;
+		   float:left;
+       }
+	   #taggedimg {
+	       max-width: 100%;
+		   width: 355px;
+		   height: 280px;
+		   padding: 59px 0 0 175px;
+		   float:left;
+	   }
+	   ul#damage {
+	       padding: 59px 0 0 10px;
+		   margin:0;
+		   float:left;
+	   }
+	   ul#damage>a>li {
+	       padding: 0 0 36px 0;
+		   list-style: none;
+	   }
+	   ul#damage>a>li.none {
+	       background: url(img/none-btn.png) left top no-repeat;
+		   width: 58px;
+		   height: 69px;
+	   }
+	   ul#damage>a>li.mild {
+	       background: url(img/mild-btn.png) left top no-repeat;
+		   width: 57px;
+		   height: 71px;
+	   }
+	   ul#damage>a>li.severe {
+	       background: url(img/severe-btn.png) left top no-repeat;
+		   width: 57px;
+		   height: 67px;
+	   }
+	   ul#damage>a>li:hover.none {
+	       background: url(img/none-btn_hover.png) left top no-repeat;
+		   width: 58px;
+		   height: 69px;
+	   }
+	   ul#damage>a>li:hover.mild {
+	       background: url(img/mild-btn_hover.png) left top no-repeat;
+		   width: 57px;
+		   height: 71px;
+	   }
+	   ul#damage>a>li:hover.severe {
+	       background: url(img/severe-btn_hover.png) left top no-repeat;
+		   width: 57px;
+		   height: 67px;
+	   }
+	   #tagged {
+	       margin: -90px 0 0 324px;
+		   float:left;
+	   }
+	   input {
+           max-width: 100%;
+       }
+       .btn {
+           margin: 0 6px 0 0;
+       }
+</style>
+</head>
+<body>
+	<div class="container">
+	<div class="row skeleton">
+
+	   <div class="span12">
+	   <div class="span8">
+	      <h2 class="subheader">How much damage do you see in this picture:</h2>
+	      
+	      <div id="iphone">
+		     <div id="taggedimg">TOPIC TAG IMAGE GOES HERE</div>
+			    <ul id="damage">
+				   <a href="#"><li class="none"></li></a>
+				   <a href="#"><li class="mild"></li></a>
+				   <a href="#"><li class="severe"></li></a>
+				</ul>
+		 </div>
+
+	     <div id="tagged">
+                <p>You've tagged [number] images. Nice!</p>
+				<p class="alignright">Thanks for helping out.</p>
+         </div>
+
+       </div>		
+       </div>		
+
+	   <div class="span12">
+	   <div class="span11 well well-small" style="margin-top:20px;">
+	      <p>You are working now on task: <span id="task-id" class="label label-warning">#</span></p>
+          <p>You have completed: <span id="done" class="label label-info"></span> tweets from
+          <span id="total" class="label label-inverse"></span></p>
+          
+          <div class="progress progress-striped">
+             <div id="progress" rel="tooltip" title="#" class="bar" style="width: 0%;"></div>
+          </div>
+
+          <span class="label label-warning"><i class="icon-bullhorn"></i> Tip</span> If you need help, check the 
+             <div style="padding-top:5px; text-align:left;"><a class="btn btn-primary" href="#"><i class="icon-question-sign"></i> Tutorial</a></div>
+	    </div>
+	   </div>
+	</div>
+    </div>	
+<script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+</body>
+</html>

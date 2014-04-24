@@ -1,0 +1,20 @@
+/* Tweet Clicker formatting and styles */
+
+     .container {min-height: 600px}
+
+	   h1,h2,h3,h4,h5,h6 {font-family: 'Museo Slab', Arial, Helvetica, sans-serif;font-weight: normal;}
+	   h1 {font-size: 24px; line-height: 26px;}
+	   h2 {font-size: 18px; line-height: normal;}
+	   h3 {font-size: 15px; line-height: normal;}
+       #map {
+           max-width: 100%;
+       }
+       #map img {
+           max-width: none;
+       }
+	   input {
+           max-width: 100%;
+       }
+       .btn {
+           margin: 0 6px 0 0;
+       }
