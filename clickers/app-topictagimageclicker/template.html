@@ -259,7 +259,8 @@
 
 
 <script>
-
+var localtask;
+var currentTaskItem;
 function loadUserProgress() {
     pybossa.userProgress('MM_ImageClicker').done(function(data){
         var pct = Math.round((data.done*100)/data.total);
@@ -310,12 +311,9 @@ function imgError(image) {
   
 pybossa.taskLoaded(function(task, deferred) {
     if ( !$.isEmptyObject(task) ) {
-        
-      var img = $('<img name="tweetphoto" onerror="imgError(this);"/>');
-                  
-
-        var imURL = task.info.imgurl;
-      
+        console.log("taskLoaded");
+        console.log("taskLoaded : " + task.id);
+        var img = $('<img name="tweetphoto" onerror="imgError(this);"/>');
 
         img.attr('src', task.info.imgurl).css( {'height': '260px',
                                                 'width': '260px',
@@ -323,7 +321,8 @@ pybossa.taskLoaded(function(task, deferred) {
                                                 'margin-top': '5px'});
         img.addClass('img-polaroid');
 
-        task.info.image = img;
+      //  task.info.image = img;
+        task.image = img;
         task.answer = {'category': null,
                         'tweet': task.info.tweet,
                         'tweetid': task.info.tweetid,
@@ -336,10 +335,10 @@ pybossa.taskLoaded(function(task, deferred) {
                         'imgurl': task.info.imgurl
                     };
 
-       // img.load(function() {
+        img.load(function() {
             // continue as soon as the image is loaded
             deferred.resolve(task);
-       // });
+        });
 
     }
     else {
@@ -349,9 +348,12 @@ pybossa.taskLoaded(function(task, deferred) {
 
 pybossa.presentTask(function(task, deferred) {
     if ( !$.isEmptyObject(task) ) {
+        console.log("presentTask");
+        console.log("presentTask : " + task.id);
         loadUserProgress();
-        $('#photo-link').html('').append(task.info.image);
-        var imURL = task.info.imgurl;
+        currentTaskItem = task;
+        localtask = task.answer;
+        $('#photo-link').html('').append(task.image);
 
         $("#photo-link").attr("href", task.info.imgurl);
         $("#photo-link").append('<span ><img id="fsize" width="530" height="530" onerror="imgError(this);"/></span>');
@@ -362,21 +364,21 @@ pybossa.presentTask(function(task, deferred) {
             if (e.type == "keydown") {
                 if(e.keyCode == 51) {
                     task.answer.category = 'severe';
-                    pybossa.saveTask(task.id, task.answer).done(function() {
+                    pybossa.saveTask(task.id, localtask).done(function() {
                         deferred.resolve();
                     });
                     $("#loading").fadeIn(500);
                 }
                 if (e.keyCode == 50) {
                     task.answer.category = 'mild';
-                    pybossa.saveTask(task.id, task.answer).done(function() {
+                    pybossa.saveTask(task.id, localtask).done(function() {
                         deferred.resolve();
                     });
                     $("#loading").fadeIn(500);
                 }
                 if (e.keyCode == 49) {
                     task.answer.category = 'none';
-                    pybossa.saveTask(task.id, task.answer).done(function() {
+                    pybossa.saveTask(task.id, localtask).done(function() {
                         deferred.resolve();
                     });
                     $("#loading").fadeIn(500);
@@ -390,10 +392,11 @@ pybossa.presentTask(function(task, deferred) {
             console.log(selectedValue);
             task.answer.category = selectedValue;
             if (typeof task.answer.category != 'undefined') {
-                pybossa.saveTask(task.id, task.answer).done(function() {
+                pybossa.saveTask(task.id, localtask).done(function() {
+                    $("#loading").fadeIn(500);
                     deferred.resolve();
                 });
-                $("#loading").fadeIn(500);
+
             } else {
                 $("#error").show();
             }
