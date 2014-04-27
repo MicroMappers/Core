@@ -261,6 +261,8 @@
 <script>
 var localtask;
 var currentTaskItem;
+var previousTaskItem;
+
 function loadUserProgress() {
     pybossa.userProgress('MM_ImageClicker').done(function(data){
         var pct = Math.round((data.done*100)/data.total);
@@ -313,6 +315,14 @@ pybossa.taskLoaded(function(task, deferred) {
     if ( !$.isEmptyObject(task) ) {
         console.log("taskLoaded");
         console.log("taskLoaded : " + task.id);
+        if(typeof localtask != 'undefined'){
+            if(localtask.taskid == task.id){
+                console.log(localtask);
+                console.log(task);
+                console.log(previousTaskItem);
+                saveRenderedData();
+            }
+        }
         var img = $('<img name="tweetphoto" onerror="imgError(this);"/>');
 
         img.attr('src', task.info.imgurl).css( {'height': '260px',
@@ -362,44 +372,12 @@ pybossa.presentTask(function(task, deferred) {
         $(window).one('keydown', function(e) {
             console.log(e.keyCode);
             if (e.type == "keydown") {
-                if(e.keyCode == 51) {
-                    task.answer.category = 'severe';
-                    pybossa.saveTask(task.id, localtask).done(function() {
-                        deferred.resolve();
-                    });
-                    $("#loading").fadeIn(500);
-                }
-                if (e.keyCode == 50) {
-                    task.answer.category = 'mild';
-                    pybossa.saveTask(task.id, localtask).done(function() {
-                        deferred.resolve();
-                    });
-                    $("#loading").fadeIn(500);
-                }
-                if (e.keyCode == 49) {
-                    task.answer.category = 'none';
-                    pybossa.saveTask(task.id, localtask).done(function() {
-                        deferred.resolve();
-                    });
-                    $("#loading").fadeIn(500);
-                }
+                saveTaggingData(true, e, deferred);
             }
+
         });
         $('.btn-answer').off('click').on('click', function(evt) {
-
-            var selectedValue = $(evt.target).attr("class");
-            selectedValue = selectedValue.replace("btn-answer","");
-            console.log(selectedValue);
-            task.answer.category = selectedValue;
-            if (typeof task.answer.category != 'undefined') {
-                pybossa.saveTask(task.id, localtask).done(function() {
-                    $("#loading").fadeIn(500);
-                    deferred.resolve();
-                });
-
-            } else {
-                $("#error").show();
-            }
+            saveTaggingData(false, evt, deferred)
         });
         $("#loading").hide();
     }
@@ -409,6 +387,63 @@ pybossa.presentTask(function(task, deferred) {
         $("#finish").fadeIn(500);
     }
 });
+
+function saveRenderedData(){
+    pybossa.newTask("MM_ImageClicker").done( function( data ) {
+
+        if ( !$.isEmptyObject(data.task) ) {
+            window.location.pathname = "/app/MM_ImageClicker/task/" + data.task.id;
+        }
+
+    });
+
+    $("#loading").fadeIn(500);
+}
+
+function saveTaggingData(isKeyPressed, e, deferred){
+    if(isKeyPressed){
+        if(e.keyCode == 51) {
+            localtask.category = 'severe';
+            pybossa.saveTask(localtask.taskid, localtask).done(function() {
+                deferred.resolve();
+                previousTaskItem = localtask;
+            });
+            $("#loading").fadeIn(500);
+        }
+        if (e.keyCode == 50) {
+            localtask.category = 'mild';
+            pybossa.saveTask(localtask.taskid, localtask).done(function() {
+                deferred.resolve();
+                previousTaskItem = localtask;
+            });
+            $("#loading").fadeIn(500);
+        }
+        if (e.keyCode == 49) {
+            localtask.category = 'none';
+            pybossa.saveTask(localtask.taskid, localtask).done(function() {
+                deferred.resolve();
+                previousTaskItem = localtask;
+            });
+            $("#loading").fadeIn(500);
+        }
+    }
+    else{
+        var selectedValue = $(e.target).attr("class");
+        selectedValue = selectedValue.replace("btn-answer","");
+        console.log(selectedValue);
+        localtask.category = selectedValue;
+        if (typeof task.answer.category != 'undefined') {
+            pybossa.saveTask(localtask.taskid, localtask).done(function() {
+                $("#loading").fadeIn(500);
+                deferred.resolve();
+                previousTaskItem = localtask;
+            });
+
+        } else {
+            $("#error").show();
+        }
+    }
+}
 
 pybossa.run('MM_ImageClicker');
 
