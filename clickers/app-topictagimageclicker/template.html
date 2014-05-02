@@ -432,7 +432,8 @@ function saveTaggingData(isKeyPressed, e, deferred){
         selectedValue = selectedValue.replace("btn-answer","");
         console.log(selectedValue);
         localtask.category = selectedValue;
-        if (typeof task.answer.category != 'undefined') {
+       // if (typeof task.answer.category != 'undefined') {
+         if (typeof selectedValue != 'undefined'){
             pybossa.saveTask(localtask.taskid, localtask).done(function() {
                 $("#loading").fadeIn(500);
                 deferred.resolve();
