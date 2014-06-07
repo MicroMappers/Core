@@ -105,7 +105,7 @@ $(function()
     var autoGeoRefresh = setInterval(
                 function ()  // Call out to get the time
                 {
-                        var requestURL = 'http://scd1.qcri.org:8084/AIDRCrowdsourcingAPI/rest/geo/JSONP/geoMap';
+                        var requestURL = 'http://scd1.qcri.org:8084/AIDRTrainerAPI/rest/geo/JSONP/geoMap';
 
                         if(lastUpdated != null && lastUpdated !='' && typeof  lastUpdated != 'undefined'){
                             requestURL = requestURL + '/qdate/' +   encodeURIComponent(lastUpdated);
@@ -133,7 +133,8 @@ $(function()
               dataCount++;
               infoUpdated.push(field.info.updated);
 
-              var tweetCreated = Date.parse(field.info.created).toString('d-MMM-yyyy HH:00 tt');
+              var tweetCreated = $.format.date("2014-05-18T21:04Z",'dd/MM/yyyy');
+
               var tweetCategory = field.info.answer;
 
               tweetList.push(field.info);
@@ -303,7 +304,7 @@ $(function()
                 var item = mapDataCollection[i];
 
                 var itemAnswer = item.info.answer;
-                var itemCreated = Date.parse(item.info.created).toString('d-MMM-yyyy HH:00 tt');
+                var itemCreated = $.format.date(item.info.created,'dd/MM/yyyy');
 
                 var found = locateSearchFilterMeet(itemAnswer, itemCreated);
 
