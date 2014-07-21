@@ -1,0 +1,53 @@
+<div class="row">
+    <div class="span12">
+        <div id="modal" class="modal hide fade">
+            <div class="modal-header">
+                <h3>Geo Aerial Clicker tutorial</h3>
+            </div>
+            <div id="0" class="modal-body" style="display:none">
+                <p><strong>Hi!</strong> Many thanks for volunteering your time as a digital humanitarian. Disaster responders need to know where damage and needs are. This critical information is often captured by videos shared on Twitter in real time, which is where you come in.
+               </p> 
+            </div>
+            <div id="1" class="modal-body" style="display:none">
+                <p>Being a Digital Humanitarian Volunteer is as easy and fast as a click of the mouse. This app will simply display one or more scenes of damage from a video. Your mission is to find out where in the country a scene of damage was taken. If the tweet refers to a location (name of city, town, village, etc), then simply copy/paste it into the Search box and click search. Alternatively, you use the mouse to place a marker on the map.</p>
+            </div>
+            <div id="2" class="modal-body" style="display:none">
+                <p>If the tweet does not include a location reference then look at the scene in the video and see whether you can identify in which city, town or village the scene was taken. If you can't find any evidence of location, then click on "No Location Information".</p>
+            </div>
+            <div class="modal-footer">
+                <a id="prevBtn" href="#" onclick="showStep('prev')" class="btn">Previous</a>
+                <a id="nextBtn" href="#" onclick="showStep('next')" class="btn btn-success">Next</a>
+                <a id="startContrib" href="../MM_AerialGeoClicker/newtask" class="btn btn-primary" style="display:none"><i class="icon-thumbs-up"></i> Start classifying!</a>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var step = -1;
+    function showStep(action) {
+        $("#" + step).hide();
+        if (action == 'next') {
+            step = step + 1;
+        }
+        if (action == 'prev') {
+            step = step - 1;
+            $("#nextBtn").show();
+            $("#startContrib").hide();
+        }
+        if (step == 0) {
+            $("#prevBtn").hide();
+        }
+        else {
+            $("#prevBtn").show();
+        }
+
+        if (step == 2 ) {
+            $("#nextBtn").hide();
+            $("#startContrib").show();
+        }
+        $("#" + step).show();
+    }
+
+    showStep('next');
+    $("#modal").modal('show');
+</script>
