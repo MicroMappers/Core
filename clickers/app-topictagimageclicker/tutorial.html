@@ -11,21 +11,27 @@
             </div>
             <div id="1" class="modal-body" style="display:none">
                 <p>Being a Digital Humanitarian Volunteer is as easy and fast as a click of the mouse. This app will simply load a picture and ask you to click on which category best describes the damage captured in the picture.</p>
-                <p>The categories are::
+                <p>The categories are:
                 <ul>
-                    <li><strong><i class="icon-severe"></i> Severe Damage:</strong> Picture shows severe damage, leveled buildings, major infrastructure damage, destroyed vehicles, etc.</li>
-                    <li><strong><i class="icon-mild"></i> Mild Damage:</strong> Picture shows mild damage, broken windows, felled trees, damaged vehicles, minor infrastructure damage. </li>
-                    <li><strong><i class="icon-none"></i> No damage:</strong> Either the picture shows an area with no damage at all, or the picture is irrelevant or unrelated.</li> 
+                    <li><strong><i class="icon-none"></i> No damage (Green):</strong> Either the picture shows an area with no damage at all, or the picture is irrelevant or unrelated.</li>
+                    <li><strong><i class="icon-mild"></i> Mild Damage (Orange):</strong> Picture shows mild damage, broken windows, felled trees, damaged vehicles, minor infrastructure damage.</li>
+                    <li><strong><i class="icon-severe"></i> Severe Damage (Red):</strong> Picture shows severe damage, leveled buildings, major infrastructure damage, destroyed vehicles, etc.</li>
+
                 </ul>
                 </p>
                 <p>You can also use your keyboard to enter responses:
                     <ul>
-                        <li><strong><i class="icon-severe"></i> Severe Damage:</strong> '3'</li>
-                        <li><strong><i class="icon-mild"></i> Mild Damage:</strong> '2' </li>
                         <li><strong><i class="icon-none"></i> No damage:</strong> '1'</li>
+                        <li><strong><i class="icon-mild"></i> Mild Damage:</strong> '2' </li>
+                        <li><strong><i class="icon-severe"></i> Severe Damage:</strong> '3'</li>
                     </ul>
                 </p>
+                <p>Each Image will be viewed by different users until 3 of those users agree on the same answer. For this reason, if you are unsure of which answer is correct, make your best guess and move on to the next one.</p>
                 <p>That's all there is to it. As soon as you click on one of the three choices, you will be shown the next picture. If you want to keep track of your progress, make sure to login.</p>
+            </div>
+            <div id="2" class="modal-body" style="display:none">
+                <p>You can view this tutorial at any time by clicking the “Tutorial” button on the screen. Additionally, if you run into any problems or have any questions, please join the chatroom by clicking the “Chatroom” button. There will be moderators present who will be able to assist you with the Clicker. Thank you!</p>
+                <p>Please note that we can’t control what pictures Twitter users post to Twitter. Some of these pictures may be graphic. Only proceed if you understand this and still would like to volunteer.</p>
             </div>
             <div class="modal-footer">
                 <a id="prevBtn" href="#" onclick="showStep('prev')" class="btn">Previous</a>
@@ -52,7 +58,7 @@
             $("#prevBtn").show();
         }
 
-        if (step == 1 ) {
+        if (step == 2 ) {
             $("#nextBtn").hide();
             $("#startContrib").show();
         }

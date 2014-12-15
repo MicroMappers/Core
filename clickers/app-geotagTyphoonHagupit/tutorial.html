@@ -1,0 +1,118 @@
+<div class="row">
+    <div class="span12">
+        <div id="modal" class="modal hide fade">
+            <div class="modal-header">
+                <h3><b>Typhoon Ruby Tutorial</b></h3>
+            </div>
+            <div id="0" class="modal-body" style="display:none">
+                    <strong>Thanks for joining this Digital Humanitarian expedition to the Philippines!</strong>
+                    <br><br>
+                    <iframe width="500" height="325" src="http://www.youtube-nocookie.com/embed/vsQb5sXAXQg?rel=0" frameborder="0" allowfullscreen></iframe>
+                    <br><br>
+                    <p>
+                    The United Nations needs our help in assessing the impact of Typhoon Ruby. This time, our mission is to review aerial photographs taken by small remote control planes (UAVs). More specifically, we’ve been asked to trace evidence of infrastructure damage and also areas of standing water. The latter is very important because standing water is where mosquitoes thrive. There are thousands of aerial photographs that were just taken in the past 24 hours that need to be analyzed as soon as possible.
+                    </p><br>
+                    <p>
+                    This is where we come in!
+                    </p>
+
+                </p>
+            </div>
+            <div id="1" class="modal-body" style="display:none">
+                <p>
+                    <p>Our partners at <a href='http://www.skyeyeproject.com/' target="_blank">SkyEye</a>, a local Filipino group in Manila that is working with the UN, use small remote-controlled airplanes to take photographs of disaster-affected regions from the air. They just took thousands of pictures of areas affected by Typhoon Ruby and need our help to review these pictures.</p><br>
+
+                    <img src="https://micromappers.files.wordpress.com/2014/11/skyeyeph.png" width="500" height="301"><br>
+                    <br>
+                    <p>All the infrastructure damage and areas of standing water we trace will then be added to an online map for the United Nations to assess the overall situation. This map will be shared with everyone who volunteers to support this MicroMappers expedition.
+</p>
+                </p>
+            </div>
+            <div id="2" class="modal-body" style="display:none">
+                <p>
+                    <p>Being a Digital Humanitarian is very easy! In this expedition you will use a tool called the MicroMappers Aerial Clicker to trace areas that show infrastructure damage and area of standing water. We have a tutorial video and some guides to help your mission:
+</p>
+
+                    <br><br>
+                    <iframe width="500" height="325" src="http://www.youtube-nocookie.com/embed/bxHrsDA-1_8?rel=0" frameborder="0" allowfullscreen></iframe>
+                    <br><br>
+
+                    <p><b>Simply click on the Damage icon to trace areas of infrastructure damage and on the Water icon to trace areas of standing water.</b>
+                    </p><br>
+
+                    <p>Identifying infrastructure damage is easy. What we’re looking for is any damaged buildings, roads, bridges, or power lines. Damaged buildings could have missing parts (such as roof, shingles, walls, etc.), debris scattered in or around them (such as trees or building pieces), or be completely destroyed (just foundations remaining). Roads can be cracked or be obstructed by debris or trees. Bridges could also be obstructed or collapsed, completely or partially. Power lines could be downed, either by the wind or from contact with other objects (such trees or branches).
+
+                    </p><br>
+
+                    <p>If you see any of these or anything else you believe to be infrastructure damage, please tag them by drawing a polygon around them. See the below example which has destroyed buildings and an obstructed road:
+</p><br>
+
+                    <img src="http://i.imgur.com/zBri8FN.png" width="500" height="500">
+                    <br><br>
+
+                    <p>Standing water may be a bit more difficult to spot, but if you know what to look for it should also be easy. Standing water is any water that is not moving. That means it is not connected to any larger body of water such as rivers, lakes, ponds, streams, or the ocean. After a disaster it can be found in places where there normally would not be bodies of water, such as farmlands, suburbs, or even urban areas. When viewing it from above, it will most often reflect the sky or and surrounding trees or buildings, making it easier to spot. If you see a body of water which you believe to unmoving, please tag it by drawing a box around it. See below for an example of a tagged body of standing water:
+                    </p><br>
+
+                    <img src="http://i.imgur.com/Gfy0FVS.png" width="500" height="500">
+                    <br><br>
+
+                    <img src="http://i.imgur.com/ecs8RX9.png" width="500" height="500">
+                    <br><br>
+
+                    <img src="http://i.imgur.com/TyO4Xa0.png" width="500" height="500">
+                </p>
+            </div>
+            <div id="3" class="modal-body" style="display:none">
+                <p><p>Some final tips before your expedition!</p>
+                    <ul>
+                        <li>Note that you can use the “+” and “-” buttons to zoom in for a closer look and to pan out.</li>
+                        <li>Don’t worry if you don’t see many trunks! Knowing where there are no coconut tree trunks is just as important. And don’t worry if you make a mistake, each photograph is being shown to 5 different Digital Humanitarians just in case.</li>
+                        <li>If you have any questions during the expedition or simply want to hang out with fellow digital rangers, we have our own <a href='http://www.chatzy.com/82984519962802' target="_blank">chat room here</a>.</li>
+                        <li>If you create a profile (click on Community above), you’ll be able to keep track of your clicks and accumulate do-good points.</li>
+                        <li>Since the Aerial Clicker is still very new, we thank you for your patience if the Clicker does not work perfectly (yet). So your feedback is super important, which you can add <a href='http://goo.gl/OvcVj4' target="_blank">here</a>.</li>
+                        <li>Our resulting traces will be shared with the UN in the form of a map.</li>
+                        <li>Our traces may also be shared with computer scientists who are interested in computer vision since they may be able to use the resulting traces to teach an algorithm to automatically identify damage and water.
+</li>
+                        <li>And now, lets support the UN’s important work in the Philippines!
+</li>
+                    </ul>
+                </p>
+            </div>
+            <div class="modal-footer">
+                <a id="prevBtn" href="#" onclick="showStep('prev')" class="btn">Previous</a>
+                <a id="nextBtn" href="#" onclick="showStep('next')" class="btn btn-success">Next</a>
+                <a id="startContrib" href="../MM_Aerial_Hagupit/newtask" class="btn btn-primary" style="display:none"><i class="icon-thumbs-up"></i> Start classifying!</a>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var step = -1;
+    function showStep(action) {
+        $("#" + step).hide();
+        if (action == 'next') {
+            step = step + 1;
+        }
+        if (action == 'prev') {
+            step = step - 1;
+            $("#nextBtn").show();
+            $("#startContrib").hide();
+        }
+        if (step == 0) {
+            $("#prevBtn").hide();
+        }
+        else {
+            $("#prevBtn").show();
+        }
+
+        if (step == 3 ) {
+            $("#nextBtn").hide();
+            $("#startContrib").show();
+        }
+        $("#" + step).show();
+    }
+
+    showStep('next');
+    $("#modal").modal('show');
+</script>
+

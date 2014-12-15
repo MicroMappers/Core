@@ -32,7 +32,7 @@
        padding: 18px 0 0 20px;
        margin:0 auto;
        clear: left;
-       margin-left: 345px;
+       margin-left: 295px;
     }
     #btn-group a.btn {
        width:72px;
@@ -75,53 +75,30 @@
         background-color: rgba(255,255,255,1);
     }
 
-    #facts {
-        position: relative;
-        margin-top:200px;
-    }
-
     .layersDiv label {
         color: white;
     }
-
-    .oneHundredPopupbox {
-         width:350px;
-         height:297px;
-         background-image:url(../../../../static/img/micromappers/aerialClicker/flashImg3.png);
-         background-repeat:no-repeat;
-         display: none; /* Hidden as default */
-         float: left;
-         opacity: .80;
-         position: fixed;
-         top: 35%; left: 35%;
-         z-index: 99999;
-         -webkit-box-shadow: 0px 0px 50px #000;
-         -moz-box-shadow: 0px 0px 50px #000;
-         box-shadow: 0px 0px 50px #000;
-    }
-
-   .loadingPopupbox {
+    .loadingPopupbox {
        width:220px;
        height:220px;
-       background-image:url(../../../../static/img/micromappers/aerialClicker/25.GIF);
+       background-image:url(../../../../static/img/micromappers/aerialClicker/loading.gif);
        background-repeat:no-repeat;
        display: none; /* Hidden as default */
        float: left;
        opacity: .80;
        position: fixed;
-       top: 40%; left: 40%;
+       top: 30%; left: 43%;
        z-index: 99999;
        -webkit-box-shadow: 0px 0px 0px #000;
        -moz-box-shadow: 0px 0px 0px #000;
        box-shadow: 0px 0px 0px #000;
     }
-
 </style>
 <div class="span3" style="margin-left: 950px">
     <div style="text-align:center;margin-right:170px;padding-bottom: 10px;">
          <a class="btn btn-primary" href="../tutorial" ><i class="icon-question-sign"></i> Tutorial</a>
     	 <a class="btn btn-warning"
-            onclick="window.open('http://www.chatzy.com/84051188846467','popupWindow',
+            onclick="window.open('http://www.chatzy.com/82984519962802','popupWindow',
 'width=410,height=450,toolbar=no,location=no, status=no,menubar=no,scrollbars=yes,resizable=yes');return false;"
             style="margin-top: 0px;margin-right: -120px;">
             <i class="icon-flag"></i> Chat Room</a>
@@ -142,19 +119,19 @@
     </div>
 </div>
 <div id="happyAlert" class="oneHundredPopupbox" style="display: none" ></div>
-<div id="loadingSign" class="loadingPopupbox" style="display: none" ></div>
-<div class="span2" id="msg_warning"  style="display: none;
-    margin-top: -140px;
-    margin-left: 400px;
-">
+<div id="loadingSign" class="loadingPopupbox" style="display:block" ></div>
+<div class="span2" id="msg_warning"  style="display: none;margin-top: -140px;margin-left: 400px;">
     <div class="alert alert-error" style="margin-top: -50px;">
         <strong>Draw a shield first!</strong>
     </div>
 </div>
-
 <div class="row">
     <!-- Success and Error Messages for the user -->
     <div class="span12" style="height:50px">
+        <div id="success" class="alert alert-success" style="display:none;">
+            <a class="close">×</a>
+            <strong>Well done!</strong> Your answer has been saved
+        </div>
         <div id="taskcompleted" class="alert alert-info" style="display:none;">
             <strong>The task has been completed!</strong> Thanks a lot!
         </div>
@@ -170,7 +147,6 @@
             <a class="close">×</a>
             <strong>Error!</strong> Something went wrong, please contact the site administrators
         </div>
-
     </div> <!-- End Success and Error Messages for the user -->
 </div> <!-- End of Row -->
 
@@ -180,10 +156,10 @@
                <div id="taggedimg"></div>
                <div id="btn-group" class="text-center">
                    <button id="skipbtn" class="btn btn-danger btn-submit" value="skip">
-                       <i class="icon-check icon-white"></i> Nothing here
+                       <i class="icon-check icon-white"></i> No Damage or Water Here
                    </button>
                    <button id="answerbtn" class="btn btn-success btn-submit" value="coordinates">
-                       <i class="icon-check icon-white"></i> Add my Shield(s)
+                       <i class="icon-check icon-white"></i> Save my Traces and go to next
                    </button>
                </div>
             </div>
@@ -191,116 +167,74 @@
             <div class="clearboth"></div>
      </div>
 </div>
-
+<script src="http://d3js.org/d3.v2.js"></script>
 <script src="/static/js/pybossa/pybossa.js" type="text/javascript"></script>
 <link rel="stylesheet" href="/static/micromappers/css/leaflet.css" />
-<link rel="stylesheet" href="/static/micromappers/css/leaflet.draw.css" />
-
+<link rel="stylesheet" href="/static/micromappers/css/hagupit/leaflet.draw.css" />
+<link href='/static/micromappers/css/leaflet.fullscreen.css' rel='stylesheet' />
 <!--[if lte IE 8]>
 <link rel="stylesheet" href="/static/micromappers/css/leaflet.ie.css" />
-<link rel="stylesheet" href="/static/micromappers/css/leaflet.draw.ie.css" />
+<link rel="stylesheet" href="/static/micromappers/css/hagupit/leaflet.draw.ie.css" />
 <![endif]-->
 
 <script src="/static/micromappers/js/leaflet.js"></script>
-<script src="/static/micromappers/js/leaflet.draw.js"></script>
-<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=drawing"></script>
-<script src="http://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.js"></script>
+<script src="/static/micromappers/js/hagupit/leaflet.draw.js"></script>
+<script src="/static/micromappers/js/L.LineUtil.PolylineDecorator.js"></script>
+<script src="/static/micromappers/js/L.Symbol.js"></script>
+<script src="/static/micromappers/js/L.PolylineDecorator.js"></script>
+<script src='/static/micromappers/js/Leaflet.fullscreen.min.js'></script>
 <!-- PyBossa interface -->
 <script>
-var theTask;
-var doneValue ;
-var totalValue;
-
-$("#loadingSign").fadeIn();
-$("#loadingSign").fadeOut(9000);
+var geoLayerCollection = [];
 function loadUserProgress() {
-    var stageInfo = $.cookie("staging");
-    if(typeof stageInfo == 'undefined'|| stageInfo == null || stageInfo != 'stage2'){
-        $.removeCookie('data.done');
-        $.removeCookie('data.total');
-        $.cookie("staging","stage2");
-    }
+    pybossa.userProgress('MM_RemoteSenseClicker').done(function(data){
+         var completed = data.done;
+         var rankTitle = "Volunteer";
 
-    doneValue = $.cookie("data.done");
-    totalValue = $.cookie("data.total");
+         if(completed>10 && completed <= 29){
+            rankTitle = "Red Cross Intern";
+         }
+         else if(completed>30 && completed <= 59){
+            rankTitle = "New FEMA Recruit";
+         }
+         else if(completed>60 && completed <= 99){
+            rankTitle = "UN Humanitarian";
+         }
+         else if(completed>100 && completed <= 299){
+            rankTitle = "Senior UN Official";
+         }
+         else if(completed>300 && completed <= 499){
+            rankTitle = "UN Country Director";
+         }
+         else if(completed>500 && completed <= 999){
+            rankTitle = "Head of UN OCHA";
+         }
+         else if(completed>1000 ){
+            rankTitle = "UN Secretary General";
+         }
 
-    if(typeof doneValue == 'undefined' || doneValue == null || doneValue =='' ||
-            typeof totalValue== 'undefined' || totalValue == null || totalValue =='' ){
-        pybossa.userProgress('MM_AerialClicker').done(function(data){
+        var remaining = data.total - data.done;
+        var togo = 100 - data.done%100;
 
-            doneValue = data.done;
-            totalValue = data.total;
+        var displayTotal = data.done + togo;
 
-            getUserProgress();
-        });
-
-
-    }
-    else{
-
-        getUserProgress();
-    }
-
-}
-
-var displayingTotalValue = 0;
-var displayingRemaining = 0 ;
-var displayingCompleted = 0;
-
-
-function getUserProgress(){
-
-    displayingCompleted = doneValue
-    var rstValue =Number(doneValue)%100;
-
-
-    displayingRemaining = 100 - Number(rstValue);
-
-    if(displayingTotalValue == 0 && displayingCompleted < 100){
-        displayingTotalValue = 100;
-    }
-    else {
-        displayingTotalValue = Number(displayingCompleted) + Number(displayingRemaining);
-    }
-
-
-    $("#total").text(displayingTotalValue);
-    $("#done").text(displayingCompleted);
-    $("#remain").text(displayingRemaining);
-
-    var completed = displayingCompleted;
-    var rankTitle = "Yogi Bear";
-
-    if(completed>10 && completed <= 29){
-        rankTitle = "Junior Ranger";
-    }
-    else if(completed>30 && completed <= 59){
-        rankTitle = "Wildlife Expert";
-    }
-    else if(completed>60 && completed <= 99){
-        rankTitle = "Ace Ventura";
-    }
-    else if(completed>100 ){
-        rankTitle = "King of the Jungle!";
-    }
-
-    var res =  doneValue/100;
-    if(res.toString().indexOf(".") == -1){
-        if(doneValue >= 100 &&  res >=0 ){
-            $("#happyAlert").fadeIn();
-            $("#happyAlert").fadeOut(8000);
+      	if(data.total < 100){
+          togo = remaining;
+          displayTotal = data.total;
         }
-    }
 
-    $("#rank").text(rankTitle);
+        $("#total").text(data.total);
+        $("#done").text(data.done);
+        $("#remain").text(togo);
+        $("#rank").text(rankTitle);
+    });
 }
+
 
 pybossa.taskLoaded(function(task, deferred){
-
     if ( !$.isEmptyObject(task) ) {
-
         var map_div = $("<div/>", {id:"map_task_" + task.id, 'class': 'span4', 'style':'margin-left:0px'});
-        var map_canvas = $("<div/>", {id: "map_" + task.id, 'class': 'map_canvas'});
+        var map_canvas = $("<div/>", {id: "map_" + task.id});
         map_canvas.css("width", "700px");
         map_canvas.css("height", "534px");
         map_div.append(map_canvas);
@@ -310,6 +244,7 @@ pybossa.taskLoaded(function(task, deferred){
         var geoBounds = task.info.geo;
         var geoBoundsArray ;
         if(task.info.geo == ''){
+            // simulated boundings box
             geoBoundsArray = [125.00587463378906,
                 11.241715102754723,
                 125.00553131103516,
@@ -319,96 +254,99 @@ pybossa.taskLoaded(function(task, deferred){
             geoBoundsArray = $.parseJSON(geoBounds);
         }
 
-        var swBound = new google.maps.LatLng(geoBoundsArray[3],geoBoundsArray[2]);
-        var neBound = new google.maps.LatLng(geoBoundsArray[1],geoBoundsArray[0]);
-        var bounds = new google.maps.LatLngBounds(swBound, neBound);
-
+        var southWest = L.latLng(geoBoundsArray[3],geoBoundsArray[2]),
+            northEast = L.latLng(geoBoundsArray[1],geoBoundsArray[0]),
+            bounds = L.latLngBounds(southWest, northEast);
 
         var centerPoint = bounds.getCenter();
 
         var imageUrl = task.info.url ;
         var imageBounds = [[geoBoundsArray[3], geoBoundsArray[2]], [geoBoundsArray[1], geoBoundsArray[0]]];
+        var map = L.map("map_" + task.id,{maxZoom: 26, minZoom:19, fullscreenControl: true}).setView([centerPoint.lat, centerPoint.lng], 21);
 
-        var map = L.map("map_" + task.id,{maxZoom: 26, minZoom:21}).setView([centerPoint.lat(), centerPoint.lng()], 21);
+        map.fitBounds([ [geoBoundsArray[3], geoBoundsArray[2]], [geoBoundsArray[1], geoBoundsArray[0]]]);
 
         L.imageOverlay(imageUrl, imageBounds,{opacity: 0.7}).addTo(map);
         L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
-          attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
+        L.control.scale().addTo(map);
+
+        map.attributionControl.setPrefix('');
 
         var drawnItems = new L.FeatureGroup();
         map.addLayer(drawnItems);
 
-        // Initialize the draw control and pass it the FeatureGroup of editable layers
-
         var drawControl = new L.Control.Draw({
             draw : {
                 position : 'topleft',
-                polygon: {
+				polyline: false,
+				polygon: {
                             allowIntersection: false, // Restricts shapes to simple polygons
                             drawError: {
-                                color: '#e1e100', // Color the shape will turn when intersects
+                                color: '#f4106b', // Color the shape will turn when intersects'
                                 message: '<strong>Oh snap!<strong> you can\'t draw that!' // Message that will show when intersect
-                            }
+                            },
+                            shapeOptions: {
+						        color: '#f40000'
+					        },
+                            repeatMode : true
                           },
-                polyline : false,
+                polygon2: {
+                            allowIntersection: false, // Restricts shapes to simple polygons
+                            drawError: {
+                                color: '#5059fa', // Color the shape will turn when intersects
+                                message: '<strong>Oh snap!<strong> you can\'t draw that!' // Message that will show when intersect
+                            },
+                            shapeOptions: {
+						        color: '#000cf4'
+					        },
+                            repeatMode : true
+                          },
+                polyline2:false,
                 rectangle : false,
                 circle : false,
-                marker : false
-
+                marker: false
             },
             edit: {
                 featureGroup: drawnItems
             }
         });
 
-
         map.addControl(drawControl);
 
         map.on('draw:created', function (e) {
             var type = e.layerType,
                 layer = e.layer;
-            drawnItems.addLayer(layer);
-            task.drawnItems = drawnItems;
-            map.removeControl(drawControl);
-            map.addControl(drawControl);
+
+            if (type === 'polygon' || type === 'polygon2') {
+                geoLayerCollection.push( new layerInfo(layer,type) ) ;
+
+                drawnItems.addLayer(layer);
+                task.drawnItems = drawnItems;
+			}
+
+
 
         });
 
         map.on('draw:edited', function (e) {
+            var type = e.layerType,
+            layer = e.layer;
             task.drawnItems = drawnItems;
         });
 
         map.on('draw:deleted', function (e) {
-            var type = e.layerType,
-                layer = e.layer;
-            drawnItems.removeLayer(layer);
+            var layers = e.layers;
+
+            layers.eachLayer(function(layer) {
+				//
+				removeSelectedLayerArrowHead(layer, map);
+
+			});
+
             task.drawnItems = drawnItems;
 
-            map.removeControl(drawControl);
-            drawControl = new L.Control.Draw({
-                draw : {
-                    position : 'topleft',
-                    polygon: {
-                            allowIntersection: false, // Restricts shapes to simple polygons
-                            drawError: {
-                                color: '#e1e100', // Color the shape will turn when intersects
-                                message: '<strong>Oh snap!<strong> you can\'t draw that!' // Message that will show when intersect
-                            }
-                          },
-                    polyline : false,
-                    rectangle : false,
-                    circle : false,
-                    marker : false
-                },
-                edit: {
-                    featureGroup: drawnItems
-                }
-            });
 
-            map.addControl(drawControl);
-
-        // Update db to save latest changes.
         });
 
         map.setMaxBounds(imageBounds);
@@ -424,93 +362,128 @@ pybossa.taskLoaded(function(task, deferred){
 
 });
 
+function layerInfo(layer,layerType) {
+        this.layer=layer;
+        this.layerType = layerType;
+}
+
+function getLayerType(layer){
+    var type;
+    for( var i in geoLayerCollection){
+        var item = geoLayerCollection[i];
+        if(item.layer == layer) {
+            type =item.layerType;
+            break;
+
+        }
+    }
+    return type;
+}
+
+
 pybossa.presentTask(function(task, deferred){
     if ( !$.isEmptyObject(task) ) {
-
         $("#task-id").text(task.id);
         loadUserProgress();
 
 
-        $("#map_task_" + task.id).show();
+        $("#map_task_" + task.id).show(
+                "complete", function() {
+                    loadingLoader(false);
+            }
+        );
 
 
         $(".btn-submit").off('click').on('click', function(evt){
-            $("#loadingSign").fadeIn();
-            $(".btn-submit").attr('disabled','disabled');
+
+            toggleSubmitButton(true);
+
             var ctrlClicked = $(evt.target).attr("id");
             var btnClicked = $(evt.target).attr("value");
+            var answer = [];
 
-
-            var errorDoNotSave = false;
             if(ctrlClicked == 'answerbtn'){
-
                 if (task.drawnItems) {
-                    //answer = task.drawnItems.toGeoJSON();
-
                     task.drawnItems.eachLayer(function (layer) {
-                        //console.log(layer);
-                        var obj = layer.toGeoJSON();
-                        obj.bounds = layer.getBounds();
-                        obj.maxBounds = layer.getBounds().pad(0.5);
-                        //console.log(obj);
-                        answer.push(obj);
+                       // geoLayerCollection
+                        var item = {};
+                        item ["layerType"] = getLayerType(layer);
+                        item ["layer"] = layer.toGeoJSON();
+
+                        if(typeof item ["layerType"] != 'undefined'){
+                             answer.push(item);
+                        }
+
                     });
                  }
-                 else{
+                else{
                     $("#msg_warning").fadeIn();
                     $("#msg_warning").fadeOut(3000);
                     errorDoNotSave = true;
-                    $("#loadingSign").fadeOut(1000);
-                    $(".btn-submit").removeAttr('disabled');
-                };
+                    toggleSubmitButton(false);
+                }
             }
 
             task.answer = {
-            'tweet': task.info.tweet,
-            'tweetid': task.info.tweetid,
-            'taskid': task.id,
-            'author': task.info.author,
-            'url': task.info.url,
-            'timestamp': task.info.timestamp,
-            'lon': task.info.lon,
-            'lat': task.info.lat,
-            'imgurl': task.info.imgurl,
-            'locationRef': null,
-            'loc': answer,
-            'geo': task.info.geo
-          };
+                'tweet': task.info.tweet,
+                'tweetid': task.info.tweetid,
+                'taskid': task.id,
+                'author': task.info.author,
+                'url': task.info.url,
+                'timestamp': task.info.timestamp,
+                'lon': task.info.lon,
+                'lat': task.info.lat,
+                'imgurl': task.info.imgurl,
+                'locationRef': null,
+                'loc': answer,
+                'geo': task.info.geo
+            };
 
-            if(!errorDoNotSave){
-                doneValue = Number(doneValue) + 1;
-                totalValue = Number(totalValue) + 1;
-                $.removeCookie('data.done');
-                $.removeCookie('data.total');
-                $.cookie("data.done", doneValue);
-                $.cookie("data.total", totalValue);
-
-                 pybossa.saveTask(task.id, task.answer).done( function(data) {
-                        $("#loadingSign").fadeOut(2000);
-                        $("#map_" + task.id).remove();
-                        deferred.resolve();
-                        $(".btn-submit").removeAttr('disabled');
-
-                });
-
-
-            }
+            pybossa.saveTask(task.id, task.answer).done( function(data) {
+                loadingLoader(true);
+                geoLayerCollection = [];
+                answer = [];
+                drawnItems = null;
+                drawnItems = new L.FeatureGroup();
+                task.drawnItems = null;
+                $("#map_" + task.id).remove();
+                toggleSubmitButton(false);
+                deferred.resolve();
+            });
 
         });
-
-        $("#map_task_" + task.id).show();
 
     }
     else {
         $(".skeleton").hide();
         $("#finish").fadeIn();
+        loadingLoader(false);
     }
 });
 
 
-pybossa.run('MM_AerialClicker');
+function toggleSubmitButton(toggle){
+    if(toggle)
+    {
+        $(".btn-submit").attr('disabled','disabled');
+
+    }
+    else{
+        $(".btn-submit").removeAttr('disabled');
+    }
+}
+
+function loadingLoader(loaderDown){
+    if(loaderDown){
+        $("#loadingSign").fadeIn();
+    }
+    else{
+        $("#loadingSign").fadeOut(5000);
+    }
+
+
+}
+
+pybossa.run('MM_Aerial_Hagupit');
 
 </script>
