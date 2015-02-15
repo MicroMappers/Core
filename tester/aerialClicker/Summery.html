@@ -1,0 +1,202 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+		<title>MicroMappers - Aerial Clicker</title>
+
+		<style type="text/css">
+            @import "media/css/main.css";
+			@import "media/css/site_jui.css";
+			@import "media/css/demo_table_jui.css";
+			@import "media/css/jquery-ui-1.7.2.custom.css";
+
+            .dataTables_filter input { width: 300px; height: 20px; margin:3px; }
+			.dataTables_info { padding-top: 0; }
+			.dataTables_paginate { padding-top: 0; }
+			.css_right { float: right; }
+			#example_wrapper .fg-toolbar { font-size: 0.8em }
+			#theme_links span { float: left; padding: 2px 10px; }
+
+		</style>
+         <!-- Bootstrap Core CSS -->
+        <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+        <link href="css/portfolio-item.css" rel="stylesheet">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+            <!-- jQuery Version 1.11.0 -->
+        <script src="js/jquery-1.11.0.js"></script>
+
+        <!-- Bootstrap Core JavaScript -->
+        <script src="js/bootstrap.min.js"></script>
+
+
+
+		<script type="text/javascript" language="javascript" src="media/js/jquery.dataTables.js"></script>
+
+        <script src="media/js/purl.js"></script>
+		<script type="text/javascript" charset="utf-8">
+			$(document).ready(function() {
+
+                $.ajax({
+                    type: 'GET',
+                    url: 'http://qcricl1linuxvm2.cloudapp.net:8081/ClickerTrainerAPI/rest/namibia/jsonp/reports',
+                    dataType: 'jsonp',
+                    success: renderList,
+                    error: FailedRenderList,
+                    jsonp: false,
+                    jsonpCallback: "jsonp"
+                });
+
+
+                function FailedRenderList() {console.log("failed");}
+
+                function renderList(data) {
+                    console.log(data);
+                    var appList = new Array();
+                    var index = 0;
+                    $.each(data, function (i,v)
+                    {
+
+                        rowInput = new Object();
+
+                        rowInput.taskID = v.taskID;
+                        var s = v.slicedImage.replace('/static/namibia/', '');
+                        s = s.replace('/slice','');
+                        var i = s.indexOf('/');
+                        var url = "detail.html?s="+v.sourceImage;
+                        rowInput.slicedImage = s.substring(i+1, s.length);
+                        rowInput.sourceImage = "<a href=" + url +" target='_blank'>" + v.sourceImage + "</a>"
+                        rowInput.foundCount = v.found;
+                        rowInput.noFoundCount = v.notFound;
+                        rowInput.totalCount  = Number(v.found) + Number(v.notFound);
+
+                        appList[index] = rowInput;
+                        index = index + 1;
+
+                    });
+
+                    var list = data == null ? [] : (data instanceof Array ? data : [data]);
+
+
+
+                     if(typeof list !='undefined' && list!= null && appList != null){
+                       //  var titleText = document.getElementById("title");
+                         //titleText.innerHTML = '<h2>Testing</h2>';
+                            //<h2>Japan chemial</h2>
+
+
+                            var oTable = $('#example').dataTable( {
+
+                                    "bProcessing": true,
+                                    "bJQueryUI": true,
+                                    "aaData": appList,
+					                "sPaginationType": "full_numbers",
+                                    "aoColumns": [
+                                        { "mData": "taskID" },
+                                        { "mData": "sourceImage" },
+                                        { "mData": "slicedImage" },
+                                        { "mData": "foundCount" },
+                                        { "mData": "noFoundCount" },
+                                        { "mData": "totalCount" }
+
+                                    ]
+
+                                } );
+
+
+
+
+
+
+
+
+
+
+                     }
+
+                }
+
+            });
+</script>
+	</head>
+	<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+        <div class="container">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <!--<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>-->
+                <a class="navbar-brand" href="http://clickers.micromappers.org/">MicroMappers</a>
+            </div>
+
+        </div>
+        <!-- /.container -->
+    </nav>
+
+
+  <!-- Page Content -->
+    <div class="container">
+
+
+        <!-- Portfolio Item Row -->
+        <div class="row">
+
+
+                    <div id="dynamic" style="margin: 15px;">
+                        <table cellpadding="0" cellspacing="0" border="0" class="display" id="example">
+                            <thead>
+                                <tr>
+                                    <th width="10%">taskID</th>
+                                    <th width="20%">sourceImage</th>
+                                    <th width="20%">slicedImage</th>
+                                    <th width="20%">Animal Found</th>
+                                    <th width="20%">Animal Not Found</th>
+                                    <th width="10%">Total Vote</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="4" class="dataTables_empty"><p id="loadingInfo">Loading data.........</p></td>
+                                </tr>
+                            </tbody>
+
+                        </table>
+                    </div>
+                    <div class="spacer"></div>
+
+        </div>
+        <!-- /.row -->
+
+        <!-- Related Projects Row -->
+
+        <!-- /.row -->
+
+        <hr>
+
+        <!-- Footer -->
+        <footer>
+            <div class="row">
+                <div class="col-lg-12">
+                    <p>Copyright &copy; MicroMappers 2014</p>
+                </div>
+            </div>
+            <!-- /.row -->
+        </footer>
+
+    </div>
+
+	</body>
+</html>

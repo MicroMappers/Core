@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="MicroMappers">
+
+    <title>Nanimia Data Output</title>
+
+    <link rel="stylesheet" href="vendor/leaflet.css" />
+    <link rel="stylesheet" href="vendor/leaflet.draw.css" />
+
+    <!--[if lte IE 8]>
+    <link rel="stylesheet" href="vendor/leaflet.draw.ie.css" />
+    <![endif]-->
+    <script src="http://www.openlayers.org/api/OpenLayers.js"></script>
+    <script src="vendor/leaflet.js"></script>
+    <script src="vendor/Leaflet.draw.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=drawing"></script>
+
+    <!-- Bootstrap Core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="css/portfolio-item.css" rel="stylesheet">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+        <div class="container">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <!--<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>-->
+                <a class="navbar-brand" href="http://clickers.micromappers.org/">MicroMappers</a>
+            </div>
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <!--<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav">
+                    <li>
+                        <a href="#">About</a>
+                    </li>
+                    <li>
+                        <a href="#">Services</a>
+                    </li>
+                    <li>
+                        <a href="#">Contact</a>
+                    </li>
+                </ul>
+            </div>-->
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container -->
+    </nav>
+
+    <!-- Page Content -->
+    <div class="container">
+
+        <!-- Portfolio Item Heading -->
+        <div class="row">
+            <div class="col-lg-12" id="mapSourceContainer">
+                <img id="sourceImage" width="100%" height="100%" /><br><br>
+            </div>
+        </div>
+        <!-- /.row -->
+        <hr>
+        <!-- Portfolio Item Row -->
+        <div class="row">
+            <div class="col-lg-10">
+                <div id="mapContainer0"></div>
+                <br>
+            </div>
+            <div class="col-lg-2">
+                <h3 id="imageName0">Image Name</h3>
+                <ul>
+                    <li id="totalcount0">total 5votes</li>
+                    <li id="yescount0">3 said YES</li>
+                    <li id="nocount0">1 said NO</li>
+                </ul>
+            </div>
+
+
+        </div>
+        <hr>
+        <div class="row">
+           <div class="col-lg-10">
+                <div id="mapContainer1" ></div>
+                <br>
+            </div>
+            <div class="col-lg-2">
+                <h3 id="imageName1">Image Name</h3>
+                <ul>
+                    <li id="totalcount1">total 5votes</li>
+                    <li id="yescount1">3 said YES</li>
+                    <li id="nocount1">1 said NO</li>
+                </ul>
+            </div>
+         </div>
+
+        <hr>
+        <div class="row">
+           <div class="col-lg-10">
+                <div id="mapContainer2" ></div>
+                <br>
+            </div>
+            <div class="col-lg-2">
+                <h3 id="imageName2">Image Name</h3>
+                <ul>
+                    <li id="totalcount2">total 5votes</li>
+                    <li id="yescount2">3 said YES</li>
+                    <li id="nocount2">1 said NO</li>
+                </ul>
+            </div>
+         </div>
+
+        <hr>
+        <div class="row">
+           <div class="col-lg-10">
+                <div id="mapContainer3" ></div>
+                <br>
+            </div>
+            <div class="col-lg-2">
+                <h3 id="imageName3">Image Name</h3>
+                <ul>
+                    <li id="totalcount3">total 5votes</li>
+                    <li id="yescount3">3 said YES</li>
+                    <li id="nocount3">1 said NO</li>
+                </ul>
+            </div>
+         </div>
+
+        <!-- /.row -->
+
+        <!-- Related Projects Row -->
+
+        <!-- /.row -->
+
+        <hr>
+
+        <!-- Footer -->
+        <footer>
+            <div class="row">
+                <div class="col-lg-12">
+                    <p>Copyright &copy; MicroMappers 2014</p>
+                </div>
+            </div>
+            <!-- /.row -->
+        </footer>
+
+    </div>
+    <!-- /.container -->
+
+    <!-- jQuery Version 1.11.0 -->
+    <script src="js/jquery-1.11.0.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="js/bootstrap.min.js"></script>
+
+
+    <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+
+    <script src="media/js/purl.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script type="text/javascript">
+        var parmValue = $.url().param('s');
+        var appList = new Array();
+        var path = "savmap_images/"
+        var geoBoundsArray = [125.00587463378906,
+                    11.241715102754723,
+                    125.00553131103516,
+                    11.241378366973036];
+//http://qcricl1linuxvm2.cloudapp.net:8081/ClickerTrainerAPI/rest/namibia
+        if(typeof parmValue !='undefined' && parmValue!='' && parmValue !=null){
+                    $.ajax({
+            type: 'GET',
+            url: 'http://qcricl1linuxvm2.cloudapp.net:8081/ClickerTrainerAPI/rest/namibia/jsonp/image/source/'+parmValue,
+            dataType: 'jsonp',
+            success: renderList,
+            error: FailedRenderList,
+            jsonp: false,
+            jsonpCallback: "jsonp"
+        });
+
+        }
+
+
+        function renderList(data) {
+
+            var index = 0;
+            $.each(data, function (i,v)
+            {
+
+                var task = new Object();
+
+                task.id = v.taskID;
+                var s = v.slicedImage.replace('/static/namibia/', '');
+                s = s.replace('/slice','');
+                var i = s.indexOf('/');
+                var folder = s.substring(0, i);
+                folder = path + folder;
+                task.slicedImage = s.substring(i+1, s.length);
+                task.sourceImage = v.sourceImage;
+
+
+                task.foundCount = v.found;
+                task.noFoundCount = v.notFound;
+
+                task.geo = v.geo;
+                task.totalCount  = Number(v.found) + Number(v.notFound);
+                task.imageUrl =folder + "/slice/" +s.substring(i+1, s.length);
+                task.foler = folder;
+                appList[index] = task;
+                index = index + 1;
+
+            });
+
+            //<img src="savmap_images/day2_rgb_transect_count/IMG_1255.JPG" id="sourceImage" width="100%" height="100%" /><br><br>
+            var src = appList[0].foler +'/' + appList[0].sourceImage.toUpperCase();
+            $('#sourceImage').attr("src", src);
+            for(var i=0; i < appList.length; i++){
+                renderMap(appList[i], i);
+            }
+
+        }
+
+        function renderMap(appObject, divIndex){
+            var map_div = $("<div/>", {id:"map_task_" + divIndex, 'class': 'span4', 'style':'margin-left:0px'});
+            var map_canvas = $("<div/>", {id: "map_" + divIndex, 'class': 'map_canvas'});
+            map_canvas.css("width", "900px");
+            map_canvas.css("height", "534px");
+            map_div.append(map_canvas);
+            $("#mapContainer"+divIndex).prepend(map_div);
+
+
+            $("#imageName"+divIndex).text(appObject.slicedImage);
+            $("#totalcount"+divIndex).text('Total Vote : ' +appObject.totalCount);
+            $("#yescount"+divIndex).text('Yes Vote : ' +appObject.foundCount);
+            $("#nocount"+divIndex).text('No Vote : ' +appObject.noFoundCount);
+
+            var swBound = new google.maps.LatLng(geoBoundsArray[3],geoBoundsArray[2]);
+            var neBound = new google.maps.LatLng(geoBoundsArray[1],geoBoundsArray[0]);
+            var bounds = new google.maps.LatLngBounds(swBound, neBound);
+
+            var centerPoint = bounds.getCenter();
+
+
+
+            var map = L.map("map_" + divIndex,{maxZoom: 26, minZoom:21}).setView([centerPoint.lat(), centerPoint.lng()], 21);
+
+
+            //var imageBounds = [[51.490, -0.122], [51.510, -0.028]];
+            var imageBounds = [[geoBoundsArray[3], geoBoundsArray[2]], [geoBoundsArray[1], geoBoundsArray[0]]];
+            L.imageOverlay(appObject.imageUrl, imageBounds).addTo(map);
+
+            L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+                }).addTo(map);
+
+            map.setMaxBounds(imageBounds);
+            var obj = jQuery.parseJSON(appObject.geo);
+            for(var a=0; a < obj.length; a++){
+                var o1 = obj[a];
+                for(var i=0; i < o1.length; i++){
+                    var geoOps = o1[i];
+                    L.geoJson(geoOps,{
+                        onEachFeature:function(feature, layer) {
+                           // console.log("feature" + feature);
+                            var rect = L.rectangle(layer.getBounds(), {color: 'red', weight: 1}).addTo(map);
+                        },
+                        style: function(layer) {
+                            switch (a) {
+                                case 0: return {color:"#fb0909"};
+                                case 1: return {color:"#50730c"};
+                                case 2: return {color:"#73660c"};
+                                case 3: return {color:"#19f21e"};
+                                case 4: return {color:"#f7f26f"};
+                                case 5: return {color:"#8bddfb"};
+                                default:return {color:"#d4dbde"};
+                            }
+                        }
+                    }).addTo(map);
+                }
+            }
+
+
+        }
+
+        function FailedRenderList() {console.log("failed");}
+
+
+    </script>
+
+</body>
+
+</html>
