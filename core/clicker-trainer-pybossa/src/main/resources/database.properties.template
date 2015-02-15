@@ -1,0 +1,5 @@
+jdbc.driver=com.mysql.jdbc.Driver
+jdbc.url=jdbc:mysql://url
+jdbc.user=userid
+jdbc.password=password
+
