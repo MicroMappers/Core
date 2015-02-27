@@ -92,7 +92,7 @@ public class DroneTrackerController {
     public void addNewDrone(String data){
         System.out.println("addNewDrone : " + data);
         droneTrackerService.saveUserMappingRequest(data);
-      //  return Response.status(CodeLookUp.APP_REQUEST_SUCCESS).entity(StatusCodeType.POST_COMPLETED).build();
+      //  return Response.status(CodeLookUp.APP_REQUEST_SUCCESS).qa.qcri.mm.media.entity(StatusCodeType.POST_COMPLETED).build();
 
     }
 
@@ -105,7 +105,7 @@ public class DroneTrackerController {
         temp.replace(");","");
         System.out.println("addJSONPNewDrone - temp : " + temp);
         droneTrackerService.saveUserMappingRequest(temp);
-        //  return Response.status(CodeLookUp.APP_REQUEST_SUCCESS).entity(StatusCodeType.POST_COMPLETED).build();
+        //  return Response.status(CodeLookUp.APP_REQUEST_SUCCESS).qa.qcri.mm.media.entity(StatusCodeType.POST_COMPLETED).build();
 
     }
 

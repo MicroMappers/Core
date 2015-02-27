@@ -22,7 +22,7 @@ import java.net.URL;
 public class Communicator {
 
     // will be placed on config.
-    protected static Logger logger = Logger.getLogger("service");
+    protected static Logger logger = Logger.getLogger("qa.qcri.mm.media.service");
 
     public Communicator(){
 

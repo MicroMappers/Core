@@ -11,7 +11,7 @@ import java.io.Serializable;
  * To change this template use File | Settings | File Templates.
  */
 @Entity
-@Table(catalog = "aidr_scheduler",name = "userToken")
+@Table(catalog = "mm_uaviators",name = "userToken")
 public class UserToken implements Serializable {
     private static final long serialVersionUID = -5527566248002296042L;
 
