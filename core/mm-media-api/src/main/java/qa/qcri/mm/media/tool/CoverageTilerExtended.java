@@ -6,6 +6,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -205,13 +206,13 @@ public class CoverageTilerExtended extends BaseArgumentsManager implements Proce
             //file.getAbsolutePath();
             CSVWriter writer = new CSVWriter(new FileWriter(fileName, true));
 
-            String[] header = {"fileURL", "width","height","minX", "minY", "maxX", "maxY"};
+            String[] header = {"fileURL", "width","height","minX", "minY", "maxX", "maxY", "bounds"};
 
             writer.writeNext(header);
 
             for (File fileEntry : outputLocation.listFiles()) {
                 if (!fileEntry.isDirectory()) {
-                    String[] data = new String[7];
+                    String[] data = new String[8];
 
                     GeoTiffReader reader = new GeoTiffReader(fileEntry);
                     GridCoverage2D cov = reader.read(null);
@@ -223,15 +224,16 @@ public class CoverageTilerExtended extends BaseArgumentsManager implements Proce
                     data[4] =    Double.toString(cov.getEnvelope2D().getMinY());
                     data[5] =    Double.toString(cov.getEnvelope2D().getMaxX());
                     data[6] =    Double.toString(cov.getEnvelope2D().getMaxY());
+                    data[7] =    cov.getEnvelope2D().getMinX()+ "," + cov.getEnvelope2D().getMinY() + "," + cov.getEnvelope2D().getMaxX() + "," + cov.getEnvelope2D().getMaxY();
 
 
-                    System.out.println(fileEntry.getAbsolutePath());
                     writer.writeNext(data);
                     reader.dispose();
                 }
             }
 
             writer.close();
+            fireEvent("Output export file created :" + file + " at " + new Date(), 100 );
 
         }
         catch(Exception e){
