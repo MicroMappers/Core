@@ -29,6 +29,11 @@ public class ClientAppSourceServiceImpl implements ClientAppSourceService {
     }
 
     @Override
+    public List<ClientAppSource> getClientAppSourceWithStatusCode(int status) {
+        return clientAppSourceDao.getClientAppSourceWithStatusOnly(status);  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
     @Transactional(readOnly = false)
     public void updateClientAppSourceStatus(Long clientAppID, int status) {
         clientAppSourceDao.updateClientAppSourceStatus(clientAppID, status);

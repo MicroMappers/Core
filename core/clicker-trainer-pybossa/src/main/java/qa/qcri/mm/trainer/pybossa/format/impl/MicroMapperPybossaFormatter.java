@@ -29,31 +29,6 @@ public class MicroMapperPybossaFormatter {
     protected static Logger logger = Logger.getLogger("MicroMapperPybossaFormatter");
     public MicroMapperPybossaFormatter(){}
 
-    public String assmeblePybossaAppCreationForm(String name, String shortName, String description) throws Exception{
-
-        JSONObject app = new JSONObject();
-
-        app.put("name", name);
-        app.put("short_name", shortName);
-        app.put("description", description);
-
-        return app.toJSONString();
-    }
-
-
-    public Long getAppID(String jsonApp, JSONParser parser) throws Exception{
-        Long appID = null;
-        JSONArray array = (JSONArray) parser.parse(jsonApp);
-        Iterator itr= array.iterator();
-
-        while(itr.hasNext()){
-            JSONObject featureJsonObj = (JSONObject)itr.next();
-            appID = (Long)featureJsonObj.get("id");
-        }
-
-        return appID;
-    }
-
     public List<String> assemblePybossaTaskPublishForm( List<MicromapperInput> inputSources, ClientApp clientApp) throws Exception {
 
         List<String> outputFormatData = new ArrayList<String>();
@@ -80,92 +55,6 @@ public class MicroMapperPybossaFormatter {
 
         return outputFormatData;
     }
-
-
-    public String updateApp(ClientApp clientApp,JSONObject attribute, JSONArray labelModel) throws Exception {
-        InputStream templateIS = Thread.currentThread().getContextClassLoader().getResourceAsStream("html/template.html");
-        String templateString = StreamConverter.convertStreamToString(templateIS) ;
-
-        templateString = templateString.replace("TEMPLATE:SHORTNAME", clientApp.getShortName());
-       // templateString = templateString.replace("TEMPLATE:NAME", clientApp.getName());
-        //TEMPLATEFORATTRIBUTEAIDR
-        String attributeDisplay = (String)attribute.get("name") ;
-        attributeDisplay =  attributeDisplay +" " + (String)attribute.get("description") ;
-        templateString = templateString.replace("TEMPLATE:FORATTRIBUTEAIDR", attributeDisplay);
-
-
-        JSONArray sortedLabelModel = JsonSorter.sortJsonByKey(labelModel, "norminalLabelCode");
-        StringBuffer displayLabel = new StringBuffer();
-        Iterator itr= sortedLabelModel.iterator();
-       // logger.debug("sortedLabelModel : " + sortedLabelModel);
-        while(itr.hasNext()){
-
-            JSONObject featureJsonObj = (JSONObject)itr.next();
-            String labelName = (String)featureJsonObj.get("name");
-            String lableCode = (String)featureJsonObj.get("norminalLabelCode");
-            String description = (String)featureJsonObj.get("description");
-            Long norminalLabelID = (Long) featureJsonObj.get("norminalLabelID");
-
-            displayLabel.append("<label class='checkbox' name='nominalLabel'><strong>")  ;
-            displayLabel.append("<input name='nominalLabel' type='checkbox' value=");
-            displayLabel.append(labelName) ;
-            displayLabel.append(">") ;
-            displayLabel.append(labelName) ;
-            displayLabel.append("</strong>")  ;
-            if(!description.isEmpty()){
-                displayLabel.append("&nbsp;&nbsp;")  ;
-                displayLabel.append("<font color='#999999' size=-1>")  ;
-                displayLabel.append(description) ;
-                displayLabel.append("</font>")  ;
-            }
-            displayLabel.append("</label>")  ;
-        }
-
-       // logger.debug("displayLabel : " + displayLabel.toString());
-
-        templateString = templateString.replace("TEMPLATE:FORLABELSFROMAIDR", displayLabel.toString());
-
-        InputStream tutorialIS = Thread.currentThread().getContextClassLoader().getResourceAsStream("html/tutorial.html");
-        String tutorialString = StreamConverter.convertStreamToString(tutorialIS) ;
-
-        tutorialString = tutorialString.replace("TEMPLATE:SHORTNAME", clientApp.getShortName());
-        tutorialString = tutorialString.replace("TEMPLATE:NAME", clientApp.getName());
-
-        InputStream longDescIS = Thread.currentThread().getContextClassLoader().getResourceAsStream("html/long_description.html");
-        String longDescString = StreamConverter.convertStreamToString(longDescIS) ;
-
-        JSONObject app = new JSONObject();
-
-        app.put("task_presenter", templateString);
-
-        app.put("tutorial", tutorialString);
-        app.put("thumbnail", "http://i.imgur.com/lgZAWIc.png");
-
-        JSONObject app2 = new JSONObject();
-        app2.put("info", app );
-
-        app2.put("long_description", longDescString);
-        app2.put("name", clientApp.getName());
-        app2.put("short_name", clientApp.getShortName());
-        app2.put("description", clientApp.getShortName());
-        app2.put("id", clientApp.getPlatformAppID());
-        app2.put("time_limit", 0);
-        app2.put("long_tasks", 0);
-        app2.put("created", "" + new Date().toString()+"");
-        app2.put("calibration_frac", 0);
-        app2.put("bolt_course_id", 0);
-        app2.put("link", "<link rel='self' title='app' href='http://localhost:5000/api/app/2'/>");
-        app2.put("allow_anonymous_contributors", true);
-        app2.put("time_estimate", 0);
-        app2.put("hidden", 0);
-        app2.put("category_id", null);
-        app2.put("owner_id", 1);
-
-        //long_description
-        return  app2.toJSONString();
-
-    }
-
 
     private JSONObject assemblePybossaInfoFormat(MicromapperInput micromapperInput, ClientApp clientApp) throws Exception{
 
@@ -197,7 +86,6 @@ public class MicroMapperPybossaFormatter {
         return pybossaData;
     }
 
-
     private JSONObject createNonGeoClickerInfo(JSONObject pybossaData, MicromapperInput micromapperInput ){
 
         pybossaData.put("author",micromapperInput.getAuthor());
@@ -213,7 +101,6 @@ public class MicroMapperPybossaFormatter {
         return pybossaData;
 
     }
-
 
     private JSONObject createGeoClickerInfo(JSONObject pybossaData, MicromapperInput micromapperInput ){
 
@@ -231,7 +118,6 @@ public class MicroMapperPybossaFormatter {
         return pybossaData;
     }
 
-
     private JSONObject createAerialClickerInfo(JSONObject pybossaData, MicromapperInput micromapperInput ){
 
         pybossaData.put("url",micromapperInput.getUrl());
@@ -243,7 +129,6 @@ public class MicroMapperPybossaFormatter {
 
         return pybossaData;
     }
-
 
     public boolean isTaskStatusCompleted(String data) throws Exception{
         /// will do later for importing process
@@ -353,6 +238,12 @@ public class MicroMapperPybossaFormatter {
         JSONObject responseJSON = new JSONObject();
 
         String[] questions = getQuestion( clientAppAnswer,  parser);
+
+        if(questions == null) {
+            System.out.println("active answer key is null. No validation is required");
+            return null;
+        }
+
         int[] responses = new int[questions.length];
 
         JSONArray array = (JSONArray) parser.parse(pybossaResult) ;
@@ -409,6 +300,7 @@ public class MicroMapperPybossaFormatter {
             if(featureJsonObj.get("info") instanceof String){
                 System.out.println("getAnswerResponseForGeo : info is instance of string, not JSONObject " );
             }
+
             JSONObject info = (JSONObject)featureJsonObj.get("info");
             tweetID = (String) info.get("tweetid");
             String locValue = info.get("loc").toString();
@@ -467,13 +359,6 @@ public class MicroMapperPybossaFormatter {
         return  taskQueueResponse;
     }
 
-    /**
-     *
-     * @param locations
-     * @return
-     * todo : use mysql function for spatical data
-     */
-
     private JSONObject calculateCentralPoint(JSONArray locations){
         JSONObject geoResponse = new JSONObject();
         // Min 3 votes are required
@@ -481,68 +366,22 @@ public class MicroMapperPybossaFormatter {
             return geoResponse;
         }
 
-       // if(locations.size() == PybossaConf.DEFAULT_GEO_N_ANSWERS){
+        JSONObject loc = (JSONObject)locations.get(0);
+        JSONObject geometry = (JSONObject)loc.get("geometry");
+        JSONArray coordinates =  (JSONArray)geometry.get("coordinates");
+        System.out.println(coordinates.get(0) + "," + coordinates.get(1));
 
-            JSONObject loc = (JSONObject)locations.get(0);
-            JSONObject geometry = (JSONObject)loc.get("geometry");
-            JSONArray coordinates =  (JSONArray)geometry.get("coordinates");
-            System.out.println(coordinates.get(0) + "," + coordinates.get(1));
-
-
-          //  double lat1 = (Double)coordinates.get(1);
-           // double lon1 = (Double)coordinates.get(0);
-            /**
-            loc = (JSONObject)locations.get(1);
-            geometry = (JSONObject)loc.get("geometry");
-            coordinates =  (JSONArray)geometry.get("coordinates");
-            System.out.println(coordinates.get(0) + "," + coordinates.get(1));
-            double lat2 = (Double)coordinates.get(1);
-            double lon2 = (Double)coordinates.get(0);
-
-            loc = (JSONObject)locations.get(2);
-            geometry = (JSONObject)loc.get("geometry");
-            coordinates =  (JSONArray)geometry.get("coordinates");
-            System.out.println(coordinates.get(0) + "," + coordinates.get(1));
-            double lat3 = (Double)coordinates.get(1);
-            double lon3 = (Double)coordinates.get(0);
-
-            double results[] = new double[2];
-
-            LatLngUtils.geoMidPointFor3Points(lat1, lon1,lat2,  lon2, lat3,  lon3, results);
-
-            double maxDistanceLength = getMaxDistance(locations, results);
-            **/
-
-            //if(maxDistanceLength <= PybossaConf.ONE_MILE_DISTANCE){
-                JSONObject jsonObject = new JSONObject();
-                JSONArray jsonCoordinate = new JSONArray();
-                jsonCoordinate.add(coordinates.get(0));
-                jsonCoordinate.add(coordinates.get(1));
-                jsonObject.put("coordinates", jsonCoordinate);
-                jsonObject.put("type", "Point");
-                jsonObject.put("distance", PybossaConf.ONE_MILE_DISTANCE );
-                geoResponse.put("geometry", jsonObject);
-                geoResponse.put("type","Feature");
-           // }
-      //  }
+        JSONObject jsonObject = new JSONObject();
+        JSONArray jsonCoordinate = new JSONArray();
+        jsonCoordinate.add(coordinates.get(0));
+        jsonCoordinate.add(coordinates.get(1));
+        jsonObject.put("coordinates", jsonCoordinate);
+        jsonObject.put("type", "Point");
+        jsonObject.put("distance", PybossaConf.ONE_MILE_DISTANCE );
+        geoResponse.put("geometry", jsonObject);
+        geoResponse.put("type","Feature");
 
         return geoResponse;
-    }
-
-    private int getFrequencyOverOne(List<Integer> list, JSONArray locations){
-        int returnValue = -1;
-
-        Set<Integer> uniqueSet = new HashSet<Integer>(list);
-
-        for (Integer temp : uniqueSet) {
-            int frequency = Collections.frequency(list, temp);
-
-            if(frequency > 1){
-                returnValue = temp;
-                locations.remove(locations.get(temp));
-            }
-        }
-        return returnValue;
     }
 
     private HashMap<Integer, Integer> addToTimeStampList(HashMap<Integer, Integer> timeStampList, String answerValue){
@@ -605,7 +444,13 @@ public class MicroMapperPybossaFormatter {
     }
 
     private String[] getQuestion(ClientAppAnswer clientAppAnswer, JSONParser parser) throws ParseException {
-        JSONArray questionArrary =   (JSONArray) parser.parse(clientAppAnswer.getAnswer()) ;
+        String answerKey =  clientAppAnswer.getAnswer();
+        if(clientAppAnswer.getActiveAnswerKey() != null){
+            answerKey =      clientAppAnswer.getActiveAnswerKey();
+        }
+
+        JSONArray questionArrary =   (JSONArray) parser.parse(answerKey) ;
+
         int questionSize =  questionArrary.size();
         String[] questions = new String[questionSize];
 
@@ -710,120 +555,6 @@ public class MicroMapperPybossaFormatter {
 
         }
         return  found;
-    }
-
-    private double getMaxDistance(JSONArray locations, double[] centralPoint){
-          double maxDistance = 0;
-          if(locations.size() == 3) {
-
-              double lon = centralPoint[0];
-              double lat = centralPoint[1];
-
-              double[] distance = new double[3];
-              JSONObject loc = (JSONObject)locations.get(0);
-              JSONObject geometry = (JSONObject)loc.get("geometry");
-              JSONArray coordinates =  (JSONArray)geometry.get("coordinates");
-
-              double lat1 = (Double)coordinates.get(1);
-              double lon1 = (Double)coordinates.get(0);
-
-              loc = (JSONObject)locations.get(1);
-              geometry = (JSONObject)loc.get("geometry");
-              coordinates =  (JSONArray)geometry.get("coordinates");
-
-              double lat2 = (Double)coordinates.get(1);
-              double lon2 = (Double)coordinates.get(0);
-
-              loc = (JSONObject)locations.get(2);
-              geometry = (JSONObject)loc.get("geometry");
-              coordinates =  (JSONArray)geometry.get("coordinates");
-
-              double lat3 = (Double)coordinates.get(1);
-              double lon3 = (Double)coordinates.get(0);
-
-              double[] distanceInMiles = new double[1];
-
-              LatLngUtils.computeDistanceInMile(lat, lon, lat1, lon1, distanceInMiles);
-              distance[0] = distanceInMiles[0];
-              LatLngUtils.computeDistanceInMile(lat, lon, lat2, lon2, distanceInMiles);
-              distance[1] = distanceInMiles[0];
-              LatLngUtils.computeDistanceInMile(lat, lon, lat3, lon3, distanceInMiles);
-              distance[2] = distanceInMiles[0];
-
-              Arrays.sort(distance) ;
-
-              maxDistance = distance[2];
-
-        }
-
-
-        return maxDistance;
-    }
-
-    private JSONArray calculateDistance(JSONArray locations){
-        if(locations.size() < 2){
-            return locations;
-        }
-
-        double preLat = 0;
-        double preLon = 0;
-        double currentLat =0;
-        double currentLon = 0;
-
-        List<Integer> list = new ArrayList<Integer>();
-        ArrayList<GeoPropertyModel> geoProperties = new ArrayList<GeoPropertyModel>();
-
-        if(locations.size() > 1){
-            for(int i=0; i < locations.size(); i++){
-                JSONObject loc = (JSONObject)locations.get(i);
-                JSONObject geometry = (JSONObject)loc.get("geometry");
-                JSONArray coordinates =  (JSONArray)geometry.get("coordinates");
-                preLat = currentLat;
-                preLon = currentLon;
-                currentLat = (Double)coordinates.get(1);
-                currentLon = (Double)coordinates.get(0);
-
-                if(i > 0){
-                    double[] result= new double[2];
-                    LatLngUtils.computeDistanceAndBearing(preLat, preLon, currentLat, currentLon, result);
-
-                    if(result[0] > PybossaConf.ONE_MILE_RADIUS){
-                        geoProperties.add(new GeoPropertyModel(i-1, i, result[0]));
-                        list.add(i);
-                        list.add(i-1);
-                    }
-                }
-            }
-
-            if(geoProperties.size() > 1){
-                getFrequencyOverOne(list, locations);
-            }
-
-        }
-
-        return locations;
-    }
-
-    public List<String> processPybossaCompletedTask(String data) throws Exception{
-        /// will do later for importing process
-        if(!data.isEmpty() && data.length() > 10){
-            List<String> completedTaskID = new ArrayList<String>();
-            JSONParser parser = new JSONParser();
-            Object obj = parser.parse(data);
-            JSONArray jsonObject = (JSONArray) obj;
-            Iterator itr= jsonObject.iterator();
-
-            while(itr.hasNext()){
-                JSONObject featureJsonObj = (JSONObject)itr.next();
-                Long id = (Long)featureJsonObj.get("id") ;
-                String taskID =  id.toString();
-                completedTaskID.add(taskID);
-            }
-
-            return completedTaskID;  //To change body of implemented methods use File | Settings | File Templates.
-        }
-
-        return null;
     }
 
     private int getCutOffNumber(int responseSize, int maxResponseSize, ClientAppAnswer clientAppAnswer){

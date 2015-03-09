@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import qa.qcri.mm.trainer.pybossa.entity.*;
 import qa.qcri.mm.trainer.pybossa.format.impl.CVSRemoteFileFormatter;
 import qa.qcri.mm.trainer.pybossa.format.impl.GeoJsonOutputModel;
+import qa.qcri.mm.trainer.pybossa.format.impl.MicromapperInput;
 import qa.qcri.mm.trainer.pybossa.service.*;
 import qa.qcri.mm.trainer.pybossa.store.PybossaConf;
 import qa.qcri.mm.trainer.pybossa.store.StatusCodeType;
@@ -52,10 +53,31 @@ public class ReportProductServiceImpl implements ReportProductService {
     @Autowired
     private ClientAppEventService clientAppEventService;
 
+    private CVSRemoteFileFormatter cvsRemoteFileFormatter;
+
     private Client client;
 
     public void setClassVariable() throws Exception{
         client = clientService.findClientByCriteria("name", UserAccount.MIROMAPPER_USER_NAME);
+    }
+
+    @Override
+    public void generateReportTemplateFromExternalSource() throws Exception {
+        List<ClientAppSource> datasources = clientAppSourceService.getClientAppSourceWithStatusCode(StatusCodeType.EXTERNAL_DATA_SOURCE_TO_GEO_READY_REPORT);
+
+        for(int j=0; j < datasources.size(); j++){
+
+            String url = datasources.get(j).getSourceURL();
+            Long clientAppID = datasources.get(j).getClientAppID();
+
+            if(!cvsRemoteFileFormatter.doesSourcerExist(url)){
+                return;
+            }
+
+            List<MicromapperInput> micromapperInputList = cvsRemoteFileFormatter.getInputDataForReportTemplate(url);
+            this.generateReportTemplate(micromapperInputList,clientAppID );
+        }
+
     }
 
     @Override
@@ -157,5 +179,18 @@ public class ReportProductServiceImpl implements ReportProductService {
         data[7] = rpt.getAnswer();
 
         return data;
+    }
+
+    private void generateReportTemplate(List<MicromapperInput> micromapperInputList, Long clientAppID){
+        long taskID = 0;
+        long taskQueueID = 0;
+        for(MicromapperInput ins : micromapperInputList){
+            ReportTemplate template = new ReportTemplate( taskQueueID,taskID,ins.getTweetID(), ins.getTweet(),ins.getAuthor(), ins.getLat(), ins.getLng(), ins.getUrl(),ins.getCreated(),
+                    ins.getAnswer(), StatusCodeType.TEMPLATE_IS_READY_FOR_EXPORT, clientAppID);
+
+            reportTemplateService.saveReportItem(template);
+
+        }
+
     }
 }

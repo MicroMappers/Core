@@ -13,6 +13,7 @@ import java.util.List;
  */
 public interface ClientAppSourceService {
     List<ClientAppSource> getClientAppSourceByStatus(Long clientAppID, int status);
+    List<ClientAppSource> getClientAppSourceWithStatusCode(int status);
     void updateClientAppSourceStatus(Long clientAppSourceID, int status);
     void insertNewClientAppSource(ClientAppSource clientAppSource);
 }

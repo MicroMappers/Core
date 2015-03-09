@@ -14,6 +14,7 @@ import java.util.List;
 public interface ClientAppSourceDao extends AbstractDao<ClientAppSource, String>{
 
     List<ClientAppSource> getClientAppSource(Long clientAppID, int status);
+    List<ClientAppSource> getClientAppSourceWithStatusOnly(int status);
     void updateClientAppSourceStatus(Long clientAppID, int status);
     void insertClientAppSource(ClientAppSource clientAppSource);
 }

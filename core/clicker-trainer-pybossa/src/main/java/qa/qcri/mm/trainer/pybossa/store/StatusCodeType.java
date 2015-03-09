@@ -33,7 +33,7 @@ public class StatusCodeType {
     public static Integer EXTERNAL_DATA_SOURCE_USED = 2;
     public static Integer EXTERNAL_DATA_SOURCE_ACTIVE = 1;
     public static Integer EXTERNAL_DATA_SOURCE_UPLOADED = 0;
-
+    public static Integer EXTERNAL_DATA_SOURCE_TO_GEO_READY_REPORT = 3;
 
 
     public static Integer TEMPLATE_IS_READY_FOR_EXPORT = 0;

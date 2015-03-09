@@ -29,6 +29,11 @@ public class ClientAppSourceDaoImpl extends AbstractDaoImpl<ClientAppSource, Str
     }
 
     @Override
+    public List<ClientAppSource> getClientAppSourceWithStatusOnly(int status) {
+        return findByCriteria(Restrictions.eq("status", status));
+    }
+
+    @Override
     public void updateClientAppSourceStatus(Long clientAppSourceID, int status) {
         ClientAppSource clientAppSource = findByCriterionID(Restrictions.eq("clientAppSourceID",clientAppSourceID));
         clientAppSource.setStatus(status);

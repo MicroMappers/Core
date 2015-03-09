@@ -13,6 +13,7 @@ import java.util.List;
  */
 public interface ReportProductService {
 
+    void generateReportTemplateFromExternalSource() throws Exception;
     void generateCVSReportForGeoClicker() throws Exception;
     void generateGeoJsonForESRI(List<GeoJsonOutputModel> geoJsonOutputModels) throws Exception;
 }

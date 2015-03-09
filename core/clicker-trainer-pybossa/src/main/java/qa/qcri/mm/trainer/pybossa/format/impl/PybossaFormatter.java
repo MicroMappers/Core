@@ -24,7 +24,7 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class PybossaFormatter {
-   // protected static Logger logger = Logger.getLogger("service");
+   // protected static Logger logger = Logger.getLogger("qa.qcri.mm.media.service");
     public PybossaFormatter(){}
 
     public String assmeblePybossaAppCreationForm(String name, String shortName, String description) throws Exception{

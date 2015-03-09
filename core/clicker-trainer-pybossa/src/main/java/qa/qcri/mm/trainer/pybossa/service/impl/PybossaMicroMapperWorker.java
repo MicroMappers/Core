@@ -263,6 +263,8 @@ public class PybossaMicroMapperWorker implements MicroMapperWorker {
     @Override
     public void processTaskExport() throws Exception {
         reportProductService.generateCVSReportForGeoClicker();
+        // will be activated when AIDR is ready.
+        //reportProductService.generateReportTemplateFromExternalSource();
     }
 
     private void processTaskQueueImport(ClientApp clientApp,TaskQueue taskQueue, Long taskID, List<GeoJsonOutputModel> geoJsonOutputModels) throws Exception {

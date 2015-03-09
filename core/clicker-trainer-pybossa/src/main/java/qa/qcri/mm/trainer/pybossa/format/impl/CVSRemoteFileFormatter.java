@@ -18,6 +18,36 @@ import java.util.*;
  */
 public class CVSRemoteFileFormatter {
 
+    public List<MicromapperInput> getInputDataForReportTemplate(String url) throws Exception{
+        //tweetID,tweet,author,lat,lon,created,answerCode
+
+        String[] row = null;
+        List<MicromapperInput> sourceSet = new ArrayList<MicromapperInput>();
+
+        URL stockURL = new URL(url);
+        BufferedReader in = new BufferedReader(new InputStreamReader(stockURL.openStream()));
+
+        CSVReader csvReader = new CSVReader(in);
+        List content = csvReader.readAll();
+
+        for (Object object : content) {
+            row = (String[]) object;
+            if(row.length >= 7){
+                //  tweetID,tweet,author,lat,lng,url,created
+                MicromapperInput source = new MicromapperInput(row[0], row[1], row[2], row[3], row[4], null,row[5], row[6]);
+                sourceSet.add(source);
+            }
+        }
+
+        csvReader.close();
+
+        if(sourceSet.size() > 1){
+            sourceSet.remove(0);   // header
+        }
+
+        return sourceSet;
+    }
+
     public List<MicromapperInput> getInputData(String url) throws Exception{
         //[Twitter username] // [Tweet message] // [optional: time-stamp] // [optional: location] // [optional: latitude] // [optional: longitude] // [image link]
 
@@ -47,7 +77,6 @@ public class CVSRemoteFileFormatter {
 
         return sourceSet;
     }
-
 
     private CSVReader getCVSContentReader(String source) throws Exception{
         CSVReader csvReader = null;
@@ -131,7 +160,6 @@ public class CVSRemoteFileFormatter {
         return sourceSet;
     }
 
-
     public List<MicromapperInput> getGeoClickerInputData(String url) throws Exception{
         //"tweetID","tweet","author","lat","lng","url","created","answer"
         String[] row = null;
@@ -167,7 +195,6 @@ public class CVSRemoteFileFormatter {
         return sourceSet;
     }
 
-
     public List<MicromapperInput> getAerialClickerInputData(String url) throws Exception{
         String[] row = null;
         List<MicromapperInput> sourceSet = new ArrayList<MicromapperInput>();
@@ -199,7 +226,6 @@ public class CVSRemoteFileFormatter {
 
         return sourceSet;
     }
-
 
     public List<MicromapperInput> getClickerLocalFileInputData(String csvFilename) throws Exception{
         String[] row = null;
@@ -264,7 +290,6 @@ public class CVSRemoteFileFormatter {
         return sourceSet;
     }
 
-
     public CSVWriter instanceToOutput(String fileName) throws Exception{
         File file = new File(fileName);
         //file.getAbsolutePath();
@@ -287,7 +312,6 @@ public class CVSRemoteFileFormatter {
         writer.close();
 
     }
-
 
     public boolean doesSourcerExist(String fileLocation){
 
