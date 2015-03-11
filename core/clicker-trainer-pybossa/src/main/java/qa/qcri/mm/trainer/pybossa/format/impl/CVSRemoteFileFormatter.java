@@ -94,7 +94,7 @@ public class CVSRemoteFileFormatter {
         return csvReader;
     }
 
-    private String getAerialClickerJsonData(String source) throws Exception{
+    private String getClickerJsonData(String source) throws Exception{
         StringBuffer responseOutput = new StringBuffer();
         if(source.toLowerCase().startsWith("http")){
             URL stockURL = new URL(source);
@@ -196,10 +196,10 @@ public class CVSRemoteFileFormatter {
     }
 
     public List<MicromapperInput> getAerialClickerInputData(String url) throws Exception{
-        String[] row = null;
+
         List<MicromapperInput> sourceSet = new ArrayList<MicromapperInput>();
 
-        String geoJsonString = getAerialClickerJsonData(url);
+        String geoJsonString = this.getClickerJsonData(url);
         JSONParser parser = new JSONParser();
 
         JSONArray tileJson = (JSONArray)parser.parse(geoJsonString);
@@ -222,6 +222,32 @@ public class CVSRemoteFileFormatter {
             MicromapperInput source = new MicromapperInput( imgURL, jsonBound, imgSize.toJSONString(), mediaSource);
             sourceSet.add(source);
 
+        }
+
+        return sourceSet;
+    }
+
+
+    public List<MicromapperInput> get3WClickerInputData(String url) throws Exception{
+        List<MicromapperInput> sourceSet = new ArrayList<MicromapperInput>();
+
+        String geoJsonString = this.getClickerJsonData(url);
+        JSONParser parser = new JSONParser();
+
+        JSONArray newsJson = (JSONArray)parser.parse(geoJsonString);
+
+        for (Object object : newsJson) {
+            JSONObject aJson = (JSONObject) object;
+            String jsonBound = null;
+
+            JSONArray glide = (JSONArray) aJson.get("glide");
+            String link = (String) aJson.get("link");
+            JSONArray where = (JSONArray) aJson.get("where");
+            JSONArray who = (JSONArray) aJson.get("who");
+            String langcode = (String) aJson.get("langcode");
+
+            MicromapperInput source = new MicromapperInput( glide, link, where, who, langcode);
+            sourceSet.add(source);
         }
 
         return sourceSet;

@@ -50,7 +50,6 @@ public class MicroMapperPybossaFormatter {
 
             outputFormatData.add(tasks.toJSONString());
 
-            //System.out.println(featureJsonObj.toString());
         }
 
         return outputFormatData;
@@ -58,30 +57,27 @@ public class MicroMapperPybossaFormatter {
 
     private JSONObject assemblePybossaInfoFormat(MicromapperInput micromapperInput, ClientApp clientApp) throws Exception{
 
-       // Integer n_answers = clientApp.getClient().getDefaultTaskRunsPerTask();
-
-        //if(clientApp != null){
-         //   n_answers = clientApp.getTaskRunsPerTask();
-        //}
 
         JSONObject pybossaData = new JSONObject();
         pybossaData.put("question","please tag it.");
 
         if(clientApp.getAppType() == StatusCodeType.APP_MAP ){
             pybossaData = createGeoClickerInfo(pybossaData, micromapperInput);
-        }
-        else{
-
-            if(clientApp.getAppType() == StatusCodeType.APP_AERIAL){
-                pybossaData = createAerialClickerInfo(pybossaData, micromapperInput);
-            }
-            else{
-                pybossaData = createNonGeoClickerInfo(pybossaData, micromapperInput);
-            }
-
+            return  pybossaData;
         }
 
-        //pybossaData.put("n_answers",n_answers);
+
+        if(clientApp.getAppType() == StatusCodeType.APP_AERIAL){
+            pybossaData = createAerialClickerInfo(pybossaData, micromapperInput);
+            return  pybossaData;
+        }
+
+        if(clientApp.getAppType() == StatusCodeType.APP_3W){
+            pybossaData = create3WClickerInfo(pybossaData, micromapperInput);
+            return  pybossaData;
+        }
+        // otherwise, process no geoclicker
+        pybossaData = createNonGeoClickerInfo(pybossaData, micromapperInput);
 
         return pybossaData;
     }
@@ -126,6 +122,17 @@ public class MicroMapperPybossaFormatter {
         pybossaData.put("mediaSize",micromapperInput.getMediaSize());
         pybossaData.put("category",micromapperInput.getUrl());
         pybossaData.put("mediasource",micromapperInput.getMediasSource());
+
+        return pybossaData;
+    }
+
+    private JSONObject create3WClickerInfo(JSONObject pybossaData, MicromapperInput micromapperInput ){
+
+        pybossaData.put("glide",micromapperInput.getGlide());
+        pybossaData.put("link",micromapperInput.getLink());
+        pybossaData.put("where",micromapperInput.getWhere());
+        pybossaData.put("who",micromapperInput.getWho());
+        pybossaData.put("langcode",micromapperInput.getLang());
 
         return pybossaData;
     }

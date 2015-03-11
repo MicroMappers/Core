@@ -141,6 +141,9 @@ public class PybossaMicroMapperWorker implements MicroMapperWorker {
                             if(currentClientApp.getAppType() == StatusCodeType.APP_AERIAL){
                                 micromapperInputList = cvsRemoteFileFormatter.getAerialClickerInputData(url);
                             }
+                            else if(currentClientApp.getAppType() == StatusCodeType.APP_3W){
+                                micromapperInputList = cvsRemoteFileFormatter.get3WClickerInputData(url);
+                            }
                             else{
                                 micromapperInputList = cvsRemoteFileFormatter.getClickerInputData(url);
                             }
@@ -327,7 +330,7 @@ public class PybossaMicroMapperWorker implements MicroMapperWorker {
             for (String temp : aidr_data) {
 
                 String response = pybossaCommunicator.sendPostGet(temp, PYBOSSA_API_TASK_PUBLSIH_URL) ;
-                System.out.println("response : " + response);
+
                 if(!response.startsWith(StatusCodeType.EXCEPTION_STRING)){
 
                     addToTaskQueue(response, currentClientApp.getClientAppID(), StatusCodeType.TASK_PUBLISHED, clientAppSourceID) ;
