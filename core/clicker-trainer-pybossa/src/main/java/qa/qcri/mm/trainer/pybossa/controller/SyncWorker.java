@@ -33,7 +33,7 @@ public class SyncWorker implements Worker {
         } catch (Exception e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
-        logger.info("Scheduler is going sleep");
+        //logger.info("Scheduler is going sleep");
     }
 	
 }

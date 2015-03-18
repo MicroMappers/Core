@@ -41,7 +41,7 @@ public class CVSRemoteFileFormatter {
 
         csvReader.close();
 
-        if(sourceSet.size() > 1){
+        if(sourceSet.size() >= 1){
             sourceSet.remove(0);   // header
         }
 
@@ -71,7 +71,7 @@ public class CVSRemoteFileFormatter {
 
         csvReader.close();
 
-        if(sourceSet.size() > 1){
+        if(sourceSet.size() >= 1){
             sourceSet.remove(0);   // header
         }
 
@@ -153,7 +153,7 @@ public class CVSRemoteFileFormatter {
         }
         csvReader.close();
         // REMOVEW HEADER
-        if(sourceSet.size() > 1){
+        if(sourceSet.size() >= 1){
             sourceSet.remove(0);
         }
 
@@ -188,7 +188,7 @@ public class CVSRemoteFileFormatter {
         }
         csvReader.close();
 
-        if(sourceSet.size() > 1){
+        if(sourceSet.size() >= 1){
             sourceSet.remove(0);
         }
 
@@ -283,7 +283,7 @@ public class CVSRemoteFileFormatter {
         }
         csvReader.close();
         // REMOVEW HEADER
-        if(sourceSet.size() > 1){
+        if(sourceSet.size() >= 1){
             sourceSet.remove(0);
         }
 
@@ -309,7 +309,7 @@ public class CVSRemoteFileFormatter {
         csvReader.close();
 
         // REMOVEW HEADER
-        if(sourceSet.size() > 1){
+        if(sourceSet.size() >= 1){
             sourceSet.remove(0);
         }
 

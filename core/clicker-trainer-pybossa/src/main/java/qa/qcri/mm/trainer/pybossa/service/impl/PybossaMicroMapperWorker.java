@@ -120,11 +120,11 @@ public class PybossaMicroMapperWorker implements MicroMapperWorker {
             for(int i=0; i < appList.size(); i++){
                 ClientApp currentClientApp =  appList.get(i);
 
-                System.out.println("clientApp processTaskPublish : " +  currentClientApp.getClientAppID());
+                //System.out.println("clientApp processTaskPublish : " +  currentClientApp.getClientAppID());
 
                 if(currentClientApp.getStatus().equals(StatusCodeType.MICROMAPPER_ONLY)){
                     List<ClientAppSource> datasources = clientAppSourceService.getClientAppSourceByStatus(currentClientApp.getClientAppID(),StatusCodeType.EXTERNAL_DATA_SOURCE_ACTIVE);
-
+                    //System.out.println("clientApp processTaskPublish datasources : " +  datasources.size());
                     for(int j=0; j < datasources.size(); j++){
 
                         List<MicromapperInput> micromapperInputList = null;
@@ -150,13 +150,14 @@ public class PybossaMicroMapperWorker implements MicroMapperWorker {
                         }
 
                         if(micromapperInputList != null){
+                            ClientAppSource source = datasources.get(j);
+
                             if(micromapperInputList.size() > 0) {
-                                ClientAppSource source = datasources.get(j);
-
                                 this.publishToPybossa(currentClientApp, micromapperInputList , source.getClientAppSourceID());
-                                clientAppSourceService.updateClientAppSourceStatus(source.getClientAppSourceID(), StatusCodeType.EXTERNAL_DATA_SOURCE_USED);
-
                             }
+
+                            clientAppSourceService.updateClientAppSourceStatus(source.getClientAppSourceID(), StatusCodeType.EXTERNAL_DATA_SOURCE_USED);
+
                         }
                     }
                     this.searchUpdateNextAvailableAppSource(currentClientApp.getClientAppID());

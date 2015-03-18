@@ -309,21 +309,23 @@ public class MicroMapperPybossaFormatter {
             }
 
             JSONObject info = (JSONObject)featureJsonObj.get("info");
-            tweetID = (String) info.get("tweetid");
+            tweetID = (String) info.get("url");
             String locValue = info.get("loc").toString();
             if(!locValue.equalsIgnoreCase(PybossaConf.TASK_QUEUE_GEO_INFO_NOT_FOUND)){
-                JSONObject loc = (JSONObject)info.get("loc");
-                String locType = (String)loc.get("type");
-                if(locType.equalsIgnoreCase(PybossaConf.GEOJSON_TYPE_FEATURE_COLLECTION)){
-                    JSONArray features = (JSONArray)loc.get("features");
+                if(DataFormatValidator.isValidateJson(locValue)) {
+                    JSONObject loc = (JSONObject)info.get("loc");
+                    String locType = (String)loc.get("type");
+                    if(locType.equalsIgnoreCase(PybossaConf.GEOJSON_TYPE_FEATURE_COLLECTION)){
+                        JSONArray features = (JSONArray)loc.get("features");
 
-                    for(int i= 0; i < features.size(); i++  ){
-                        locations.add(features.get(i)) ;
+                        for(int i= 0; i < features.size(); i++  ){
+                            locations.add(features.get(i)) ;
+                        }
+
                     }
-
-                }
-                else{
-                    locations.add(info.get("loc"))   ;
+                    else{
+                        locations.add(info.get("loc"))   ;
+                    }
                 }
             }
 

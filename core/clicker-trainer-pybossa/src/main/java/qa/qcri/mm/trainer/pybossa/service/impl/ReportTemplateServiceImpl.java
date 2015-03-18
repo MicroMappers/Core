@@ -29,9 +29,10 @@ public class ReportTemplateServiceImpl implements ReportTemplateService {
     public void saveReportItem(ReportTemplate reportTemplate) {
 
         try{
-            if(isNumeric(reportTemplate.getTweetID()) && reportTemplate.getUrl().length() < 300 && reportTemplate.getAuthor().length() < 100){
+           // if(isNumeric(reportTemplate.getTweetID()) && reportTemplate.getUrl().length() < 300 && reportTemplate.getAuthor().length() < 100){
                 reportTemplateDao.saveReportItem(reportTemplate);
-            }
+            //}
+
         }
         catch(Exception ex){
             System.out.println("saveReportItem exception : " + ex.getMessage());
