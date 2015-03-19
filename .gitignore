@@ -1,0 +1,12 @@
+
+core/mm-api/target
+
+core/clicker-trainer-pybossa/src/main/resources/database.properties
+
+core/mm-api/src/main/resources/database.properties
+
+core/mm-media-api/src/main/resources/database.properties
+
+core/clicker-trainer-pybossa/target
+
+core/mm-drone-api/target
