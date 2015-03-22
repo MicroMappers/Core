@@ -268,6 +268,7 @@ public class MicroMapperPybossaFormatter {
             Long taskID = (Long) featureJsonObj.get("id");
 
             answer = this.getUserAnswer(featureJsonObj, clientApp);
+            //KPS: the answer will say "Not English"
 
             if(answer!=null && !clientApp.getAppType().equals(StatusCodeType.APP_MAP) ){
                 for(int i=0; i < questions.length; i++ ){
@@ -289,6 +290,7 @@ public class MicroMapperPybossaFormatter {
         responseJsonString = responseJSON.toJSONString();
         //}
 
+        //
         TaskQueueResponse taskQueueResponse = new TaskQueueResponse(taskQueueID, responseJsonString, taskInfo);
         return  taskQueueResponse;
     }

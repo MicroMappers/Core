@@ -13,7 +13,7 @@ import qa.qcri.mm.trainer.pybossa.service.Worker;
 @Component("syncWorker")
 public class SyncWorker implements Worker {
 
-	protected static Logger logger = Logger.getLogger("SyncWorker");
+	protected static Logger logger = Logger.getLogger("controller.SyncWorker");
 
     @Autowired
     private MicroMapperWorker microMapperWorker;

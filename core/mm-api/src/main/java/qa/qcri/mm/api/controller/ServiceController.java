@@ -16,7 +16,7 @@ import javax.ws.rs.core.Response;
  * Time: 3:42 PM
  * To change this template use File | Settings | File Templates.
  */
-@Path("/qa.qcri.mm.media.util")
+@Path("/util")
 @Component
 public class ServiceController {
 
