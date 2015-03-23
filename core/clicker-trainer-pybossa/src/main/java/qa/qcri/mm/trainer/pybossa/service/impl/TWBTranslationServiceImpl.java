@@ -9,12 +9,15 @@ import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJacksonHttpMessageConverter;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import qa.qcri.mm.trainer.pybossa.format.impl.TranslationProjectModel;
+import qa.qcri.mm.trainer.pybossa.format.impl.TranslationRequestModel;
 import  qa.qcri.mm.trainer.pybossa.service.TranslationService;
 import org.codehaus.jackson.*;
 
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -28,26 +31,48 @@ import java.util.List;
 public class TWBTranslationServiceImpl implements TranslationService {
 
     protected static Logger logger = Logger.getLogger("service.translationService");
-    public void pushTranslationRequest() {    }
+
+    public String pushTranslationRequest(TranslationRequestModel request) {
+        final String url=BASE_URL+"/orders";
+        HttpHeaders requestHeaders=new HttpHeaders();
+        requestHeaders.add("X-Proz-API-Key", API_KEY);
+        requestHeaders.setContentType(MediaType.APPLICATION_JSON);
+        RestTemplate restTemplate=new RestTemplate();
+        //restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
+        HttpEntity entity = new HttpEntity(getJsonForRequest(request), requestHeaders);
+
+        ResponseEntity<String> response=restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
+        logger.debug(response);
+        return response.getBody();
+
+    }
+
+    public String pullTranslationResponse() {
+        return null;
+    }
 
     final private static String BASE_URL = "https://twb.translationcenter.org/api/v1";
     final private static String API_KEY = "jk26fh2yzwo4";
 
 
-    public List<TranslationProjectModel> pullTranslationProjects() {
-        final String url="https://twb.translationcenter.org/api/v1/projects?client=me";
+    public List<TranslationProjectModel> pullTranslationProjects(String clientId) {
+        final String url=BASE_URL+"/projects?client="+clientId;
         HttpHeaders requestHeaders=new HttpHeaders();
-        requestHeaders.add("X-Proz-API-Key", "jk26fh2yzwo4");
+        requestHeaders.add("X-Proz-API-Key", API_KEY);
         requestHeaders.setAccept(Collections.singletonList(new MediaType("application", "json")));
         RestTemplate restTemplate=new RestTemplate();
         restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
 
-
-        ResponseEntity<TranslationProjectModel[]> response=restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<Object>(requestHeaders), TranslationProjectModel[].class);
-        logger.debug(response);
-        TranslationProjectModel[] projectArray = response.getBody();
-        ArrayList<TranslationProjectModel>  list = new ArrayList<TranslationProjectModel>(Arrays.asList(projectArray));
-        return list;
+        try {
+            ResponseEntity<TranslationProjectModel[]> response = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<Object>(requestHeaders), TranslationProjectModel[].class);
+            logger.debug(response);
+            TranslationProjectModel[] projectArray = response.getBody();
+            ArrayList<TranslationProjectModel> list = new ArrayList<TranslationProjectModel>(Arrays.asList(projectArray));
+            return list;
+        } catch (HttpClientErrorException exception) {
+            logger.debug("Exception caught: " +exception.getResponseBodyAsString());
+        }
+        return null;
     }
     //temporary for testing
     public String pullTranslationProjectsAsString(String clientId) {
@@ -60,5 +85,27 @@ public class TWBTranslationServiceImpl implements TranslationService {
         ResponseEntity<String> response=restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<Object>(requestHeaders), String.class);
         logger.debug(response);
         return response.getBody();
+    }
+
+    //brute force but simpler to debug than using Jackson
+    private String getJsonForRequest(TranslationRequestModel request) {
+
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+        String formattedDate = formatter.format(request.getDeadline());
+
+        String jsonString = "{            \n" +
+                "            \"contact_email\": \"" + request.getContactEmail() + "\",\n" +
+                "            \"title\": \"" + request.getTitle() + "\",\n" +
+                "            \"source_lang\": \"" + request.getSourceLanguage() + "\",\n" +
+                "            \"target_langs\": [\"" + request.getTargetLanguages()[0] + "\"],\n" +
+                "            \"source_document_ids\": [" + request.getSourceDocumentIds()[0] + "],\n" +
+                "            \"source_wordcount\":" + request.getSourceWordCount() + ",\n" +
+                "            \"instructions\": \"" + request.getInstructions() + "\",\n" +
+                "            \"deadline\": \"" + formattedDate + "\",\n" +
+                "            \"urgency\": \"" + request.getUrgency() + "\",\n" +
+                "            \"project_id\": " + request.getProjectId() + ",\n" +
+                "            \"callback_url\": \"" + request.getCallbackURL() + "\"\n" +
+                "}";
+        return jsonString;
     }
 }
