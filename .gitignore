@@ -10,3 +10,9 @@ core/mm-media-api/src/main/resources/database.properties
 core/clicker-trainer-pybossa/target
 
 core/mm-drone-api/target
+
+core/clicker-trainer-pybossa/.*
+
+core/mm-api/.*
+
+core/mm-api/clear.sh

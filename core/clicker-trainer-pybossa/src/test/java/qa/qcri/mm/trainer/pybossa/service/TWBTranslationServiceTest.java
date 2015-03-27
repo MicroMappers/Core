@@ -1,15 +1,20 @@
 package qa.qcri.mm.trainer.pybossa.service;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
+import java.util.Date;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.datetime.DateFormatter;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import qa.qcri.mm.trainer.pybossa.format.impl.TranslationRequestModel;
 
-import java.util.Date;
-import java.util.List;
+import qa.qcri.mm.trainer.pybossa.dao.TaskTranslationDao;
+import qa.qcri.mm.trainer.pybossa.entity.TaskTranslation;
+import qa.qcri.mm.trainer.pybossa.format.impl.TranslationProjectModel;
+import qa.qcri.mm.trainer.pybossa.format.impl.TranslationRequestModel;
 
 /**
  * Created with IntelliJ IDEA.
@@ -24,7 +29,7 @@ import java.util.List;
 public class TWBTranslationServiceTest {
     @Autowired
     TranslationService translationService;
-
+    
     @Test
     public void testPullTranslationProjects() throws Exception {
 
@@ -32,10 +37,10 @@ public class TWBTranslationServiceTest {
         //assert(list.size() > 0);
 
         String result = translationService.pullTranslationProjectsAsString("me");
-        assert(result != null);
+        assertNotNull(result);
 
         String result2 = translationService.pullTranslationProjectsAsString("1211");
-        assert(result2 != null);
+        assertNotNull(result2);
 
     }
 
@@ -58,6 +63,23 @@ public class TWBTranslationServiceTest {
         model.setCallbackURL("https://www.example.com/my-callback-url");
 
         String result = translationService.pushTranslationRequest(model);
-        assert(result != null);
+        assertNotNull(result);
     }
+    
+    @Test
+    public void testCreateAndUpdateTranslation() throws Exception {
+    	TaskTranslation translation = new TaskTranslation();
+    	translationService.createTranslation(translation);
+    	assertNotNull(translation.getTranslationId());
+    	String newVal = "TEST";
+    	translation.setStatus(newVal);
+    	translationService.updateTranslation(translation);
+    	translation = translationService.findById(translation.getTranslationId());
+    	// we would really need to flush and clear the hibernate session for this next validation
+    	assertEquals(newVal, translation.getStatus());
+    	translationService.delete(translation);
+    	assertEquals(0, translationService.findAllTranslations().size());
+    }
+    
+    
 }

@@ -1,27 +1,29 @@
 package qa.qcri.mm.trainer.pybossa.service.impl;
 
-import org.apache.log4j.Logger;
-import org.springframework.http.*;
-import org.springframework.http.client.CommonsClientHttpRequestFactory;
-import org.springframework.http.converter.FormHttpMessageConverter;
-import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.StringHttpMessageConverter;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.http.converter.json.MappingJacksonHttpMessageConverter;
-import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.RestTemplate;
-import qa.qcri.mm.trainer.pybossa.format.impl.TranslationProjectModel;
-import qa.qcri.mm.trainer.pybossa.format.impl.TranslationRequestModel;
-import  qa.qcri.mm.trainer.pybossa.service.TranslationService;
-import org.codehaus.jackson.*;
-
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestTemplate;
+
+import qa.qcri.mm.trainer.pybossa.dao.TaskTranslationDao;
+import qa.qcri.mm.trainer.pybossa.entity.TaskTranslation;
+import qa.qcri.mm.trainer.pybossa.format.impl.TranslationProjectModel;
+import qa.qcri.mm.trainer.pybossa.format.impl.TranslationRequestModel;
+import qa.qcri.mm.trainer.pybossa.service.TranslationService;
 
 
 /**
@@ -29,6 +31,10 @@ import java.util.List;
  */
 @Service("translationService")
 public class TWBTranslationServiceImpl implements TranslationService {
+	
+    @Autowired
+    private TaskTranslationDao taskTranslationDao;
+
 
     protected static Logger logger = Logger.getLogger("service.translationService");
 
@@ -108,4 +114,35 @@ public class TWBTranslationServiceImpl implements TranslationService {
                 "}";
         return jsonString;
     }
+
+	@Override
+	@Transactional
+	public void createTranslation(TaskTranslation translation) {
+		taskTranslationDao.save(translation);
+		
+	}
+
+	@Override
+	@Transactional
+	public void updateTranslation(TaskTranslation translation) {
+		taskTranslationDao.saveOrUpdate(translation);
+	}
+
+	@Override
+	@Transactional
+	public TaskTranslation findById(Long translationId) {
+		 return taskTranslationDao.findTranslationByID(translationId);
+	}
+
+	@Override
+	@Transactional
+	public void delete(TaskTranslation translation) {
+		taskTranslationDao.delete(translation);
+	}
+
+	@Override
+	@Transactional
+	public List<TaskTranslation> findAllTranslations() {
+		return taskTranslationDao.getAll();
+	}
 }
