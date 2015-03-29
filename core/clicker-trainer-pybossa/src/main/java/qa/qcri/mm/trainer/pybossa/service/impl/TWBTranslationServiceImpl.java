@@ -1,13 +1,14 @@
 package qa.qcri.mm.trainer.pybossa.service.impl;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -16,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
@@ -34,11 +36,23 @@ public class TWBTranslationServiceImpl implements TranslationService {
 	
     @Autowired
     private TaskTranslationDao taskTranslationDao;
+    final private static String BASE_URL = "https://twb.translationcenter.org/api/v1";
+    final private static String API_KEY = "jk26fh2yzwo4";
+
 
 
     protected static Logger logger = Logger.getLogger("service.translationService");
 
-    public String pushTranslationRequest(TranslationRequestModel request) {
+    public Map pushTranslationRequest(TranslationRequestModel request) {
+        Map documentResult = pushDocumentForRequest(request);
+        // maybe throw exceptions
+        if (documentResult == null) {
+            return null;
+        }
+
+        long documentIds[] = new long[1];
+        documentIds[0] = ((Integer)documentResult.get("document_id")).longValue();
+        request.setSourceDocumentIds(documentIds);
         final String url=BASE_URL+"/orders";
         HttpHeaders requestHeaders=new HttpHeaders();
         requestHeaders.add("X-Proz-API-Key", API_KEY);
@@ -47,18 +61,81 @@ public class TWBTranslationServiceImpl implements TranslationService {
         //restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
         HttpEntity entity = new HttpEntity(getJsonForRequest(request), requestHeaders);
 
-        ResponseEntity<String> response=restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
+        ResponseEntity<Map> response=restTemplate.exchange(url, HttpMethod.POST, entity, Map.class);
         logger.debug(response);
         return response.getBody();
 
     }
 
+    public Map pushDocumentForRequest(TranslationRequestModel request) {
+        String filename = "TWB_Source_"+System.currentTimeMillis()+".csv";
+
+        //decide whether its better to send file or content
+        String content = getCSVData(request.getTranslationList());
+        //generateCsvFile(filename, request.getTranslationList());
+
+        final String url=BASE_URL+"/documents";
+        HttpHeaders requestHeaders=new HttpHeaders();
+        requestHeaders.add("X-Proz-API-Key", API_KEY);
+        requestHeaders.setContentType(MediaType.MULTIPART_FORM_DATA);
+        RestTemplate restTemplate=new RestTemplate();
+        restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
+
+        LinkedMultiValueMap<String, Object> map = new LinkedMultiValueMap<String, Object>();
+        map.add("document", content);
+
+        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new    HttpEntity<LinkedMultiValueMap<String, Object>>(
+                map, requestHeaders);
+        ResponseEntity<Map> result = restTemplate.exchange(url, HttpMethod.POST, requestEntity, Map.class);
+        logger.debug("Result of document push:"+result.getBody());
+        return result.getBody();
+
+    }
+
+    private static void generateCsvFile(String sFileName, List<TaskTranslation> list)
+    {
+        String result = null;
+        try
+        {
+            File file = new File(sFileName);
+            file.createNewFile();
+            String data = getCSVData(list);
+            FileWriter writer = new FileWriter(sFileName);
+            writer.append(data);
+            writer.flush();
+            writer.close();
+
+
+        }
+        catch(IOException e)
+        {
+            logger.error("Error create translation csv file", e);
+        }
+    }
+
+    private static String getCSVData(List<TaskTranslation> list) {
+        StringBuffer buffer = new StringBuffer();
+        if (list != null) {
+            Iterator<TaskTranslation> iterator = list.iterator();
+            while (iterator.hasNext()) {
+                TaskTranslation translation = iterator.next();
+                buffer.append(Long.toString(translation.getTaskId()));
+                buffer.append(",");
+                buffer.append(translation.getOriginalText());
+                buffer.append(",");
+                buffer.append(",");
+                buffer.append("\n");
+
+            }
+        }
+        return buffer.toString();
+    }
+
+
     public String pullTranslationResponse() {
         return null;
     }
 
-    final private static String BASE_URL = "https://twb.translationcenter.org/api/v1";
-    final private static String API_KEY = "jk26fh2yzwo4";
 
 
     public List<TranslationProjectModel> pullTranslationProjects(String clientId) {

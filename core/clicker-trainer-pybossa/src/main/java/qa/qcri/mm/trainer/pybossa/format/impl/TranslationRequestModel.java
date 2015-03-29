@@ -7,9 +7,11 @@ package qa.qcri.mm.trainer.pybossa.format.impl;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
+import qa.qcri.mm.trainer.pybossa.entity.TaskTranslation;
 
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.Date;
+import java.util.List;
 
 
 @JsonSerialize(include= JsonSerialize.Inclusion.NON_NULL)
@@ -46,6 +48,8 @@ public class TranslationRequestModel {
 
     @JsonProperty("callback_url")
     private String callbackURL;
+
+    private List<TaskTranslation> translationList;
 
     public String getContactEmail() {
         return contactEmail;
@@ -134,5 +138,14 @@ public class TranslationRequestModel {
     public void setCallbackURL(String callbackURL) {
         this.callbackURL = callbackURL;
     }
+
+    public List<TaskTranslation> getTranslationList() {
+        return translationList;
+    }
+
+    public void setTranslationList(List<TaskTranslation> translationList) {
+        this.translationList = translationList;
+    }
+
 }
 
