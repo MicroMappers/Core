@@ -39,8 +39,14 @@ public class TaskTranslation {
     private String answerCode;
 
     @Column(name = "status")
-    private String status = "NEW";
-    
+    private String status = STATUS_NEW;
+
+    //change this to Enum?
+    public static final String STATUS_NEW = "New";
+    public static final String STATUS_IN_PROGRESS = "In Progress";
+    public static final String STATUS_RECEIVED = "Received";
+    public static final String STATUS_COMPLETE = "Complete";
+
 
 	public Long getTranslationId() {
 		return translationId;

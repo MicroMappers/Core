@@ -22,6 +22,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import qa.qcri.mm.trainer.pybossa.dao.TaskTranslationDao;
+import qa.qcri.mm.trainer.pybossa.entity.ClientApp;
 import qa.qcri.mm.trainer.pybossa.entity.TaskTranslation;
 import qa.qcri.mm.trainer.pybossa.format.impl.TranslationProjectModel;
 import qa.qcri.mm.trainer.pybossa.format.impl.TranslationRequestModel;
@@ -41,7 +42,52 @@ public class TWBTranslationServiceImpl implements TranslationService {
 
 
 
+
     protected static Logger logger = Logger.getLogger("service.translationService");
+
+    @Transactional
+    public Map processTranslations(ClientApp clientApp) {
+
+
+        TranslationRequestModel model = new TranslationRequestModel();
+        model.setContactEmail("test@test.com");
+        model.setTitle("Translation Request from "+clientApp.getShortName());
+        model.setSourceLanguage("eng");
+        String[] targets = {"eng"};
+        model.setTargetLanguages(targets);
+        model.setSourceWordCount(100); //random test
+        model.setInstructions("Please translate according to ...");
+        model.setDeadline(new Date());
+        model.setUrgency("high");
+        model.setProjectId(5681);// hard coded for now, need to get from clientApp
+
+        model.setCallbackURL("https://www.example.com/my-callback-url");
+
+        List<TaskTranslation> translations = findAllTranslationsByClientAppIdAndStatus(clientApp.getClientAppID(), TaskTranslation.STATUS_NEW);
+
+        model.setTranslationList(translations);
+
+        Map result = pushTranslationRequest(model);
+
+        if (result.get("order_id") != null) {
+            Long orderId = new Long ((Integer)result.get("order_id"));
+            updateTranslationsWithOrderId(translations, orderId);
+        }
+
+        return result;
+
+    }
+
+    private void updateTranslationsWithOrderId(List<TaskTranslation> translations, Long orderId) {
+        Iterator<TaskTranslation> itr = translations.iterator();
+        while (itr.hasNext()) {
+            TaskTranslation translation = itr.next();
+            translation.setTwbOrderId(orderId);
+            translation.setStatus(TaskTranslation.STATUS_IN_PROGRESS);
+            updateTranslation(translation);
+        }
+
+    }
 
     public Map pushTranslationRequest(TranslationRequestModel request) {
         Map documentResult = pushDocumentForRequest(request);
@@ -222,4 +268,7 @@ public class TWBTranslationServiceImpl implements TranslationService {
 	public List<TaskTranslation> findAllTranslations() {
 		return taskTranslationDao.getAll();
 	}
+
+    @Transactional
+    public List<TaskTranslation> findAllTranslationsByClientAppIdAndStatus(Long clientAppId, String status) {return taskTranslationDao.getAll();}
 }

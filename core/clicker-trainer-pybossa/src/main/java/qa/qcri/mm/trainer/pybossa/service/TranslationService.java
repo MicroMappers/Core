@@ -4,6 +4,7 @@ package qa.qcri.mm.trainer.pybossa.service;
 import java.util.List;
 import java.util.Map;
 
+import qa.qcri.mm.trainer.pybossa.entity.ClientApp;
 import qa.qcri.mm.trainer.pybossa.entity.TaskTranslation;
 import qa.qcri.mm.trainer.pybossa.format.impl.TranslationProjectModel;
 import qa.qcri.mm.trainer.pybossa.format.impl.TranslationRequestModel;
@@ -13,6 +14,8 @@ import qa.qcri.mm.trainer.pybossa.format.impl.TranslationRequestModel;
  */
 public interface TranslationService {
     public Map pushTranslationRequest(TranslationRequestModel request);
+
+    public Map processTranslations(ClientApp clientApp);
 
     public Map pushDocumentForRequest(TranslationRequestModel request);
 
@@ -25,4 +28,5 @@ public interface TranslationService {
 	public TaskTranslation findById(Long translationId);
 	public void delete(TaskTranslation translation);
 	public List<TaskTranslation> findAllTranslations();
+    public List<TaskTranslation> findAllTranslationsByClientAppIdAndStatus(Long clientAppId, String status);
 }
