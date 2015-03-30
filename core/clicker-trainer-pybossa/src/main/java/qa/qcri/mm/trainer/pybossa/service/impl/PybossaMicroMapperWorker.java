@@ -78,6 +78,9 @@ public class PybossaMicroMapperWorker implements MicroMapperWorker {
     @Autowired
     private LookupService lookupService;
 
+    @Autowired
+    private TranslationService translationService;
+
 
     public void setClassVariable() throws Exception{
         client = clientService.findClientByCriteria("name", UserAccount.MIROMAPPER_USER_NAME);
@@ -313,7 +316,7 @@ public class PybossaMicroMapperWorker implements MicroMapperWorker {
 
             }
             else{
-                taskQueueResponse = pybossaFormatter.getAnswerResponse(clientApp, importResult, parser, taskQueue.getTaskQueueID(), clientAppAnswer, reportTemplateService);
+                taskQueueResponse = pybossaFormatter.getAnswerResponse(clientApp, importResult, parser, taskQueue.getTaskQueueID(), clientAppAnswer, reportTemplateService, translationService);
             }
 
             if(taskQueueResponse != null){

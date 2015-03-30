@@ -36,6 +36,9 @@ public class TWBTranslationServiceTest {
     @Autowired
     ClientAppService clientAppService;
 
+    @Autowired
+    private MicroMapperWorker microMapperWorker;
+
     private static final long TEST_CLIENT_ID = 4;
     
     @Test
@@ -167,6 +170,30 @@ public class TWBTranslationServiceTest {
     	translationService.delete(translation);
     	assertEquals(0, translationService.findAllTranslations().size());
     }
-    
-    
+
+    @Test
+    public void testFindByTaskId() throws Exception {
+        TaskTranslation translation = new TaskTranslation();
+        translation.setTaskId(new Long(898));
+        translationService.createTranslation(translation);
+
+        TaskTranslation found = translationService.findByTaskId(new Long(898));
+        assertNotNull(found);
+        translationService.delete(found);
+
+
+    }
+
+    @Test
+    public void testProcessTaskPublish() throws Exception {
+        //this test requires clicking to ensure something happens
+        //List<TaskTranslation> previousTranslations = translationService.findAllTranslations();
+        //microMapperWorker.processTaskImport();
+        //List<TaskTranslation> currentTranslations = translationService.findAllTranslations();
+
+
+    }
+
+
+
 }

@@ -26,6 +26,7 @@ public interface TranslationService {
     public void createTranslation(TaskTranslation translation);
     public void updateTranslation(TaskTranslation translation);
 	public TaskTranslation findById(Long translationId);
+    public TaskTranslation findByTaskId(Long taskId);
 	public void delete(TaskTranslation translation);
 	public List<TaskTranslation> findAllTranslations();
     public List<TaskTranslation> findAllTranslationsByClientAppIdAndStatus(Long clientAppId, String status);

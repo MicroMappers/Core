@@ -24,4 +24,11 @@ public class TaskTranslationDaoImpl extends AbstractDaoImpl<TaskTranslation, Str
         return translation;  
 	}
 
+
+    public TaskTranslation findTranslationByTaskID(Long taskId) {
+        TaskTranslation translation = findByCriterionID(Restrictions.eq("taskId", taskId));
+        return translation;
+    }
+
+
 }

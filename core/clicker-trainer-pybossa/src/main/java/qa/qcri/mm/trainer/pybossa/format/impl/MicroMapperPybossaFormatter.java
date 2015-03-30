@@ -8,6 +8,7 @@ import org.json.simple.parser.ParseException;
 import org.springframework.util.StringUtils;
 import qa.qcri.mm.trainer.pybossa.entity.*;
 import qa.qcri.mm.trainer.pybossa.service.ReportTemplateService;
+import qa.qcri.mm.trainer.pybossa.service.TranslationService;
 import qa.qcri.mm.trainer.pybossa.store.PybossaConf;
 import qa.qcri.mm.trainer.pybossa.store.StatusCodeType;
 import qa.qcri.mm.trainer.pybossa.util.DataFormatValidator;
@@ -28,6 +29,8 @@ import java.util.*;
 public class MicroMapperPybossaFormatter {
     protected static Logger logger = Logger.getLogger("MicroMapperPybossaFormatter");
     public MicroMapperPybossaFormatter(){}
+
+    private static final String ANSWER_NOT_ENGLISH = "Not English";
 
     public List<String> assemblePybossaTaskPublishForm( List<MicromapperInput> inputSources, ClientApp clientApp) throws Exception {
 
@@ -236,7 +239,7 @@ public class MicroMapperPybossaFormatter {
         return  taskQueueResponse;
     }
 
-    public TaskQueueResponse getAnswerResponse(ClientApp clientApp, String pybossaResult, JSONParser parser, Long taskQueueID, ClientAppAnswer clientAppAnswer, ReportTemplateService rtpService) throws Exception{
+    public TaskQueueResponse getAnswerResponse(ClientApp clientApp, String pybossaResult, JSONParser parser, Long taskQueueID, ClientAppAnswer clientAppAnswer, ReportTemplateService rtpService, TranslationService translationService) throws Exception{
         if(clientAppAnswer == null){
             System.out.println("clientAppAnswer is null ");
             return null;
@@ -278,7 +281,11 @@ public class MicroMapperPybossaFormatter {
                     }
 
                 }
+                if (answer.equals(ANSWER_NOT_ENGLISH)) {
+                    createTaskTranslation(info, clientAppAnswer, translationService);
+                }
             }
+
         }
 
         String taskInfo = "";
@@ -289,6 +296,7 @@ public class MicroMapperPybossaFormatter {
         }
         responseJsonString = responseJSON.toJSONString();
         //}
+
 
         //TODO: look to hook in here for translation
         TaskQueueResponse taskQueueResponse = new TaskQueueResponse(taskQueueID, responseJsonString, taskInfo);
@@ -471,6 +479,26 @@ public class MicroMapperPybossaFormatter {
         }
 
         return questions;
+    }
+
+    private void createTaskTranslation(JSONObject info, ClientAppAnswer clientAppAnswer, TranslationService translationService){
+        // MAKE SURE TO MODIFY TEMPLATE HTML  Standize OUTPUT FORMAT
+        String tweet = (String)info.get("tweet");
+        String created = (String)info.get("timestamp");
+        Long taskID = (Long)info.get("taskid");
+
+        if (translationService.findByTaskId(taskID) != null) {
+            return;
+        }
+
+        TaskTranslation translation = new TaskTranslation();
+        translation.setTaskId(taskID);
+        translation.setClientAppId(clientAppAnswer.getClientAppID().toString());//should be Long
+        translation.setOriginalText(tweet);
+        translation.setStatus(TaskTranslation.STATUS_NEW);
+        translationService.createTranslation(translation);
+
+
     }
 
     private void handleItemAboveCutOff(Long taskQueueID,int responseCount, String answer, JSONObject info, ClientAppAnswer clientAppAnswer, ReportTemplateService reportTemplateService, int cutOffSize){

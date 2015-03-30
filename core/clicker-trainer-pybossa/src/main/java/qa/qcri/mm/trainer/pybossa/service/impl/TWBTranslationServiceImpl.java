@@ -16,6 +16,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
@@ -33,6 +34,7 @@ import qa.qcri.mm.trainer.pybossa.service.TranslationService;
  * Created by kamal on 3/22/15.
  */
 @Service("translationService")
+@Transactional(readOnly = false)
 public class TWBTranslationServiceImpl implements TranslationService {
 	
     @Autowired
@@ -239,7 +241,7 @@ public class TWBTranslationServiceImpl implements TranslationService {
     }
 
 	@Override
-	@Transactional
+	@Transactional(readOnly = false, propagation= Propagation.REQUIRES_NEW)
 	public void createTranslation(TaskTranslation translation) {
 		taskTranslationDao.save(translation);
 		
@@ -257,7 +259,11 @@ public class TWBTranslationServiceImpl implements TranslationService {
 		 return taskTranslationDao.findTranslationByID(translationId);
 	}
 
-	@Override
+    @Transactional
+    public TaskTranslation findByTaskId(Long taskId) {return taskTranslationDao.findTranslationByTaskID(taskId);}
+
+
+    @Override
 	@Transactional
 	public void delete(TaskTranslation translation) {
 		taskTranslationDao.delete(translation);
