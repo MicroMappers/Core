@@ -38,6 +38,7 @@ public class StatusCodeType {
 
     public final static Integer TEMPLATE_IS_READY_FOR_EXPORT = 0;
     public final static Integer TEMPLATE_EXPORTED = 1;
+    public final static Integer TEMPLATE_IS_PROCESSING = 2;
 
     public final static Integer APP_MULTIPLE_CHOICE = 1;
     public final static Integer APP_IMAGE = 2;

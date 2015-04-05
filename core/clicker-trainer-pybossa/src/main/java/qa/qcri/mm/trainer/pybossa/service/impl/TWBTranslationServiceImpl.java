@@ -41,39 +41,59 @@ public class TWBTranslationServiceImpl implements TranslationService {
     private TaskTranslationDao taskTranslationDao;
     final private static String BASE_URL = "https://twb.translationcenter.org/api/v1";
     final private static String API_KEY = "jk26fh2yzwo4";
-
-
+    final private static int MAX_BATCH_SIZE = 1000;
+    final private static long MAX_WAIT_TIME_MILLIS = 30000; // one hour
+    private static long timeOfLastTranslationProcessingMillis = System.currentTimeMillis() ; //initialize at startup
 
 
     protected static Logger logger = Logger.getLogger("service.translationService");
 
     @Transactional
     public Map processTranslations(ClientApp clientApp) {
+        //pullAllCompletedTranslations(clientApp);
+        //Long twbProjectId = clientApp.getTWBProjectId();
+        Long twbProjectId = new Long(5681);
+        return pushAllTranslations(clientApp.getClientAppID(), twbProjectId, MAX_WAIT_TIME_MILLIS, MAX_BATCH_SIZE);
+    }
+
+    public Map pushAllTranslations(Long clientAppId, Long twbProjectId, long maxTimeToWait, int maxBatchSize) {
+        List<TaskTranslation> translations = findAllTranslationsByClientAppIdAndStatus(clientAppId, TaskTranslation.STATUS_NEW, maxBatchSize);
+        Map result = null;
+        boolean forceProcessingByTime = false;
+        long currentTimeMillis = System.currentTimeMillis();
+        if ((currentTimeMillis - timeOfLastTranslationProcessingMillis) >= maxTimeToWait) {
+            forceProcessingByTime = true;
+        }
+        if ((forceProcessingByTime || translations.size() >= maxBatchSize) && (translations.size() > 0)) {
+            while (true) {
+
+                TranslationRequestModel model = new TranslationRequestModel();
+                model.setContactEmail("test@test.com");
+                model.setTitle("Translation Request from Micromappers" );
+                model.setSourceLanguage("und");
+                String[] targets = {"eng"};
+                model.setTargetLanguages(targets);
+                model.setSourceWordCount(100); //random test
+                model.setInstructions("Please translate according to ...");
+                model.setDeadline(new Date());
+                model.setUrgency("high");
+                model.setProjectId(twbProjectId.longValue());
+
+                model.setCallbackURL("https://www.example.com/my-callback-url");
+                model.setTranslationList(translations);
 
 
-        TranslationRequestModel model = new TranslationRequestModel();
-        model.setContactEmail("test@test.com");
-        model.setTitle("Translation Request from "+clientApp.getShortName());
-        model.setSourceLanguage("eng");
-        String[] targets = {"eng"};
-        model.setTargetLanguages(targets);
-        model.setSourceWordCount(100); //random test
-        model.setInstructions("Please translate according to ...");
-        model.setDeadline(new Date());
-        model.setUrgency("high");
-        model.setProjectId(5681);// hard coded for now, need to get from clientApp
+                result = pushTranslationRequest(model);
 
-        model.setCallbackURL("https://www.example.com/my-callback-url");
-
-        List<TaskTranslation> translations = findAllTranslationsByClientAppIdAndStatus(clientApp.getClientAppID(), TaskTranslation.STATUS_NEW);
-
-        model.setTranslationList(translations);
-
-        Map result = pushTranslationRequest(model);
-
-        if (result.get("order_id") != null) {
-            Long orderId = new Long ((Integer)result.get("order_id"));
-            updateTranslationsWithOrderId(translations, orderId);
+                if (result.get("order_id") != null) {
+                    Long orderId = new Long((Integer) result.get("order_id"));
+                    updateTranslationsWithOrderId(model.getTranslationList(), orderId);
+                }
+                translations = findAllTranslationsByClientAppIdAndStatus(clientAppId, TaskTranslation.STATUS_NEW, maxBatchSize);
+                if (translations.size() < maxBatchSize) {
+                    break;
+                }
+            }
         }
 
         return result;
@@ -276,5 +296,7 @@ public class TWBTranslationServiceImpl implements TranslationService {
 	}
 
     @Transactional
-    public List<TaskTranslation> findAllTranslationsByClientAppIdAndStatus(Long clientAppId, String status) {return taskTranslationDao.getAll();}
+    public List<TaskTranslation> findAllTranslationsByClientAppIdAndStatus(Long clientAppId, String status, Integer count) {
+        return taskTranslationDao.findAllTranslationsByClientAppIdAndStatus(clientAppId, status, count);
+    }
 }

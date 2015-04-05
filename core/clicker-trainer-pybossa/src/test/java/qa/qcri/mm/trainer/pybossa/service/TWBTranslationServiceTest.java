@@ -3,20 +3,16 @@ package qa.qcri.mm.trainer.pybossa.service;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-import java.lang.reflect.Array;
 import java.util.*;
 
-import com.sun.javafx.tk.Toolkit;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import qa.qcri.mm.trainer.pybossa.dao.TaskTranslationDao;
 import qa.qcri.mm.trainer.pybossa.entity.ClientApp;
 import qa.qcri.mm.trainer.pybossa.entity.TaskTranslation;
-import qa.qcri.mm.trainer.pybossa.format.impl.TranslationProjectModel;
 import qa.qcri.mm.trainer.pybossa.format.impl.TranslationRequestModel;
 
 /**
@@ -40,17 +36,19 @@ public class TWBTranslationServiceTest {
     private MicroMapperWorker microMapperWorker;
 
     private static final long TEST_CLIENT_ID = 4;
-    
+    private static final String NEW_CLIENT_APP_ID = "1211";
+    private static final long TEST_TWB_PROJECT_ID = 5681;
+
     @Test
     public void testPullTranslationProjects() throws Exception {
 
-        List list = translationService.pullTranslationProjects("1211");
+        List list = translationService.pullTranslationProjects(NEW_CLIENT_APP_ID);
         assert(list.size() > 0);
 
         String result = translationService.pullTranslationProjectsAsString("me");
         assertNotNull(result);
 
-        String result2 = translationService.pullTranslationProjectsAsString("1211");
+        String result2 = translationService.pullTranslationProjectsAsString(NEW_CLIENT_APP_ID);
         assertNotNull(result2);
 
     }
@@ -67,10 +65,10 @@ public class TWBTranslationServiceTest {
         model.setInstructions("Unit test instructions");
         model.setDeadline(new Date());
         model.setUrgency("high");
-        model.setProjectId(5681);// hard coded for now
+        model.setProjectId(TEST_TWB_PROJECT_ID);// hard coded for now
 
         model.setCallbackURL("https://www.example.com/my-callback-url");
-        List translations = generateTestTranslationTasks(new Long(1211), false);
+        List translations = generateTestTranslationTasks(NEW_CLIENT_APP_ID, false, 2);
         model.setTranslationList(translations);
 
         Map result = translationService.pushTranslationRequest(model);
@@ -78,29 +76,34 @@ public class TWBTranslationServiceTest {
     }
 
     @Test
-    public void testProcessTranslations() {
+    public void testPushAllTranslations() {
 
-        ClientApp clientApp = clientAppService.getAllClientAppByClientID(new Long(TEST_CLIENT_ID)).get(0);
+        //ClientApp clientApp = clientAppService.getAllClientAppByClientID(new Long(TEST_CLIENT_ID)).get(0);
 
-        List translations = generateTestTranslationTasks(clientApp.getClientAppID(), true);
-
-        List checkTranslations = translationService.findAllTranslationsByClientAppIdAndStatus(clientApp.getClientAppID(), TaskTranslation.STATUS_NEW);
+        List translations = generateTestTranslationTasks(NEW_CLIENT_APP_ID, true, 12);
+        Long clientAppId = new Long(NEW_CLIENT_APP_ID);
+        List checkTranslations = translationService.findAllTranslationsByClientAppIdAndStatus(clientAppId, TaskTranslation.STATUS_NEW, 100);
 
         assert(checkTranslations.size() > 0);
 
 
-        Map result = translationService.processTranslations(clientApp);
-
+        Map result = translationService.pushAllTranslations(clientAppId, new Long(TEST_TWB_PROJECT_ID), 0, 5);
         assertNotNull(result);
 
-        List<TaskTranslation> inProgressTranslations = translationService.findAllTranslationsByClientAppIdAndStatus(clientApp.getClientAppID(), TaskTranslation.STATUS_IN_PROGRESS);
-        assert(inProgressTranslations.size() == checkTranslations.size());
+        List<TaskTranslation> inProgressTranslations = translationService.findAllTranslationsByClientAppIdAndStatus(clientAppId, TaskTranslation.STATUS_IN_PROGRESS, 100);
+        assert(inProgressTranslations.size() > (checkTranslations.size()-5));
         Iterator<TaskTranslation> itr = inProgressTranslations.iterator();
         while (itr.hasNext()) {
             TaskTranslation translation = itr.next();
             assert(translation.getStatus().equals(TaskTranslation.STATUS_IN_PROGRESS));
+        }
+
+        Iterator<TaskTranslation> itr2 = checkTranslations.iterator();
+        while (itr2.hasNext()) {
+            TaskTranslation translation = itr2.next();
             translationService.delete(translation);
         }
+
     }
 
 
@@ -119,11 +122,11 @@ public class TWBTranslationServiceTest {
         model.setInstructions("Unit test instructions");
         model.setDeadline(new Date());
         model.setUrgency("high");
-        model.setProjectId(5681);// hard coded for now
+        model.setProjectId(TEST_TWB_PROJECT_ID);// hard coded for now
 
         model.setCallbackURL("https://www.example.com/my-callback-url");
 
-        List translations = generateTestTranslationTasks(new Long(1211), false);
+        List translations = generateTestTranslationTasks(NEW_CLIENT_APP_ID, false, 2);
         model.setTranslationList(translations);
 
         Map result = translationService.pushDocumentForRequest(model);
@@ -131,33 +134,40 @@ public class TWBTranslationServiceTest {
     }
 
 
-    private List generateTestTranslationTasks(Long clientAppId, boolean persist) {
-        TaskTranslation translation = new TaskTranslation();
-        translation.setTaskId((long) 1);
-        translation.setClientAppId("1211");
-        translation.setOriginalText("Je m'appelle Jacques");
-        translation.setStatus("New");
-        if (persist) {
-            translationService.createTranslation(translation);
-        }
-        TaskTranslation translation2 = new TaskTranslation();
-        translation2.setTaskId((long)2);
-        translation2.setClientAppId("1211");
-        translation2.setOriginalText("Me llamo es Juan");
-        translation2.setStatus("New");
-        if (persist) {
-            translationService.createTranslation(translation2);
-        }
-
+    private List generateTestTranslationTasks(String clientAppId, boolean persist, int number) {
         List<TaskTranslation> list = new ArrayList<TaskTranslation>();
-        list.add(translation);
-        list.add(translation2);
+        int loops = number/2;
+
+        if (loops == 0) {loops = 1;}
+
+        for (int i=0; i<loops; i++) {
+            TaskTranslation translation = new TaskTranslation();
+            translation.setTaskId((long) 1);
+            translation.setClientAppId(clientAppId);
+            translation.setOriginalText("Je m'appelle Jacques");
+            translation.setStatus("New");
+            if (persist) {
+                translationService.createTranslation(translation);
+            }
+            TaskTranslation translation2 = new TaskTranslation();
+            translation2.setTaskId((long) 2);
+            translation2.setClientAppId(clientAppId);
+            translation2.setOriginalText("Me llamo es Juan");
+            translation2.setStatus("New");
+            if (persist) {
+                translationService.createTranslation(translation2);
+            }
+
+            list.add(translation);
+            list.add(translation2);
+        }
         return list;
 
     }
 
     @Test
     public void testCreateAndUpdateTranslation() throws Exception {
+        int initialSize = translationService.findAllTranslations().size();
     	TaskTranslation translation = new TaskTranslation();
     	translationService.createTranslation(translation);
     	assertNotNull(translation.getTranslationId());
@@ -168,7 +178,7 @@ public class TWBTranslationServiceTest {
     	// we would really need to flush and clear the hibernate session for this next validation
     	assertEquals(newVal, translation.getStatus());
     	translationService.delete(translation);
-    	assertEquals(0, translationService.findAllTranslations().size());
+    	assertEquals(initialSize, translationService.findAllTranslations().size());
     }
 
     @Test
@@ -184,6 +194,34 @@ public class TWBTranslationServiceTest {
 
     }
 
+    @Test
+    public void testFindByClientAppIdAndStatus () throws Exception {
+        //ClientApp clientApp = clientAppService.getAllClientAppByClientID(new Long(TEST_CLIENT_ID)).get(0);
+        String testStatus = "TESTING324";
+        List<TaskTranslation> translations = generateTestTranslationTasks(NEW_CLIENT_APP_ID, true, 4);
+        TaskTranslation taskTranslation = translations.get(0);
+        taskTranslation.setStatus(testStatus);
+        translationService.updateTranslation(taskTranslation);
+
+        List testList = translationService.findAllTranslationsByClientAppIdAndStatus(new Long(NEW_CLIENT_APP_ID), testStatus, 1000);
+        assert(testList.size() == 1);
+
+        String newClientAppId = "976";
+        taskTranslation = translations.get(1);
+        taskTranslation.setClientAppId(newClientAppId);
+        translationService.updateTranslation(taskTranslation);
+
+
+        testList = translationService.findAllTranslationsByClientAppIdAndStatus(new Long(newClientAppId), TaskTranslation.STATUS_NEW, 1000);
+        assert(testList.size() == 1);
+        Iterator<TaskTranslation> itr = translations.iterator();
+        while (itr.hasNext()) {
+            TaskTranslation translation = itr.next();
+            translationService.delete(translation);
+        }
+
+
+    }
     @Test
     public void testProcessTaskPublish() throws Exception {
         //this test requires clicking to ensure something happens

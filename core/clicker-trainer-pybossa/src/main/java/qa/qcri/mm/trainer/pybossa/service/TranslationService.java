@@ -16,6 +16,7 @@ public interface TranslationService {
     public Map pushTranslationRequest(TranslationRequestModel request);
 
     public Map processTranslations(ClientApp clientApp);
+    public Map pushAllTranslations(Long clientAppId, Long twbProjetcId, long maxTimeToWait, int maxBatchSize);
 
     public Map pushDocumentForRequest(TranslationRequestModel request);
 
@@ -29,5 +30,5 @@ public interface TranslationService {
     public TaskTranslation findByTaskId(Long taskId);
 	public void delete(TaskTranslation translation);
 	public List<TaskTranslation> findAllTranslations();
-    public List<TaskTranslation> findAllTranslationsByClientAppIdAndStatus(Long clientAppId, String status);
+    public List<TaskTranslation> findAllTranslationsByClientAppIdAndStatus(Long clientAppId, String status, Integer count);
 }

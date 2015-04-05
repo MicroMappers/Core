@@ -218,8 +218,13 @@ public class PybossaMicroMapperWorker implements MicroMapperWorker {
                 }
             }
 
+            processTranslations(clientApp);
 
         }
+    }
+
+    private void processTranslations(ClientApp clientApp) throws Exception {
+        translationService.processTranslations(clientApp);
     }
 
     @Override
@@ -316,7 +321,7 @@ public class PybossaMicroMapperWorker implements MicroMapperWorker {
 
             }
             else{
-                taskQueueResponse = pybossaFormatter.getAnswerResponse(clientApp, importResult, parser, taskQueue.getTaskQueueID(), clientAppAnswer, reportTemplateService, translationService);
+                taskQueueResponse = pybossaFormatter.getAnswerResponse(clientApp, importResult, parser, taskQueue.getTaskQueueID(), clientAppAnswer, reportTemplateService);
             }
 
             if(taskQueueResponse != null){
