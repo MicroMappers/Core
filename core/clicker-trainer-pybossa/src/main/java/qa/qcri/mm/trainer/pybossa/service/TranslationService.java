@@ -20,7 +20,8 @@ public interface TranslationService {
 
     public Map pushDocumentForRequest(TranslationRequestModel request);
 
-    public String pullTranslationResponse();
+    public String pullAllTranslationResponses(Long clientAppId, Long twbProjetcId);
+
     public List<TranslationProjectModel> pullTranslationProjects(String clientId);
     public String pullTranslationProjectsAsString(String clientId);
     

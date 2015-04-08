@@ -52,6 +52,14 @@ public class TWBTranslationServiceTest {
         assertNotNull(result2);
 
     }
+    @Test
+    public void testPullAllTranslationResponses() throws Exception {
+
+        translationService.pullAllTranslationResponses(new Long(NEW_CLIENT_APP_ID), TEST_TWB_PROJECT_ID);
+        assert(true);
+
+    }
+
 
     @Test
     public void testPushTranslationRequest() {
@@ -101,7 +109,7 @@ public class TWBTranslationServiceTest {
         Iterator<TaskTranslation> itr2 = checkTranslations.iterator();
         while (itr2.hasNext()) {
             TaskTranslation translation = itr2.next();
-            translationService.delete(translation);
+            //translationService.delete(translation);
         }
 
     }

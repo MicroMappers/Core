@@ -1,11 +1,10 @@
 package qa.qcri.mm.trainer.pybossa.service.impl;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import au.com.bytecode.opencsv.CSVParser;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
@@ -200,10 +199,110 @@ public class TWBTranslationServiceImpl implements TranslationService {
     }
 
 
-    public String pullTranslationResponse() {
+    public String pullAllTranslationResponses (Long clientAppId, Long twbProjectId) {
+        final String url=BASE_URL+"/orders?delivery_status=to_accept";
+        HttpHeaders requestHeaders=new HttpHeaders();
+        requestHeaders.add("X-Proz-API-Key", API_KEY);
+        requestHeaders.setAccept(Collections.singletonList(new MediaType("application", "json")));
+        RestTemplate restTemplate=new RestTemplate();
+        restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
+
+        try {
+            ResponseEntity<Map> response = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<Map>(requestHeaders), Map.class);
+            logger.debug(response.getBody().toString());
+            processTranslationResponses((List<Map>) response.getBody().get("data"));
+//            TranslationProjectModel[] projectArray = response.getBody();
+//            ArrayList<TranslationProjectModel> list = new ArrayList<TranslationProjectModel>(Arrays.asList(projectArray));//
+//            return list;
+        } catch (HttpClientErrorException exception) {
+            logger.debug("Exception caught: " +exception.getResponseBodyAsString());
+        }
+        return null;
+
+
+    }
+
+    private String processTranslationResponses(List<Map> translationResponses) {
+        boolean error = false;
+        String errorMessage = "";
+        Iterator<Map> iterator = translationResponses.iterator();
+        while(iterator.hasNext()) {
+            try {
+                Map response = iterator.next();
+                Integer orderId = (Integer) response.get("order_id");
+                Integer projectId = (Integer) response.get("project_id");
+                List documents = (List) response.get("delivered_documents");
+                if (documents.size() > 0) {
+                    Map document = (Map) documents.get(0);
+                    processTranslationDocument((String) document.get("download_link"), orderId, projectId);
+                } else {
+                    throw new RuntimeException("No documents were found for order id: " + orderId + ", project id:" + projectId);
+                }
+            } catch (Exception ex) {
+                logger.debug(ex.toString());
+            }
+
+        }
         return null;
     }
 
+    @Transactional
+    private void processTranslationDocument(String download_link, Integer orderId, Integer projectId) throws Exception {
+        final String url=download_link;
+        HttpHeaders requestHeaders=new HttpHeaders();
+        requestHeaders.add("X-Proz-API-Key", API_KEY);
+        requestHeaders.setAccept(Collections.singletonList(new MediaType("text", "plain")));
+        RestTemplate restTemplate=new RestTemplate();
+        restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
+
+        try {
+            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<String>(requestHeaders), String.class);
+            logger.debug(response.getBody());
+            processResponseDocumentContent(response.getBody(), orderId, projectId);
+//            TranslationProjectModel[] projectArray = response.getBody();
+//            ArrayList<TranslationProjectModel> list = new ArrayList<TranslationProjectModel>(Arrays.asList(projectArray));//
+//            return list;
+        } catch (HttpClientErrorException exception) {
+            logger.debug("Exception caught: " +exception.getResponseBodyAsString());
+            throw new RuntimeException("Error retrieving document at url:"+url);
+        }
+    }
+
+    private void processResponseDocumentContent(String content, Integer orderId, Integer projectId) throws Exception {
+        BufferedReader reader = new BufferedReader(new StringReader(content));
+        String line;
+        String[] toks;
+        CSVParser parser=new CSVParser();
+        int counter = 1;
+        while ((line=reader.readLine()) != null) {
+            counter++;
+            line = line.trim();
+            if (line.length() <= 0) continue;
+            try {
+                toks = parser.parseLine(line);
+
+                if (toks.length != 4) {
+                    throw new RuntimeException("Invalid number of columns in row "+counter);
+                }
+
+                updateTranslation(new Long(toks[0]), toks[1], toks[2], toks[3]);
+            } catch (IOException e) {
+                logger.error("Invalid line: " + line + " (" + e.getMessage() + ")");
+                continue;
+            }
+        }
+    }
+
+    private void updateTranslation(Long taskId, String sourceTranslation, String finalTranslation, String code) throws Exception {
+        TaskTranslation taskTranslation = findByTaskId(taskId);
+        if (taskTranslation == null) {
+            throw new RuntimeException("No translation task found for id:" +taskId);
+        }
+        taskTranslation.setTranslatedText(finalTranslation);
+        taskTranslation.setAnswerCode(code);
+        taskTranslation.setStatus(TaskTranslation.STATUS_RECEIVED);
+        updateTranslation(taskTranslation);
+    }
 
 
     public List<TranslationProjectModel> pullTranslationProjects(String clientId) {
