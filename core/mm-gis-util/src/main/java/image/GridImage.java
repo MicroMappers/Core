@@ -8,15 +8,28 @@ package image;
  * To change this template use File | Settings | File Templates.
  */
 
+import com.google.gdata.client.photos.PicasawebService;
+import com.google.gdata.data.PlainTextConstruct;
+import com.google.gdata.data.photos.AlbumEntry;
+import com.google.gdata.data.photos.UserFeed;
+import com.google.gdata.util.ServiceException;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+
 import java.awt.image.BufferedImage;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import javax.imageio.ImageIO;
 
 public class GridImage implements Runnable {
     private int rows, columns;
+    private ArrayList<String> stringList = new ArrayList<String>();
+    public GridImage(){}
 
     public GridImage(String foldername, int rows, int columns) {
 
@@ -34,13 +47,35 @@ public class GridImage implements Runnable {
                 if(dataEntery!=null && !dataEntery.isEmpty())
                 {
                     sb.append(dataEntery);
+
                 }
             }
         }
 
-        generateFile(sb.toString(), foldername);
+        //generateFile(sb.toString(), foldername);
+        generateJson()  ;
 
     }
+
+    public void generateJson(){
+        JSONArray imageGeoJsonArray = new JSONArray();
+        JSONArray size = new JSONArray();
+        size.add(1024);
+        size.add(1024);
+
+        for(String f : stringList){
+            JSONObject ele = new JSONObject();
+            String sf = f.replace("/Users/jlucas/Downloads/documents-export-2015-03-20/slice2","/static/qatar/slice");
+            ele.put("bounds","");
+            ele.put("source",sf);
+            ele.put("url",sf);
+            ele.put("size",size);
+            imageGeoJsonArray.add(ele)  ;
+        }
+
+        System.out.println(imageGeoJsonArray.toJSONString());
+    }
+
 
     public String processGridImage(File fileEntry){
         StringBuffer sb = new StringBuffer();
@@ -63,11 +98,11 @@ public class GridImage implements Runnable {
                         String printFileName =   fileName;
                         String fileNameExtension =   (count++) + ".jpg";
 
-                        fileName =   fileEntry.getParent()+"/slice/" + fileName;
+                        fileName =   fileEntry.getParent()+"/slice2/" + fileName;
                         printFileName = printFileName + fileNameExtension;
 
                         String slicedFileName =   fileName + fileNameExtension ;
-
+                        stringList.add(slicedFileName);
                         System.out.println(fileEntry.getParent() +"," + fileEntry.getName() + "," + printFileName + System.lineSeparator());
 
                         ImageIO.write(smallImages[x][y], "jpg", new File( slicedFileName));
@@ -117,6 +152,7 @@ public class GridImage implements Runnable {
         }
         catch (Exception e){
             e.printStackTrace();
+            System.out.print(e.getMessage());
         }
     }
     public void run() {
@@ -124,8 +160,8 @@ public class GridImage implements Runnable {
     }
 
     public static void main(String[] args) {
-        String parentPath = "/Users/jlucas/Documents/aerialClicker/original/savmap_images_archive/";
-        String[] folderName = {"day5_rgb_transect_main_road","day5_rgb_transect_rosinki_ixus","day5_rgb_zebra"};
+        String parentPath = "/Users/jlucas/Downloads/";
+        String[] folderName = {"documents-export-2015-03-20"};
         //"day2_rgb_transect_count","day3_rgb_kaelber","day5_rgb_transect_main_road","day5_rgb_transect_rosinki_ixus","day5_rgb_zebra"
        // String parentPath = "/Users/jlucas/Documents/aerialClicker/";
         //String[] folderName = {"day5_rgb_zebra_archive"};
@@ -134,6 +170,41 @@ public class GridImage implements Runnable {
             String path =  parentPath + folderName[i];
             GridImage image = new GridImage(path,2, 2);
         }
+    }
 
+
+    public  void picasaTest(){
+        try {
+            PicasawebService picasawebService = new PicasawebService("exampleCo-exampleApp-2");
+
+            PicasawebService myService = new PicasawebService("exampleCo-exampleApp-2");
+            myService.setUserCredentials("micromappers2@gmail.com", "micromapperspwd");
+
+            URL feedUrl = new URL("https://picasaweb.google.com/data/feed/api/user/micromappers2?kind=album");
+
+            UserFeed myUserFeed = myService.getFeed(feedUrl, UserFeed.class);
+
+            for (AlbumEntry myAlbum : myUserFeed.getAlbumEntries()) {
+                System.out.println(myAlbum.getTitle().getPlainText());
+            }
+            /**
+            AlbumEntry myAlbum = new AlbumEntry();
+
+            myAlbum.setTitle(new PlainTextConstruct("Trip to France"));
+            myAlbum.setDescription(new PlainTextConstruct("My recent trip to France was delightful!"));
+
+            picasa.insertAlbum(myAlbum) ;
+             **/
+        } catch (IOException e) {
+            System.out.print(e.getMessage());
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        } catch (ServiceException e) {
+            System.out.print(e.getMessage());
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+        catch(Exception e){
+            System.out.print(e.getMessage());
+            e.printStackTrace();
+        }
     }
 }
