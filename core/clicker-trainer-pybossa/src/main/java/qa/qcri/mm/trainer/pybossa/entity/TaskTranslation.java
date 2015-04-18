@@ -26,6 +26,24 @@ public class TaskTranslation {
     @Column(name = "clientAppID")
     private String clientAppId;
 
+    @Column(name = "tweetID", nullable = false)
+    private String tweetID;
+
+    @Column(name = "author", nullable = false)
+    private String author;
+
+    @Column(name = "lat", nullable = false)
+    private String lat;
+
+    @Column(name = "lon", nullable = false)
+    private String lon;
+
+    @Column(name = "url", nullable = false)
+    private String url;
+
+    @Column(name = "taskQueueID")
+    private Long taskQueueID;
+
     @Column(name = "twbOrderID")
     private Long twbOrderId;
     
@@ -38,6 +56,9 @@ public class TaskTranslation {
     @Column(name = "answerCode")
     private String answerCode;
 
+    @Column(name = "created", nullable = false)
+    private String created;
+
     @Column(name = "status")
     private String status = STATUS_NEW;
 
@@ -47,8 +68,25 @@ public class TaskTranslation {
     public static final String STATUS_RECEIVED = "Received";
     public static final String STATUS_COMPLETE = "Complete";
 
+    public TaskTranslation() {
 
-	public Long getTranslationId() {
+    }
+
+    public TaskTranslation(Long taskId, String clientAppId, String tweetID, String author, String lat, String lon, String url, Long taskQueueID, String originalText, String status) {
+        this.taskId = taskId;
+        this.clientAppId = clientAppId;
+        this.tweetID = tweetID;
+        this.author = author;
+        this.lat = lat;
+        this.lon = lon;
+        this.url = url;
+        this.taskQueueID = taskQueueID;
+        this.originalText = originalText;
+        this.status = status;
+    }
+
+
+    public Long getTranslationId() {
 		return translationId;
 	}
 
@@ -114,6 +152,61 @@ public class TaskTranslation {
 	}
 
 
-    
-    
+    public String getTweetID() {
+        return tweetID;
+    }
+
+    public void setTweetID(String tweetID) {
+        this.tweetID = tweetID;
+    }
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(String author) {
+        this.author = author;
+    }
+
+    public String getLat() {
+        return lat;
+    }
+
+    public void setLat(String lat) {
+        this.lat = lat;
+    }
+
+    public String getLon() {
+        return lon;
+    }
+
+    public void setLon(String lon) {
+        this.lon = lon;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    public Long getTaskQueueID() {
+        return taskQueueID;
+    }
+
+    public void setTaskQueueID(Long taskQueueID) {
+        this.taskQueueID = taskQueueID;
+    }
+
+
+    public String getCreated() {
+        return created;
+    }
+
+
+
+
+
 }

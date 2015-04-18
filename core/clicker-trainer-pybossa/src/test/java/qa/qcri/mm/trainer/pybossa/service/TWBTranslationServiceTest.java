@@ -88,7 +88,7 @@ public class TWBTranslationServiceTest {
 
         //ClientApp clientApp = clientAppService.getAllClientAppByClientID(new Long(TEST_CLIENT_ID)).get(0);
 
-        List translations = generateTestTranslationTasks(NEW_CLIENT_APP_ID, true, 12);
+        List translations = generateTestTranslationTasks(NEW_CLIENT_APP_ID, true, 6);
         Long clientAppId = new Long(NEW_CLIENT_APP_ID);
         List checkTranslations = translationService.findAllTranslationsByClientAppIdAndStatus(clientAppId, TaskTranslation.STATUS_NEW, 100);
 
@@ -146,22 +146,16 @@ public class TWBTranslationServiceTest {
         List<TaskTranslation> list = new ArrayList<TaskTranslation>();
         int loops = number/2;
 
+        long id = 10;
+
         if (loops == 0) {loops = 1;}
 
         for (int i=0; i<loops; i++) {
-            TaskTranslation translation = new TaskTranslation();
-            translation.setTaskId((long) 1);
-            translation.setClientAppId(clientAppId);
-            translation.setOriginalText("Je m'appelle Jacques");
-            translation.setStatus("New");
+            TaskTranslation translation = new TaskTranslation(id++, clientAppId, "63636", "Fred Jones", "22.22", "33.33", "http://google.com", id, "Je m'appelle Jacques", TaskTranslation.STATUS_NEW);
             if (persist) {
                 translationService.createTranslation(translation);
             }
-            TaskTranslation translation2 = new TaskTranslation();
-            translation2.setTaskId((long) 2);
-            translation2.setClientAppId(clientAppId);
-            translation2.setOriginalText("Me llamo es Juan");
-            translation2.setStatus("New");
+            TaskTranslation translation2 = new TaskTranslation(id++, clientAppId, "63636", "Fred Jones", "22.22", "33.33", "http://google.com", id, "Me llamo es Juan", TaskTranslation.STATUS_NEW);
             if (persist) {
                 translationService.createTranslation(translation2);
             }

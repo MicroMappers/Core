@@ -23,10 +23,13 @@ import org.springframework.web.client.RestTemplate;
 
 import qa.qcri.mm.trainer.pybossa.dao.TaskTranslationDao;
 import qa.qcri.mm.trainer.pybossa.entity.ClientApp;
+import qa.qcri.mm.trainer.pybossa.entity.ReportTemplate;
 import qa.qcri.mm.trainer.pybossa.entity.TaskTranslation;
 import qa.qcri.mm.trainer.pybossa.format.impl.TranslationProjectModel;
 import qa.qcri.mm.trainer.pybossa.format.impl.TranslationRequestModel;
+import qa.qcri.mm.trainer.pybossa.service.ReportTemplateService;
 import qa.qcri.mm.trainer.pybossa.service.TranslationService;
+import qa.qcri.mm.trainer.pybossa.store.StatusCodeType;
 
 
 /**
@@ -38,6 +41,10 @@ public class TWBTranslationServiceImpl implements TranslationService {
 	
     @Autowired
     private TaskTranslationDao taskTranslationDao;
+
+    @Autowired
+    private ReportTemplateService reportTemplateService;
+
     final private static String BASE_URL = "https://twb.translationcenter.org/api/v1";
     final private static String API_KEY = "jk26fh2yzwo4";
     final private static int MAX_BATCH_SIZE = 1000;
@@ -47,7 +54,7 @@ public class TWBTranslationServiceImpl implements TranslationService {
 
     protected static Logger logger = Logger.getLogger("service.translationService");
 
-    @Transactional
+
     public Map processTranslations(ClientApp clientApp) {
         //pullAllCompletedTranslations(clientApp);
         //Long twbProjectId = clientApp.getTWBProjectId();
@@ -56,6 +63,7 @@ public class TWBTranslationServiceImpl implements TranslationService {
     }
 
     public Map pushAllTranslations(Long clientAppId, Long twbProjectId, long maxTimeToWait, int maxBatchSize) {
+        //add ordering
         List<TaskTranslation> translations = findAllTranslationsByClientAppIdAndStatus(clientAppId, TaskTranslation.STATUS_NEW, maxBatchSize);
         Map result = null;
         boolean forceProcessingByTime = false;
@@ -234,7 +242,7 @@ public class TWBTranslationServiceImpl implements TranslationService {
                 List documents = (List) response.get("delivered_documents");
                 if (documents.size() > 0) {
                     Map document = (Map) documents.get(0);
-                    processTranslationDocument((String) document.get("download_link"), orderId, projectId);
+                    processTranslationDocument((Integer) document.get("document_id"), (String) document.get("download_link"), orderId, projectId);
                 } else {
                     throw new RuntimeException("No documents were found for order id: " + orderId + ", project id:" + projectId);
                 }
@@ -246,12 +254,12 @@ public class TWBTranslationServiceImpl implements TranslationService {
         return null;
     }
 
-    @Transactional
-    private void processTranslationDocument(String download_link, Integer orderId, Integer projectId) throws Exception {
+
+    private void processTranslationDocument(Integer documentId, String download_link, Integer orderId, Integer projectId) throws Exception {
         final String url=download_link;
         HttpHeaders requestHeaders=new HttpHeaders();
         requestHeaders.add("X-Proz-API-Key", API_KEY);
-        requestHeaders.setAccept(Collections.singletonList(new MediaType("text", "plain")));
+        requestHeaders.setAccept(Collections.singletonList(new MediaType("application", "json")));
         RestTemplate restTemplate=new RestTemplate();
         restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
 
@@ -259,6 +267,7 @@ public class TWBTranslationServiceImpl implements TranslationService {
             ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<String>(requestHeaders), String.class);
             logger.debug(response.getBody());
             processResponseDocumentContent(response.getBody(), orderId, projectId);
+            updateTranslationOrder(orderId, documentId, "accepted", "Translation was accepted");
 //            TranslationProjectModel[] projectArray = response.getBody();
 //            ArrayList<TranslationProjectModel> list = new ArrayList<TranslationProjectModel>(Arrays.asList(projectArray));//
 //            return list;
@@ -268,6 +277,21 @@ public class TWBTranslationServiceImpl implements TranslationService {
         }
     }
 
+    private void updateTranslationOrder(Integer orderId, Integer documentId, String status, String comment) {
+        final String url=BASE_URL+"/orders/"+orderId+"/delivered_documents/"+documentId;
+        HttpHeaders requestHeaders=new HttpHeaders();
+        requestHeaders.add("X-Proz-API-Key", API_KEY);
+        requestHeaders.setContentType(MediaType.APPLICATION_JSON);
+        RestTemplate restTemplate=new RestTemplate();
+        //restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
+        String json = "{ \"delivery_status\": \""+status+"\", \"reject_reason\": \""+comment+"\"}";
+        HttpEntity entity = new HttpEntity(json, requestHeaders);
+
+        ResponseEntity<Map> response=restTemplate.exchange(url, HttpMethod.PATCH, entity, Map.class);
+        logger.debug(response);
+    }
+
+    @Transactional
     private void processResponseDocumentContent(String content, Integer orderId, Integer projectId) throws Exception {
         BufferedReader reader = new BufferedReader(new StringReader(content));
         String line;
@@ -285,7 +309,7 @@ public class TWBTranslationServiceImpl implements TranslationService {
                     throw new RuntimeException("Invalid number of columns in row "+counter);
                 }
 
-                updateTranslation(new Long(toks[0]), toks[1], toks[2], toks[3]);
+                updateTranslation(orderId, new Long(toks[0]), toks[1], toks[2], toks[3]);
             } catch (IOException e) {
                 logger.error("Invalid line: " + line + " (" + e.getMessage() + ")");
                 continue;
@@ -293,15 +317,30 @@ public class TWBTranslationServiceImpl implements TranslationService {
         }
     }
 
-    private void updateTranslation(Long taskId, String sourceTranslation, String finalTranslation, String code) throws Exception {
+    private void updateTranslation(Integer orderId, Long taskId, String sourceTranslation, String finalTranslation, String code) throws Exception {
         TaskTranslation taskTranslation = findByTaskId(taskId);
         if (taskTranslation == null) {
             throw new RuntimeException("No translation task found for id:" +taskId);
+        } else if (taskTranslation.getTwbOrderId().intValue() != orderId.intValue()) {
+            throw new RuntimeException("TWB order number does not match");
         }
         taskTranslation.setTranslatedText(finalTranslation);
+        if (code.length() > 9) {
+            code =  code.substring(0,9);
+        }
         taskTranslation.setAnswerCode(code);
         taskTranslation.setStatus(TaskTranslation.STATUS_RECEIVED);
         updateTranslation(taskTranslation);
+
+        //
+
+        ReportTemplate template = new ReportTemplate(taskTranslation.getTaskQueueID(),
+                taskTranslation.getTaskId(), taskTranslation.getTweetID(), taskTranslation.getTranslatedText(),
+                taskTranslation.getAuthor(), taskTranslation.getLat(), taskTranslation.getLon(),
+                taskTranslation.getUrl(), taskTranslation.getCreated(), taskTranslation.getAnswerCode(), StatusCodeType.TEMPLATE_IS_READY_FOR_EXPORT, Long.parseLong(taskTranslation.getClientAppId()));
+        reportTemplateService.saveReportItem(template);
+
+
     }
 
 

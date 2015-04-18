@@ -480,17 +480,13 @@ public class MicroMapperPybossaFormatter {
         return questions;
     }
 
-    private void createTaskTranslation(Long taskID, String tweet, String created, ClientAppAnswer clientAppAnswer){
+    private void createTaskTranslation(Long taskID, String tweetID, String tweet, String author, String lat, String lon, String url, Long taskQueueID, String created, ClientAppAnswer clientAppAnswer){
 
         if (translationService.findByTaskId(taskID) != null) {
             return;
         }
 
-        TaskTranslation translation = new TaskTranslation();
-        translation.setTaskId(taskID);
-        translation.setClientAppId(clientAppAnswer.getClientAppID().toString());//should be Long
-        translation.setOriginalText(tweet);
-        translation.setStatus(TaskTranslation.STATUS_NEW);
+        TaskTranslation translation = new TaskTranslation(taskID, clientAppAnswer.getClientAppID().toString(), tweetID, author, lat, lon, url, taskQueueID, tweet, TaskTranslation.STATUS_NEW);
         translationService.createTranslation(translation);
 
 
@@ -510,9 +506,7 @@ public class MicroMapperPybossaFormatter {
 
             if(taskQueueID!=null && taskID!=null && tweetID!=null && (tweet!=null && !tweet.isEmpty())){
                 if (answer.equals(ANSWER_NOT_ENGLISH)) {
-                    createTaskTranslation(taskID, tweet, created, clientAppAnswer);
-                    ReportTemplate template = new ReportTemplate(taskQueueID, taskID, tweetID, tweet, author, lat, lng, url, created, answer, StatusCodeType.TEMPLATE_IS_PROCESSING, clientAppAnswer.getClientAppID());
-                    reportTemplateService.saveReportItem(template);
+                    createTaskTranslation(taskID, tweetID, tweet, author, lat, lng, url, taskQueueID,created, clientAppAnswer);
                 } else {
                     ReportTemplate template = new ReportTemplate(taskQueueID, taskID, tweetID, tweet, author, lat, lng, url, created, answer, StatusCodeType.TEMPLATE_IS_READY_FOR_EXPORT, clientAppAnswer.getClientAppID());
                     reportTemplateService.saveReportItem(template);
