@@ -66,6 +66,10 @@ public class ClientApp implements Serializable {
     private boolean isCustom;
 
 
+    @Column (name = "tcProjectId", nullable = true)
+    private Long tcProjectId;
+
+
     @ManyToOne
     @JoinColumn(name="clientID" ,nullable = false, insertable = false, updatable = false)
     private Client client;
@@ -233,4 +237,7 @@ public class ClientApp implements Serializable {
     public void setIsCustom(boolean isCustom) {
         this.isCustom = isCustom;
     }
+
+    public Long getTcProjectId() { return tcProjectId;}
+
 }

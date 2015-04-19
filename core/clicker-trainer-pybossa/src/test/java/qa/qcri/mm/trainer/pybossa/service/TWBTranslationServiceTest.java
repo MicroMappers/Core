@@ -40,23 +40,45 @@ public class TWBTranslationServiceTest {
     private static final long TEST_TWB_PROJECT_ID = 5681;
 
     @Test
-    public void testPullTranslationProjects() throws Exception {
-
-        List list = translationService.pullTranslationProjects(NEW_CLIENT_APP_ID);
-        assert(list.size() > 0);
-
-        String result = translationService.pullTranslationProjectsAsString("me");
-        assertNotNull(result);
-
-        String result2 = translationService.pullTranslationProjectsAsString(NEW_CLIENT_APP_ID);
-        assertNotNull(result2);
-
-    }
-    @Test
     public void testPullAllTranslationResponses() throws Exception {
 
         translationService.pullAllTranslationResponses(new Long(NEW_CLIENT_APP_ID), TEST_TWB_PROJECT_ID);
         assert(true);
+
+    }
+
+
+    @Test
+    public void testPushAllTranslations() {
+
+        ClientApp clientApp = clientAppService.getAllClientAppByClientID(new Long(TEST_CLIENT_ID)).get(0);
+        Long tcProjectId = new Long(TEST_TWB_PROJECT_ID);
+/*        if (clientApp.getTcProjectId() != null) {
+            tcProjectId = clientApp.getTcProjectId();
+        }
+*/
+        List translations = generateTestTranslationTasks(NEW_CLIENT_APP_ID, true, 1010);
+        Long clientAppId = new Long(NEW_CLIENT_APP_ID);
+        List checkTranslations = translationService.findAllTranslationsByClientAppIdAndStatus(clientAppId, TaskTranslation.STATUS_NEW, 100);
+
+        assert(checkTranslations.size() > 0);
+
+        Map result = translationService.pushAllTranslations(clientAppId, new Long(TEST_TWB_PROJECT_ID), 0, 1000);
+        assertNotNull(result);
+
+        List<TaskTranslation> inProgressTranslations = translationService.findAllTranslationsByClientAppIdAndStatus(clientAppId, TaskTranslation.STATUS_IN_PROGRESS, 100);
+        assert(inProgressTranslations.size() > (checkTranslations.size()-5));
+        Iterator<TaskTranslation> itr = inProgressTranslations.iterator();
+        while (itr.hasNext()) {
+            TaskTranslation translation = itr.next();
+            assert(translation.getStatus().equals(TaskTranslation.STATUS_IN_PROGRESS));
+        }
+
+        Iterator<TaskTranslation> itr2 = checkTranslations.iterator();
+        while (itr2.hasNext()) {
+            TaskTranslation translation = itr2.next();
+            //translationService.delete(translation);
+        }
 
     }
 
@@ -82,38 +104,6 @@ public class TWBTranslationServiceTest {
         Map result = translationService.pushTranslationRequest(model);
         assertNotNull(result);
     }
-
-    @Test
-    public void testPushAllTranslations() {
-
-        //ClientApp clientApp = clientAppService.getAllClientAppByClientID(new Long(TEST_CLIENT_ID)).get(0);
-
-        List translations = generateTestTranslationTasks(NEW_CLIENT_APP_ID, true, 6);
-        Long clientAppId = new Long(NEW_CLIENT_APP_ID);
-        List checkTranslations = translationService.findAllTranslationsByClientAppIdAndStatus(clientAppId, TaskTranslation.STATUS_NEW, 100);
-
-        assert(checkTranslations.size() > 0);
-
-
-        Map result = translationService.pushAllTranslations(clientAppId, new Long(TEST_TWB_PROJECT_ID), 0, 5);
-        assertNotNull(result);
-
-        List<TaskTranslation> inProgressTranslations = translationService.findAllTranslationsByClientAppIdAndStatus(clientAppId, TaskTranslation.STATUS_IN_PROGRESS, 100);
-        assert(inProgressTranslations.size() > (checkTranslations.size()-5));
-        Iterator<TaskTranslation> itr = inProgressTranslations.iterator();
-        while (itr.hasNext()) {
-            TaskTranslation translation = itr.next();
-            assert(translation.getStatus().equals(TaskTranslation.STATUS_IN_PROGRESS));
-        }
-
-        Iterator<TaskTranslation> itr2 = checkTranslations.iterator();
-        while (itr2.hasNext()) {
-            TaskTranslation translation = itr2.next();
-            //translationService.delete(translation);
-        }
-
-    }
-
 
 
     @Test
@@ -224,15 +214,21 @@ public class TWBTranslationServiceTest {
 
 
     }
-    @Test
-    public void testProcessTaskPublish() throws Exception {
-        //this test requires clicking to ensure something happens
-        //List<TaskTranslation> previousTranslations = translationService.findAllTranslations();
-        //microMapperWorker.processTaskImport();
-        //List<TaskTranslation> currentTranslations = translationService.findAllTranslations();
 
+    @Test
+    public void testPullTranslationProjects() throws Exception {
+
+        List list = translationService.pullTranslationProjects(NEW_CLIENT_APP_ID);
+        assert(list.size() > 0);
+
+        String result = translationService.pullTranslationProjectsAsString("me");
+        assertNotNull(result);
+
+        String result2 = translationService.pullTranslationProjectsAsString(NEW_CLIENT_APP_ID);
+        assertNotNull(result2);
 
     }
+
 
 
 

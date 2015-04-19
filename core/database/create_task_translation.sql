@@ -11,7 +11,7 @@ CREATE TABLE `taskTranslation` (
   `lat` varchar(100) DEFAULT NULL,
   `lon` varchar(100) DEFAULT NULL,
   `url` varchar(300) DEFAULT NULL,
-  `answerCode` varchar(10), 
+  `answerCode` varchar(100), 
   `status` varchar(30) NOT NULL,
   `created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',

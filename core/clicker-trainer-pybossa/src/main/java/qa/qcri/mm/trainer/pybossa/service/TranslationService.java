@@ -16,7 +16,7 @@ public interface TranslationService {
     public Map pushTranslationRequest(TranslationRequestModel request);
 
     public Map processTranslations(ClientApp clientApp);
-    public Map pushAllTranslations(Long clientAppId, Long twbProjetcId, long maxTimeToWait, int maxBatchSize);
+    public Map pushAllTranslations(Long clientAppId, Long twbProjectId, long maxTimeToWait, int maxBatchSize);
 
     public Map pushDocumentForRequest(TranslationRequestModel request);
 

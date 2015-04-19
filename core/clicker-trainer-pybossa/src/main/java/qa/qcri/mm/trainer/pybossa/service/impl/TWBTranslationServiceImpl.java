@@ -57,9 +57,8 @@ public class TWBTranslationServiceImpl implements TranslationService {
 
     public Map processTranslations(ClientApp clientApp) {
         //pullAllCompletedTranslations(clientApp);
-        //Long twbProjectId = clientApp.getTWBProjectId();
-        Long twbProjectId = new Long(5681);
-        return pushAllTranslations(clientApp.getClientAppID(), twbProjectId, MAX_WAIT_TIME_MILLIS, MAX_BATCH_SIZE);
+        Long tcProjectId = clientApp.getTcProjectId();
+        return pushAllTranslations(clientApp.getClientAppID(), tcProjectId, MAX_WAIT_TIME_MILLIS, MAX_BATCH_SIZE);
     }
 
     public Map pushAllTranslations(Long clientAppId, Long twbProjectId, long maxTimeToWait, int maxBatchSize) {
@@ -190,6 +189,15 @@ public class TWBTranslationServiceImpl implements TranslationService {
 
     private static String getCSVData(List<TaskTranslation> list) {
         StringBuffer buffer = new StringBuffer();
+        buffer.append("Task Id");
+        buffer.append(",");
+        buffer.append("Original Text");
+        buffer.append(",");
+        buffer.append("Translated Text");
+        buffer.append(",");
+        buffer.append("Answer Code");
+        buffer.append("\n");
+
         if (list != null) {
             Iterator<TaskTranslation> iterator = list.iterator();
             while (iterator.hasNext()) {
@@ -298,6 +306,7 @@ public class TWBTranslationServiceImpl implements TranslationService {
         String[] toks;
         CSVParser parser=new CSVParser();
         int counter = 1;
+        reader.readLine();  //skip the first line which is a header.
         while ((line=reader.readLine()) != null) {
             counter++;
             line = line.trim();
