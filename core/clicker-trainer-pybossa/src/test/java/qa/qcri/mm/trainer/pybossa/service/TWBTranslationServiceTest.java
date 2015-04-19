@@ -57,13 +57,13 @@ public class TWBTranslationServiceTest {
             tcProjectId = clientApp.getTcProjectId();
         }
 */
-        List translations = generateTestTranslationTasks(NEW_CLIENT_APP_ID, true, 1010);
+        List translations = generateTestTranslationTasks(NEW_CLIENT_APP_ID, true, 6);
         Long clientAppId = new Long(NEW_CLIENT_APP_ID);
         List checkTranslations = translationService.findAllTranslationsByClientAppIdAndStatus(clientAppId, TaskTranslation.STATUS_NEW, 100);
 
         assert(checkTranslations.size() > 0);
 
-        Map result = translationService.pushAllTranslations(clientAppId, new Long(TEST_TWB_PROJECT_ID), 0, 1000);
+        Map result = translationService.pushAllTranslations(clientAppId, new Long(TEST_TWB_PROJECT_ID), 0, 5);
         assertNotNull(result);
 
         List<TaskTranslation> inProgressTranslations = translationService.findAllTranslationsByClientAppIdAndStatus(clientAppId, TaskTranslation.STATUS_IN_PROGRESS, 100);

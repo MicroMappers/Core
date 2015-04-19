@@ -281,8 +281,11 @@ public class MicroMapperPybossaFormatter {
                     if(questions[i].trim().equalsIgnoreCase(answer.trim())){
                         responses[i] = responses[i] + 1;
                         handleItemAboveCutOff(taskQueueID,responses[i], answer, info, clientAppAnswer, rtpService, cutoffSize);
+                    } else {
+                        if (answer.equals(ANSWER_NOT_ENGLISH)) {
+                            handleTranslationItem(taskQueueID,responses[i], answer, info, clientAppAnswer, rtpService, cutoffSize);
+                        }
                     }
-
                 }
             }
 
@@ -505,14 +508,28 @@ public class MicroMapperPybossaFormatter {
             Long taskID = (Long)info.get("taskid");
 
             if(taskQueueID!=null && taskID!=null && tweetID!=null && (tweet!=null && !tweet.isEmpty())){
-                if (answer.equals(ANSWER_NOT_ENGLISH)) {
-                    createTaskTranslation(taskID, tweetID, tweet, author, lat, lng, url, taskQueueID,created, clientAppAnswer);
-                } else {
-                    ReportTemplate template = new ReportTemplate(taskQueueID, taskID, tweetID, tweet, author, lat, lng, url, created, answer, StatusCodeType.TEMPLATE_IS_READY_FOR_EXPORT, clientAppAnswer.getClientAppID());
-                    reportTemplateService.saveReportItem(template);
-                }
+                 ReportTemplate template = new ReportTemplate(taskQueueID, taskID, tweetID, tweet, author, lat, lng, url, created, answer, StatusCodeType.TEMPLATE_IS_READY_FOR_EXPORT, clientAppAnswer.getClientAppID());
+                 reportTemplateService.saveReportItem(template);
             }
             // save to output
+        }
+    }
+
+
+    private void handleTranslationItem(Long taskQueueID,int responseCount, String answer, JSONObject info, ClientAppAnswer clientAppAnswer, ReportTemplateService reportTemplateService, int cutOffSize){
+        // MAKE SURE TO MODIFY TEMPLATE HTML  Standize OUTPUT FORMAT
+        if(responseCount >= cutOffSize){
+            String tweetID = (String)info.get("tweetid");
+            String tweet = (String)info.get("tweet");
+            String author= (String)info.get("author");
+            String lat= (String)info.get("lat");
+            String lng= (String)info.get("lon");
+            String url= (String)info.get("url");
+            String created = (String)info.get("timestamp");
+            Long taskID = (Long)info.get("taskid");
+
+            if(taskQueueID!=null && taskID!=null && tweetID!=null && (tweet!=null && !tweet.isEmpty())){
+                createTaskTranslation(taskID, tweetID, tweet, author, lat, lng, url, taskQueueID,created, clientAppAnswer);            }
         }
     }
 
