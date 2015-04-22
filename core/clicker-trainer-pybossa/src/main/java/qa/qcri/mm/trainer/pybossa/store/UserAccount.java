@@ -10,4 +10,8 @@ package qa.qcri.mm.trainer.pybossa.store;
 public class UserAccount {
     public static String SYSTEM_USER_NAME = "MicroMappers";
     public static String MIROMAPPER_USER_NAME = "micromappers_custom";
+
+    public static String SKY_EYES_COCONUT_APP = "MM_RemoteSenseClicker";
+    public static String SKY_EYES_RUBY_APP = "MM_Aerial_Hagupit";
+    public static String PAM_APP="MM_Aerial_PAM";
 }

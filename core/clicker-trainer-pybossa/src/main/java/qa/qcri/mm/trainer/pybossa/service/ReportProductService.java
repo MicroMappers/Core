@@ -16,4 +16,6 @@ public interface ReportProductService {
     void generateReportTemplateFromExternalSource() throws Exception;
     void generateCVSReportForGeoClicker() throws Exception;
     void generateGeoJsonForESRI(List<GeoJsonOutputModel> geoJsonOutputModels) throws Exception;
+
+    void generateMapBoxTemplateForAerialClicker() throws Exception;
 }

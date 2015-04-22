@@ -8,6 +8,8 @@ import org.json.simple.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import qa.qcri.mm.trainer.pybossa.custom.MAPBoxAerialClickerFileFormat;
+import qa.qcri.mm.trainer.pybossa.dao.ImageMetaDataDao;
 import qa.qcri.mm.trainer.pybossa.entity.*;
 import qa.qcri.mm.trainer.pybossa.format.impl.CVSRemoteFileFormatter;
 import qa.qcri.mm.trainer.pybossa.format.impl.GeoJsonOutputModel;
@@ -18,10 +20,7 @@ import qa.qcri.mm.trainer.pybossa.store.StatusCodeType;
 import qa.qcri.mm.trainer.pybossa.store.UserAccount;
 import qa.qcri.mm.trainer.pybossa.util.DateTimeConverter;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.*;
 import java.util.Iterator;
 import java.util.List;
 
@@ -52,6 +51,9 @@ public class ReportProductServiceImpl implements ReportProductService {
 
     @Autowired
     private ClientAppEventService clientAppEventService;
+
+    @Autowired
+    private ImageMetaDataDao imageMetaDataDao;
 
     private CVSRemoteFileFormatter cvsRemoteFileFormatter;
 
@@ -164,6 +166,48 @@ public class ReportProductServiceImpl implements ReportProductService {
             bw.close();
         }
 
+    }
+
+    @Override
+    public void generateMapBoxTemplateForAerialClicker() throws Exception {
+
+        List<ImageMetaData> imageMetaDataList = imageMetaDataDao.getMapBoxDataTile(StatusCodeType.MAPBOX_TILE_IMPORTED, 1000);
+        String fileJsonName = PybossaConf.DEFAULT_TRAINER_FILE_PATH + DateTimeConverter.reformattedCurrentDateForFileName() + "MapBoxExport.json";
+
+        if(imageMetaDataList.size() > 0){
+            JSONArray jsonArray = MAPBoxAerialClickerFileFormat.createAerialClickerData(imageMetaDataList);
+            try {
+
+                //String fileJsonName ="/Users/jlucas/Documents/ConservationDrones/TEST/export2.json";
+
+                if(jsonArray.size() == 0){
+                    return;
+                }
+                File fileJson = new File(fileJsonName);
+
+
+                FileWriter geoWriter = new FileWriter(fileJson);
+
+                geoWriter.write(jsonArray.toJSONString());
+                geoWriter.flush();
+                geoWriter.close();
+
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if(imageMetaDataList.size() > 0){
+                    for(ImageMetaData i : imageMetaDataList) {
+                        imageMetaDataDao.updateExportedData(i);
+                    }
+                   // hard-coded id. bad code!!! willl be updated.
+                    ClientAppSource appSource = new ClientAppSource(Long.valueOf(257), StatusCodeType.MAPBOX_TILE_EXPORTED, fileJsonName);
+                    clientAppSourceService.insertNewClientAppSource(appSource);
+                }
+
+            }
+        }
+        //To change body of implemented methods use File | Settings | File Templates.
     }
 
     private String[] generateOutputData(ReportTemplate rpt){

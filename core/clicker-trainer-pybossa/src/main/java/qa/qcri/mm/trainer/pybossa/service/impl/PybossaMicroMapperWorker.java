@@ -108,6 +108,7 @@ public class PybossaMicroMapperWorker implements MicroMapperWorker {
 
     @Override
     public void processTaskPublish() throws Exception{
+        System.out.println("processTaskImport is starting");
         setClassVariable();
 
         if(client == null){
@@ -169,7 +170,7 @@ public class PybossaMicroMapperWorker implements MicroMapperWorker {
 
     @Override
     public void processTaskImport() throws Exception{
-
+        System.out.println("processTaskImport is starting");
         setClassVariable();
 
         if(client == null){
@@ -202,7 +203,7 @@ public class PybossaMicroMapperWorker implements MicroMapperWorker {
                             boolean isFound = pybossaFormatter.isTaskStatusCompleted(inputData);
 
                             if(isFound){
-                                processTaskQueueImport(clientApp,taskQueue,taskID, geoJsonOutputModels) ;
+                                this.processTaskQueueImport(clientApp,taskQueue,taskID, geoJsonOutputModels) ;
                             }
 
                         } catch (Exception e) {
@@ -267,6 +268,7 @@ public class PybossaMicroMapperWorker implements MicroMapperWorker {
     @Override
     public void processTaskExport() throws Exception {
         reportProductService.generateCVSReportForGeoClicker();
+        reportProductService.generateMapBoxTemplateForAerialClicker();
         // will be activated when AIDR is ready.
         //reportProductService.generateReportTemplateFromExternalSource();
     }
@@ -298,8 +300,9 @@ public class PybossaMicroMapperWorker implements MicroMapperWorker {
                     //TaskQueueResponse taskQueueResponse = externalCustomService.getAnswerResponseForAerial(importResult,parser,taskQueue.getTaskQueueID(), taskID) ;
 
                     // specific for skyeyes
-                    System.out.println("taskQueue : " + taskQueue.getTaskQueueID());
-                    taskQueueResponse = externalCustomService.getAnswerResponseForSkyEyes(clientApp,importResult,taskQueue);
+
+                    //taskQueueResponse = externalCustomService.getAnswerResponseForSkyEyes(clientApp,importResult,taskQueue);
+                    taskQueueResponse = externalCustomService.getAnswerResponse(clientApp,importResult,taskQueue);
 
                 }
                 else{
@@ -317,9 +320,16 @@ public class PybossaMicroMapperWorker implements MicroMapperWorker {
             }
 
             if(taskQueueResponse != null){
+                System.out.println(taskQueueResponse.getResponse());
+                System.out.println(taskQueueResponse.getTaskInfo());
+                System.out.println(taskQueueResponse.getTaskQueueID());
+
                 clientAppResponseService.processTaskQueueResponse(taskQueueResponse);
                 taskQueue.setStatus(StatusCodeType.TASK_LIFECYCLE_COMPLETED);
                 updateTaskQueue(taskQueue);
+            }
+            else{
+                System.out.println("taskQueueResponse is null");
             }
         }
     }
@@ -351,6 +361,8 @@ public class PybossaMicroMapperWorker implements MicroMapperWorker {
             Object obj = parser.parse(inputData);
             JSONObject jsonObject = (JSONObject) obj;
 
+            System.out.println("addToTaskQueue : " + inputData);
+
             Long taskID  = (Long)jsonObject.get("id");
             JSONObject info = (JSONObject)jsonObject.get("info");
             Long documentID = (Long)info.get("documentID");
@@ -376,7 +388,11 @@ public class PybossaMicroMapperWorker implements MicroMapperWorker {
 
     private void searchUpdateNextAvailableAppSource(Long clientAppID){
         List<ClientAppSource> sourceList =  clientAppSourceService.getClientAppSourceByStatus(clientAppID, StatusCodeType.EXTERNAL_DATA_SOURCE_UPLOADED);
+
+        System.out.println("searchUpdateNextAvailableAppSource : " +sourceList.size());
+
         if(sourceList.size() > 0){
+            System.out.println("searchUpdateNextAvailableAppSource2 : " + sourceList.get(0).getClientAppSourceID());
             clientAppSourceService.updateClientAppSourceStatus(sourceList.get(0).getClientAppSourceID(), StatusCodeType.EXTERNAL_DATA_SOURCE_ACTIVE);
         }
     }

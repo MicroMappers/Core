@@ -21,11 +21,13 @@ public class SyncWorker implements Worker {
 	public void work() {
 		String threadName = Thread.currentThread().getName();
 		//logger.debug("   " + threadName + " has began working.(SyncWorker - run ClientApps)");
-        logger.info("Scheduler is starting");
+        System.out.println("Scheduler is starting");
         try {
+
             microMapperWorker.processTaskPublish();
             microMapperWorker.processTaskImport();
             microMapperWorker.processTaskExport();
+
             Thread.sleep(180000);
         }
         catch (InterruptedException e) {

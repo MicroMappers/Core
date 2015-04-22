@@ -7,14 +7,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import qa.qcri.mm.trainer.pybossa.custom.NamibiaAerialClickerFileFormat;
+import qa.qcri.mm.trainer.pybossa.dao.ImageMetaDataDao;
 import qa.qcri.mm.trainer.pybossa.dao.NamibiaImageDao;
 import qa.qcri.mm.trainer.pybossa.dao.TaskRunDao;
 import qa.qcri.mm.trainer.pybossa.entity.*;
 import qa.qcri.mm.trainer.pybossa.format.impl.SkyEyeDataOutputProcessor;
+import qa.qcri.mm.trainer.pybossa.format.impl.VanuatuDataOutputProcessor;
 import qa.qcri.mm.trainer.pybossa.service.ClientAppService;
 import qa.qcri.mm.trainer.pybossa.service.ExternalCustomService;
 import qa.qcri.mm.trainer.pybossa.service.NamibiaReportService;
 import qa.qcri.mm.trainer.pybossa.store.PybossaConf;
+import qa.qcri.mm.trainer.pybossa.store.UserAccount;
 
 import java.util.Iterator;
 import java.util.List;
@@ -42,7 +45,13 @@ public class ExternalCustomServiceImpl  implements ExternalCustomService {
     @Autowired
     ClientAppService clientAppService;
 
+    @Autowired
+    ImageMetaDataDao imageMetaDataDao;
+
     private SkyEyeDataOutputProcessor skyEyeDataOutputProcessor = null;
+    private VanuatuDataOutputProcessor vanuatuDataOutputProcessor = null;
+
+    JSONParser cParser = new JSONParser();
 
     @Override
     public String NamibiaImageWithTag(int tagValue) {
@@ -152,40 +161,51 @@ public class ExternalCustomServiceImpl  implements ExternalCustomService {
 
     }
 
-    JSONParser cParser = new JSONParser();
 
-    public boolean isDirty(long taskID, JSONArray loc) throws Exception{
-        boolean isDirtyValue = false;
-        List<TaskRun> taskRuns = taskRunDao.getTaskRunbyTaskID(taskID) ;
-        if(taskRuns.isEmpty()){
-            isDirtyValue = true;
+    private TaskQueueResponse getAnswerResponseForPAM(ClientApp clientApp, String datasource, TaskQueue taskQueue) throws Exception {
+        if(vanuatuDataOutputProcessor == null || vanuatuDataOutputProcessor.getClientApp().equals(clientApp))  {
+            vanuatuDataOutputProcessor = new VanuatuDataOutputProcessor(clientApp);
         }
-        for(TaskRun t :  taskRuns){
-          JSONArray arrJson =(JSONArray) cParser.parse(t.getDuplicateInfo());
+        TaskQueueResponse response = vanuatuDataOutputProcessor.process(datasource, taskQueue);
 
-            for(int i=0; i < loc.size(); i++){
-                JSONObject oneLoc = (JSONObject) loc.get(i);
-                JSONObject aGeometry = (JSONObject)oneLoc.get("geometry") ;
+        JSONObject jsonObject = (JSONObject)cParser.parse(response.getResponse());
+        List<ImageMetaData> imageMetaDataList = imageMetaDataDao.findImageMetaDataByImageURL((String)jsonObject.get("imgurl"));
 
-                if((arrJson.toJSONString().contains(aGeometry.toJSONString())))
-                {
-                    isDirtyValue =  true;
-                }
-
-
-            }
-
+        if(imageMetaDataList.size() > 0){
+            ImageMetaData aData = imageMetaDataList.get(0);
+            jsonObject.put("lat", aData.getLat());
+            jsonObject.put("lng", aData.getLng());
+            response.setResponse(jsonObject.toJSONString());
         }
 
-        return isDirtyValue;
+        return response;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public TaskQueueResponse getAnswerResponse(ClientApp clientApp, String datasource, TaskQueue taskQueue) throws Exception {
+
+        System.out.println("name : " + clientApp.getShortName());
+        if(clientApp.getShortName().equalsIgnoreCase(UserAccount.PAM_APP)) {
+            // PAM
+            System.out.println("pam");
+           return getAnswerResponseForPAM(clientApp,  datasource,  taskQueue);
+        }
+
+        if(clientApp.getShortName().equalsIgnoreCase(UserAccount.SKY_EYES_COCONUT_APP) || clientApp.getShortName().equalsIgnoreCase(UserAccount.SKY_EYES_RUBY_APP)) {
+            //
+            System.out.println("skyeyes");
+            return getAnswerResponseForSkyEyes(clientApp,  datasource,  taskQueue);
+        }
+
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
     public TaskQueueResponse testAerialClick(String pybossaResult) throws Exception{
 
-     //   SkyEyeDataOutputProcessor p = new SkyEyeDataOutputProcessor(null);
+        //   SkyEyeDataOutputProcessor p = new SkyEyeDataOutputProcessor(null);
 
-      //  p.process(pybossaResult, null);
+        //  p.process(pybossaResult, null);
 
         return null;
 

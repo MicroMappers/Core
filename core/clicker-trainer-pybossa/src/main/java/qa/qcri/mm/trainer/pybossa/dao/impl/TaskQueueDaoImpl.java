@@ -24,7 +24,7 @@ public class TaskQueueDaoImpl extends AbstractDaoImpl<TaskQueue, String> impleme
 
     @Override
     public void createTaskQueue(TaskQueue taskQueue) {
-        saveOrUpdate(taskQueue);
+        save(taskQueue);
     }
 
     @Override

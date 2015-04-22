@@ -32,4 +32,5 @@ public class PybossaConf {
     public static String TASK_QUEUE_GEO_INFO_NOT_FOUND = "No Location Information";
 
     public static int DEFAULT_GEO_N_ANSWERS = 1;
+
 }

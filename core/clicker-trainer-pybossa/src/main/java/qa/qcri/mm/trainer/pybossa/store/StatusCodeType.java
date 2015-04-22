@@ -54,4 +54,7 @@ public class StatusCodeType {
 
     public final static Integer CLIENT_ACTIVE = 1;
 
+    public final static Integer MAPBOX_TILE_IMPORTED = 0;
+    public final static Integer MAPBOX_TILE_EXPORTED = 1;
+
 }

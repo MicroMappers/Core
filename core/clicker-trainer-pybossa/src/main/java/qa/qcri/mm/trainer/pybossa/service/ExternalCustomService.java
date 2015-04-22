@@ -19,4 +19,6 @@ public interface ExternalCustomService {
     String NamibiaImageWithTag(int tagValue);
     TaskQueueResponse getAnswerResponseForSkyEyes( ClientApp clientApp, String datasource, TaskQueue taskQueue) throws Exception;
     TaskQueueResponse testAerialClick(String pybossaResult) throws Exception;
+    TaskQueueResponse getAnswerResponse( ClientApp clientApp, String datasource, TaskQueue taskQueue) throws Exception;
+
 }

@@ -36,6 +36,7 @@ public class ClientAppSourceServiceImpl implements ClientAppSourceService {
     @Override
     @Transactional(readOnly = false)
     public void updateClientAppSourceStatus(Long clientAppID, int status) {
+        System.out.println("clientAppID :" + clientAppID);
         clientAppSourceDao.updateClientAppSourceStatus(clientAppID, status);
         //To change body of implemented methods use File | Settings | File Templates.
     }

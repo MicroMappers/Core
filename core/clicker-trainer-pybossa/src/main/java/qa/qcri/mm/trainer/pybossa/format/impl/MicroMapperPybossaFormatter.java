@@ -244,19 +244,18 @@ public class MicroMapperPybossaFormatter {
 
         JSONObject responseJSON = new JSONObject();
 
-        String[] questions = getQuestion( clientAppAnswer,  parser);
+        String[] acceptableAnswers = getAcceptableAnswers( clientAppAnswer,  parser);
 
-        if(questions == null) {
+        if(acceptableAnswers == null) {
             System.out.println("active answer key is null. No validation is required");
             return null;
         }
 
-        int[] responses = new int[questions.length];
-
+        int[] responses = new int[acceptableAnswers.length];
         JSONArray array = (JSONArray) parser.parse(pybossaResult) ;
 
         Iterator itr= array.iterator();
-        String answer = null;
+        String userAnswer = null;
 
         int cutoffSize = getCutOffNumber(array.size(), clientApp.getTaskRunsPerTask(), clientAppAnswer)  ;
 
@@ -267,27 +266,25 @@ public class MicroMapperPybossaFormatter {
 
             Long taskID = (Long) featureJsonObj.get("id");
 
-            answer = this.getUserAnswer(featureJsonObj, clientApp);
+            userAnswer = this.getUserAnswer(featureJsonObj, clientApp);
 
-            if(answer!=null && !clientApp.getAppType().equals(StatusCodeType.APP_MAP) ){
-                for(int i=0; i < questions.length; i++ ){
-                    if(questions[i].trim().equalsIgnoreCase(answer.trim())){
+            if(userAnswer!=null ){
+                for(int i=0; i < acceptableAnswers.length; i++ ){
+                    if(acceptableAnswers[i].trim().equalsIgnoreCase(userAnswer.trim())){
                         responses[i] = responses[i] + 1;
-                        handleItemAboveCutOff(taskQueueID,responses[i], answer, info, clientAppAnswer, rtpService, cutoffSize);
+                        handleItemAboveCutOff(taskQueueID,responses[i], userAnswer, info, clientAppAnswer, rtpService, cutoffSize);
                     }
-
                 }
             }
         }
 
         String taskInfo = "";
         String responseJsonString = "";
-        //if(!clientApp.getAppType().equals(StatusCodeType.APP_MAP)){
-        for(int i=0; i < questions.length; i++ ){
-            responseJSON.put(questions[i], responses[i]);
+
+        for(int i=0; i < acceptableAnswers.length; i++ ){
+            responseJSON.put(acceptableAnswers[i], responses[i]);
         }
         responseJsonString = responseJSON.toJSONString();
-        //}
 
         TaskQueueResponse taskQueueResponse = new TaskQueueResponse(taskQueueID, responseJsonString, taskInfo);
         return  taskQueueResponse;
@@ -452,10 +449,10 @@ public class MicroMapperPybossaFormatter {
         return answer;
     }
 
-    private String[] getQuestion(ClientAppAnswer clientAppAnswer, JSONParser parser) throws ParseException {
+    private String[] getAcceptableAnswers(ClientAppAnswer clientAppAnswer, JSONParser parser) throws ParseException {
         String answerKey =  clientAppAnswer.getAnswer();
         if(clientAppAnswer.getActiveAnswerKey() != null){
-            answerKey =      clientAppAnswer.getActiveAnswerKey();
+            answerKey =  clientAppAnswer.getActiveAnswerKey();
         }
 
         JSONArray questionArrary =   (JSONArray) parser.parse(answerKey) ;
