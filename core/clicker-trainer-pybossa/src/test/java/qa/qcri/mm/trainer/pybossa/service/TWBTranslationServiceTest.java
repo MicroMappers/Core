@@ -215,19 +215,6 @@ public class TWBTranslationServiceTest {
 
     }
 
-    @Test
-    public void testPullTranslationProjects() throws Exception {
-
-        List list = translationService.pullTranslationProjects(NEW_CLIENT_APP_ID);
-        assert(list.size() > 0);
-
-        String result = translationService.pullTranslationProjectsAsString("me");
-        assertNotNull(result);
-
-        String result2 = translationService.pullTranslationProjectsAsString(NEW_CLIENT_APP_ID);
-        assertNotNull(result2);
-
-    }
 
 
 

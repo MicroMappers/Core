@@ -22,9 +22,6 @@ public interface TranslationService {
 
     public String pullAllTranslationResponses(Long clientAppId, Long twbProjetcId);
 
-    public List<TranslationProjectModel> pullTranslationProjects(String clientId);
-    public String pullTranslationProjectsAsString(String clientId);
-    
     public void createTranslation(TaskTranslation translation);
     public void updateTranslation(TaskTranslation translation);
 	public TaskTranslation findById(Long translationId);
