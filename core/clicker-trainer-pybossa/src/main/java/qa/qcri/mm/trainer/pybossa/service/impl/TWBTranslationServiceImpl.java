@@ -157,6 +157,7 @@ public class TWBTranslationServiceImpl implements TranslationService {
 
         LinkedMultiValueMap<String, Object> map = new LinkedMultiValueMap<String, Object>();
         map.add("document", content);
+        map.add("name", "translation_source.csv");
 
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new    HttpEntity<LinkedMultiValueMap<String, Object>>(
                 map, requestHeaders);
@@ -249,8 +250,8 @@ public class TWBTranslationServiceImpl implements TranslationService {
                 Integer projectId = (Integer) response.get("project_id");
                 List documents = (List) response.get("delivered_documents");
                 if (documents.size() > 0) {
-                    Map document = (Map) documents.get(0);
-                    processTranslationDocument((Integer) document.get("document_id"), (String) document.get("download_link"), orderId, projectId);
+                    Map document = (Map) documents.get(documents.size()-1);
+                    processTranslationDocument((Integer) document.get("document_id"), (String) document.get("download_link"),  (String) document.get("self_link"), orderId, projectId);
                 } else {
                     throw new RuntimeException("No documents were found for order id: " + orderId + ", project id:" + projectId);
                 }
@@ -263,7 +264,7 @@ public class TWBTranslationServiceImpl implements TranslationService {
     }
 
 
-    private void processTranslationDocument(Integer documentId, String download_link, Integer orderId, Integer projectId) throws Exception {
+    private void processTranslationDocument(Integer documentId, String download_link, String selfLink, Integer orderId, Integer projectId) throws Exception {
         final String url=download_link;
         HttpHeaders requestHeaders=new HttpHeaders();
         requestHeaders.add("X-Proz-API-Key", API_KEY);
@@ -275,27 +276,25 @@ public class TWBTranslationServiceImpl implements TranslationService {
             ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<String>(requestHeaders), String.class);
             logger.debug(response.getBody());
             processResponseDocumentContent(response.getBody(), orderId, projectId);
-            updateTranslationOrder(orderId, documentId, "accepted", "Translation was accepted");
-//            TranslationProjectModel[] projectArray = response.getBody();
-//            ArrayList<TranslationProjectModel> list = new ArrayList<TranslationProjectModel>(Arrays.asList(projectArray));//
-//            return list;
-        } catch (HttpClientErrorException exception) {
-            logger.debug("Exception caught: " +exception.getResponseBodyAsString());
-            throw new RuntimeException("Error retrieving document at url:"+url);
+            updateTranslationOrder(selfLink, "accepted", "Translation was accepted");
+        } catch (Exception exception) {
+            logger.debug("Exception caught: " +exception.toString());
+            updateTranslationOrder(selfLink, "rejected", exception.toString());
         }
     }
 
-    private void updateTranslationOrder(Integer orderId, Integer documentId, String status, String comment) {
-        final String url=BASE_URL+"/orders/"+orderId+"/delivered_documents/"+documentId;
+    private void updateTranslationOrder(String selfLink, String status, String comment) {
+        final String url=selfLink;
         HttpHeaders requestHeaders=new HttpHeaders();
         requestHeaders.add("X-Proz-API-Key", API_KEY);
+        requestHeaders.add("X-HTTP-Method-Override", "PATCH");
         requestHeaders.setContentType(MediaType.APPLICATION_JSON);
         RestTemplate restTemplate=new RestTemplate();
         //restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
         String json = "{ \"delivery_status\": \""+status+"\", \"reject_reason\": \""+comment+"\"}";
         HttpEntity entity = new HttpEntity(json, requestHeaders);
 
-        ResponseEntity<Map> response=restTemplate.exchange(url, HttpMethod.PATCH, entity, Map.class);
+        ResponseEntity<Map> response=restTemplate.exchange(url, HttpMethod.POST, entity, Map.class);
         logger.debug(response);
     }
 
@@ -319,9 +318,9 @@ public class TWBTranslationServiceImpl implements TranslationService {
                 }
 
                 updateTranslation(orderId, new Long(toks[0]), toks[1], toks[2], toks[3]);
-            } catch (IOException e) {
+            } catch (Exception e) {
                 logger.error("Invalid line: " + line + " (" + e.getMessage() + ")");
-                continue;
+                throw new RuntimeException("Invalid line: " + line + " (" + e.getMessage() + ")");
             }
         }
     }
@@ -330,6 +329,8 @@ public class TWBTranslationServiceImpl implements TranslationService {
         TaskTranslation taskTranslation = findByTaskId(taskId);
         if (taskTranslation == null) {
             throw new RuntimeException("No translation task found for id:" +taskId);
+        } else if (taskTranslation.getTwbOrderId() == null) {
+            throw new RuntimeException("No TWB order number found for id:" +taskId);
         } else if (taskTranslation.getTwbOrderId().intValue() != orderId.intValue()) {
             throw new RuntimeException("TWB order number does not match");
         }

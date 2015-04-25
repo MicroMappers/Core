@@ -258,7 +258,7 @@ public class MicroMapperPybossaFormatter {
         }
 
         int[] responses = new int[questions.length];
-
+        int[] translationResponses = new int[questions.length];
         JSONArray array = (JSONArray) parser.parse(pybossaResult) ;
 
         Iterator itr= array.iterator();
@@ -283,7 +283,8 @@ public class MicroMapperPybossaFormatter {
                         handleItemAboveCutOff(taskQueueID,responses[i], answer, info, clientAppAnswer, rtpService, cutoffSize);
                     } else {
                         if (answer.equals(ANSWER_NOT_ENGLISH)) {
-                            handleTranslationItem(taskQueueID,responses[i], answer, info, clientAppAnswer, rtpService, cutoffSize);
+                            translationResponses[i]++;
+                            handleTranslationItem(taskQueueID,translationResponses[i], answer, info, clientAppAnswer, rtpService, cutoffSize);
                         }
                     }
                 }
@@ -517,7 +518,6 @@ public class MicroMapperPybossaFormatter {
 
 
     private void handleTranslationItem(Long taskQueueID,int responseCount, String answer, JSONObject info, ClientAppAnswer clientAppAnswer, ReportTemplateService reportTemplateService, int cutOffSize){
-        // MAKE SURE TO MODIFY TEMPLATE HTML  Standize OUTPUT FORMAT
         if(responseCount >= cutOffSize){
             String tweetID = (String)info.get("tweetid");
             String tweet = (String)info.get("tweet");
