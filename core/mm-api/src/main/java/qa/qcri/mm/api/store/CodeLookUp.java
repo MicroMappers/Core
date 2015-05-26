@@ -14,12 +14,15 @@ public class CodeLookUp {
     public static Integer APP_VIDEO = 3;
     public static Integer APP_MAP = 4;
     public static Integer APP_AERIAL = 5;
+    public static Integer APP_3W = 6;
+
 
     public static String APP_MULTIPLE_CHOICE_NAME = "Text Clicker";
     public static String APP_IMAGE_NAME = "Image Clicker";
     public static String APP_VIDEO_NAME = "Video Clicker";
     public static String APP_MAP_NAME = "Geo Clicker";
     public static String APP_AERIAL_NAME = "Aerial Clicker";
+    public static String APP_3W_NAME = "3W Clicker";
 
 
     public static Integer APP_STATUS_ALIVE = 200;
@@ -55,5 +58,8 @@ public class CodeLookUp {
 
 
     public static Integer MAX_APP_HOLD_PERIOD_DAY = 7;
+
+    public static double EARTH_RADIUS = 6371.01;
+    public static double EARTH_DISTANCE = 1000;
 
 }

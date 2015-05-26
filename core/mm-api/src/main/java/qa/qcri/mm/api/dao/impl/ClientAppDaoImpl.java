@@ -95,6 +95,11 @@ public class ClientAppDaoImpl extends AbstractDaoImpl<ClientApp, String> impleme
     }
 
 
+    @Override
+    public List<ClientApp> findAllClientApps() {
+
+        return getAll();
+    }
 
 
 }

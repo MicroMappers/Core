@@ -15,7 +15,7 @@ import java.util.Date;
  * To change this template use File | Settings | File Templates.
  */
 @Entity
-@Table(catalog = "aidr_scheduler",name = "taskQueueResponse")
+@Table(name = "taskQueueResponse")
 public class TaskQueueResponse implements Serializable {
     private static final long serialVersionUID = -5527566248002296042L;
 
@@ -29,7 +29,7 @@ public class TaskQueueResponse implements Serializable {
     @Column (name = "taskInfo", nullable = true)
     private String taskInfo;
 
-    @Column (name = "created", nullable = false)
+    @Column (name = "created", nullable = true)
     private Date created;
 
     public TaskQueueResponse(){}

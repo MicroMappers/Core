@@ -1,5 +1,9 @@
 package qa.qcri.mm.api.service;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import qa.qcri.mm.api.entity.Crisis;
+import qa.qcri.mm.api.template.CrisisGISModel;
 import qa.qcri.mm.api.template.GeoJsonOutputModel;
 
 import java.util.Date;
@@ -16,4 +20,5 @@ public interface GeoService {
     List<GeoJsonOutputModel> getGeoJsonOutput() throws Exception;
     String getGeoJsonOuputJSONP(Date updated) throws Exception;
     String getGeoJsonOuputJSON(Date updated) throws Exception;
+
 }

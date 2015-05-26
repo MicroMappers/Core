@@ -91,4 +91,45 @@ public class ClientAppSourceController {
         return Response.status(CodeLookUp.APP_REQUEST_SUCCESS).entity(returnValue).build();
     }
 
+
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Path("/mapbox/push")
+    public Response saveMapBoxSource(String data){
+        String returnValue = StatusCodeType.RETURN_SUCCESS;
+
+        System.out.println("saveMapBoxSource : " + data );
+
+        try{
+            clientAppSourceService.handleMapBoxDataSource(data);
+        }
+        catch(Exception e){
+            returnValue = StatusCodeType.RETURN_FAIL;
+            logger.error("saveAppSource got exception : " + e);
+            System.out.println("saveAppSource excpetion : " + e );
+        }
+
+        return Response.status(CodeLookUp.APP_REQUEST_SUCCESS).entity(returnValue).build();
+    }
+
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Path("/gist/push")
+    public Response saveMapBoxGist(String data){
+
+        String returnValue = StatusCodeType.RETURN_SUCCESS;
+        System.out.println("saveMapBoxGist : " + data );
+
+        try{
+            clientAppSourceService.handleMapBoxGistDataSource(data);
+        }
+        catch(Exception e){
+            returnValue = StatusCodeType.RETURN_FAIL;
+            logger.error("saveAppSource got exception : " + e);
+            System.out.println("saveAppSource excpetion : " + e );
+        }
+
+        return Response.status(CodeLookUp.APP_REQUEST_SUCCESS).entity(returnValue).build();
+    }
+
 }

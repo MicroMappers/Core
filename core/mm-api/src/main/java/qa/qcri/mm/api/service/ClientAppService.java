@@ -29,5 +29,5 @@ public interface ClientAppService {
     List<ClientAppModel> getAllActiveClientApps();
     String enableForClientAppStatusByCrisisID(Long crisisID, Integer status);
     List<ClientApp> getClientAppByPlatformAppID(Long platformAppID);
-
+    List<ClientApp> getAllClientApp();
 }

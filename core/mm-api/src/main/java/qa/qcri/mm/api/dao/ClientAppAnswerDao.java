@@ -11,7 +11,7 @@ import java.util.List;
  * Time: 1:34 PM
  * To change this template use File | Settings | File Templates.
  */
-public interface ClientAppAnswerDao {
+public interface ClientAppAnswerDao extends AbstractDao<ClientAppAnswer, String> {
 
     List<ClientAppAnswer> getClientAppAnswer(Long clientAppID);
 

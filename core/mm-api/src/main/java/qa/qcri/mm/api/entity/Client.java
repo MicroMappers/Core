@@ -13,7 +13,7 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 @Entity
-@Table(catalog = "aidr_scheduler", name = "client")
+@Table(name = "client")
 public class Client implements Serializable {
 
     private static final long serialVersionUID = -5527566248002296042L;
@@ -123,7 +123,7 @@ public class Client implements Serializable {
     @Column (name = "aidrHostURL", nullable = false)
     private String aidrHostURL;
 
-    @Column (name = "created", nullable = false)
+    @Column (name = "created", nullable = true)
     private Date created;
 
     @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.EAGER)

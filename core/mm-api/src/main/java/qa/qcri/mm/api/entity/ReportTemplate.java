@@ -11,7 +11,7 @@ import java.io.Serializable;
  * To change this template use File | Settings | File Templates.
  */
 @Entity
-@Table(catalog = "aidr_scheduler",name = "reportTemplate")
+@Table(name = "reportTemplate")
 public class ReportTemplate implements Serializable {
 
     private static final long serialVersionUID = -5527566248002296042L;
@@ -49,7 +49,7 @@ public class ReportTemplate implements Serializable {
     @Column(name = "url", nullable = false)
     private String url;
 
-    @Column(name = "created", nullable = false)
+    @Column(name = "created", nullable = true)
     private String created;
 
     @Column(name = "answer", nullable = false)

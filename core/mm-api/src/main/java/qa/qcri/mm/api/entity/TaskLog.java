@@ -7,7 +7,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 @Entity @IdClass(TaskLogKey.class)
-@Table(catalog = "aidr_scheduler",name = "taskLog")
+@Table(name = "taskLog")
 public class TaskLog implements Serializable {
 
     private static final long serialVersionUID = -5527566248002296042L;
@@ -53,6 +53,6 @@ public class TaskLog implements Serializable {
     @Column (name = "status", nullable = false)
     private int status;
 
-    @Column (name = "created", nullable = false)
+    @Column (name = "created", nullable = true)
     private Date created;
 }

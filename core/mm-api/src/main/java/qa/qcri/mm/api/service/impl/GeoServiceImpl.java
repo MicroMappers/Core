@@ -9,16 +9,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import qa.qcri.mm.api.dao.ReportTemplateDao;
 import qa.qcri.mm.api.dao.TaskQueueResponseDao;
-import qa.qcri.mm.api.entity.ClientApp;
-import qa.qcri.mm.api.entity.ReportTemplate;
-import qa.qcri.mm.api.entity.TaskQueue;
-import qa.qcri.mm.api.entity.TaskQueueResponse;
+import qa.qcri.mm.api.entity.*;
 import qa.qcri.mm.api.service.ClientAppService;
 import qa.qcri.mm.api.service.GeoService;
 import qa.qcri.mm.api.service.TaskQueueService;
 import qa.qcri.mm.api.store.CodeLookUp;
 import qa.qcri.mm.api.store.StatusCodeType;
 import qa.qcri.mm.api.template.GeoJsonOutputModel;
+
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -167,7 +165,6 @@ public class GeoServiceImpl implements GeoService {
         return geoJsonOutputModels;
     }
 
-
     private boolean isEmptyGeoJson(String jsonString){
         boolean isEmpty = false;
         //geometry
@@ -189,4 +186,5 @@ public class GeoServiceImpl implements GeoService {
         }
         return isEmpty;
     }
+
 }

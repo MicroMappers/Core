@@ -6,7 +6,9 @@ import org.json.simple.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import qa.qcri.mm.api.entity.ClientApp;
 import qa.qcri.mm.api.entity.TaskQueueResponse;
+import qa.qcri.mm.api.service.ClientAppService;
 import qa.qcri.mm.api.service.SkyeyeReportService;
 import qa.qcri.mm.api.service.TaskQueueService;
 
@@ -29,17 +31,21 @@ public class SkyeyeReportServiceImpl implements SkyeyeReportService {
     @Autowired
     TaskQueueService taskQueueService;
 
+    @Autowired
+    ClientAppService clientAppService;
+
 
     @Override
     public List<TaskQueueResponse> getSummerydDataSetForReport(String shortName) {
         List<TaskQueueResponse> filteredReportList = new ArrayList<TaskQueueResponse>()   ;
 
         List<TaskQueueResponse> reportList =  taskQueueService.getTaskQueueResponseByClientApp(shortName);
+
         try{
             for(TaskQueueResponse t : reportList)  {
                 JSONObject obj = (JSONObject)parser.parse(t.getResponse());
                 JSONArray geo = (JSONArray)obj.get("geo");
-                if(geo.size() >= 3){
+                if(geo.size() > 0){
                     filteredReportList.add(t);
                 }
             }
@@ -53,9 +59,12 @@ public class SkyeyeReportServiceImpl implements SkyeyeReportService {
         return filteredReportList;
     }
 
+
+
     @Override
     public JSONArray getJSONSummerydDataSetForReport(String shortName) {
         List<TaskQueueResponse> reportList =  taskQueueService.getTaskQueueResponseByClientApp(shortName);
+        ClientApp app =  clientAppService.findClientAppByCriteria("shortName", shortName);
         JSONArray jsonArray = new JSONArray();
         try{
             for(int i= 0; i < reportList.size(); i++){
@@ -65,7 +74,7 @@ public class SkyeyeReportServiceImpl implements SkyeyeReportService {
 
                 System.out.print("taskid :" + obj.get("taskid") + "  = " + geo.size() );
 
-                if(geo.size() >= 3 && !geo.isEmpty()){
+                if(geo.size() >= app.getTaskRunsPerTask() && !geo.isEmpty()){
                     jsonArray.add(reportList.get(i).getResponse());
                 }
 

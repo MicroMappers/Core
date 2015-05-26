@@ -44,6 +44,11 @@ public class ClientAppServiceImpl implements ClientAppService {
     }
 
     @Override
+    public List<ClientApp> getAllClientApp() {
+        return clientAppDao.findAllClientApps();  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
     public ClientApp findClientAppByCriteria(String columnName, String value) {
         return clientAppDao.findClientAppByCriteria(columnName, value);
        // return null;  //To change body of implemented methods use File | Settings | File Templates.
@@ -179,12 +184,17 @@ public class ClientAppServiceImpl implements ClientAppService {
         List<ClientApp> appList = clientAppDao.getAllActiveClientApp();
         List<ClientAppModel> aList = new ArrayList<ClientAppModel>();
 
+        System.out.println("appList : " + appList.size());
+
         for (ClientApp t : appList) {
+            System.out.println("ClientApp : " + t.getName());
             //System.out.println(temp);
             //Long id, Long platformID, Long crisisID, String name, String shortName, Integer appType
             ClientAppModel model = new ClientAppModel(t.getClientAppID(),t.getPlatformAppID(),t.getCrisisID(),t.getName(), t.getShortName(), t.getAppType());
             aList.add(model);
         }
+
+        System.out.println("aList : " + aList.size());
 
         return aList;  //To change body of implemented methods use File | Settings | File Templates.
     }

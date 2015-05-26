@@ -14,4 +14,7 @@ public interface ClientAppSourceService {
 
     void addExternalDataSouceWithAppType(String fileURL, Integer appType);
     void addExternalDataSouceWithPlatFormInd(String fileURL, Long micromappersID);
+
+    void handleMapBoxDataSource(String jsonString);
+    void handleMapBoxGistDataSource(String url);
 }

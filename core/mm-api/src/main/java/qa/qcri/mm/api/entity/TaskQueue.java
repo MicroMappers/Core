@@ -12,7 +12,7 @@ import java.util.Date;
  * To change this template use File | Settings | File Templates.
  */
 @Entity
-@Table(catalog = "aidr_scheduler",name = "taskQueue")
+@Table(name = "taskQueue")
 public class TaskQueue implements Serializable {
     private static final long serialVersionUID = -5527566248002296042L;
 
@@ -42,10 +42,10 @@ public class TaskQueue implements Serializable {
     @Column (name = "status", nullable = false)
     private Integer status;
 
-    @Column (name = "created", nullable = false)
+    @Column (name = "created", nullable = true)
     private Date created;
 
-    @Column (name = "updated", nullable = false)
+    @Column (name = "updated", nullable = true)
     private Date updated;
 
     public TaskQueue(){}

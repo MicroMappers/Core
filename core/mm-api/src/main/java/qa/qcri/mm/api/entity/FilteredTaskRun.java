@@ -12,7 +12,7 @@ import java.util.Date;
  * To change this template use File | Settings | File Templates.
  */
 @Entity
-@Table(catalog = "aidr_scheduler",name = "FilteredTaskRun")
+@Table(name = "FilteredTaskRun")
 public class FilteredTaskRun implements Serializable {
 
     private static final long serialVersionUID = -5527566248002296042L;

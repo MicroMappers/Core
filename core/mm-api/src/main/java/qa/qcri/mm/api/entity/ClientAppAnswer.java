@@ -16,7 +16,7 @@ import java.util.Date;
  * To change this template use File | Settings | File Templates.
  */
 @Entity
-@Table(catalog = "aidr_scheduler",name = "clientAppAnswer")
+@Table(name = "clientAppAnswer")
 public class ClientAppAnswer implements Serializable {
     private static final long serialVersionUID = -5527566248002296042L;
 
@@ -29,6 +29,9 @@ public class ClientAppAnswer implements Serializable {
 
     @Column (name = "activeAnswerKey", nullable = true)
     private String activeAnswerKey;
+
+    @Column (name = "answerMarkerInfo", nullable = true)
+    private String answerMarkerInfo;
 
     @Column (name = "created", nullable = false)
     private Date created;
@@ -71,5 +74,13 @@ public class ClientAppAnswer implements Serializable {
 
     public void setAnswer(String answer) {
         this.answer = answer;
+    }
+
+    public String getAnswerMarkerInfo() {
+        return answerMarkerInfo;
+    }
+
+    public void setAnswerMarkerInfo(String answerMarkerInfo) {
+        this.answerMarkerInfo = answerMarkerInfo;
     }
 }

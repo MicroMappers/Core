@@ -1,9 +1,11 @@
 package qa.qcri.mm.api.controller;
 
 import org.apache.log4j.Logger;
+import org.json.simple.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import qa.qcri.mm.api.service.GeoService;
+import qa.qcri.mm.api.template.CrisisGISModel;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -12,6 +14,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -119,6 +122,9 @@ public class GeoController {
 
         return returnValue;
     }
+
+
+
 
 
 
