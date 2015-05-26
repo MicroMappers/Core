@@ -29,10 +29,13 @@ public class MicromapperInput {
     private List<String> who;
     private String lang;
 
+
+    private String documentID;
+
     public MicromapperInput(){
 
     }
-
+    //3w
     public MicromapperInput(List<String> glide, String link, List<String> where, List<String> who, String lang){
         this.glide = glide;
         this.link = link;
@@ -41,6 +44,7 @@ public class MicromapperInput {
         this.lang = lang;
     }
 
+    //aerial
     public MicromapperInput(String url, String geo, String mediaSize, String mediaSource){
         this.geo = geo;
         this.url = url;
@@ -69,6 +73,20 @@ public class MicromapperInput {
         this.created = created;
         this.answer = answer;
     }
+
+    // Kate starbird experiement
+    public MicromapperInput(String tweetID, String tweet, String author, String lat, String lng , String url, String created, String answer, String documentID){
+        this.tweetID = tweetID;
+        this.tweet = tweet;
+        this.author = author;
+        this.lat = lat;
+        this.lng = lng;
+        this.url = url;
+        this.created = created;
+        this.answer = answer;
+        this.documentID = documentID;
+    }
+
 
     public String getTweetID() {
         return tweetID;
@@ -196,5 +214,13 @@ public class MicromapperInput {
 
     public void setLang(String lang) {
         this.lang = lang;
+    }
+
+    public String getDocumentID() {
+        return documentID;
+    }
+
+    public void setDocumentID(String documentID) {
+        this.documentID = documentID;
     }
 }

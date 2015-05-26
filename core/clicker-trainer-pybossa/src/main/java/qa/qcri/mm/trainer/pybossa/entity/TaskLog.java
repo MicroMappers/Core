@@ -53,6 +53,6 @@ public class TaskLog implements Serializable {
     @Column (name = "status", nullable = false)
     private int status;
 
-    @Column (name = "created", nullable = false)
+    @Column (name = "created", nullable = true)
     private Date created;
 }

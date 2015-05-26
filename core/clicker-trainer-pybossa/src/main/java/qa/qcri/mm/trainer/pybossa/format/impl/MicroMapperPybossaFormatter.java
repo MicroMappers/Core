@@ -5,15 +5,17 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import qa.qcri.mm.trainer.pybossa.dao.CrisisDao;
+import qa.qcri.mm.trainer.pybossa.dao.MarkerStyleDao;
 import qa.qcri.mm.trainer.pybossa.entity.*;
 import qa.qcri.mm.trainer.pybossa.service.ReportTemplateService;
 import qa.qcri.mm.trainer.pybossa.store.PybossaConf;
 import qa.qcri.mm.trainer.pybossa.store.StatusCodeType;
-import qa.qcri.mm.trainer.pybossa.util.DataFormatValidator;
-import qa.qcri.mm.trainer.pybossa.util.JsonSorter;
-import qa.qcri.mm.trainer.pybossa.util.LatLngUtils;
-import qa.qcri.mm.trainer.pybossa.util.StreamConverter;
+import qa.qcri.mm.trainer.pybossa.util.*;
 
 import java.io.InputStream;
 import java.util.*;
@@ -26,7 +28,9 @@ import java.util.*;
  * To change this template use File | Settings | File Templates.
  */
 public class MicroMapperPybossaFormatter {
-    protected static Logger logger = Logger.getLogger("MicroMapperPybossaFormatter");
+    protected static Logger logger = Logger.getLogger(MicroMapperPybossaFormatter.class);
+
+
     public MicroMapperPybossaFormatter(){}
 
     public List<String> assemblePybossaTaskPublishForm( List<MicromapperInput> inputSources, ClientApp clientApp) throws Exception {
@@ -84,6 +88,13 @@ public class MicroMapperPybossaFormatter {
 
     private JSONObject createNonGeoClickerInfo(JSONObject pybossaData, MicromapperInput micromapperInput ){
 
+        if(micromapperInput.getDocumentID() != null && micromapperInput.getAnswer()!=null){
+            pybossaData.put("tweet_category",micromapperInput.getAnswer());
+            long docID = Long.parseLong(micromapperInput.getDocumentID()) ;
+            pybossaData.put("documentID", docID);
+        }
+
+
         pybossaData.put("author",micromapperInput.getAuthor());
         pybossaData.put("tweetid",micromapperInput.getTweetID());
         pybossaData.put("userID",micromapperInput.getAuthor());
@@ -109,7 +120,7 @@ public class MicroMapperPybossaFormatter {
         pybossaData.put("lon",micromapperInput.getLng());
         pybossaData.put("url",micromapperInput.getUrl());
         pybossaData.put("imgurl",micromapperInput.getUrl());
-        pybossaData.put("category",micromapperInput.getUrl());
+        pybossaData.put("category",micromapperInput.getAnswer());
 
         return pybossaData;
     }
@@ -290,15 +301,15 @@ public class MicroMapperPybossaFormatter {
         return  taskQueueResponse;
     }
 
-    public TaskQueueResponse getAnswerResponseForGeo(String pybossaResult, JSONParser parser, Long taskQueueID) throws Exception{
+    public TaskQueueResponse getAnswerResponseForGeo(String pybossaResult, JSONParser parser, Long taskQueueID, ClientApp clientApp, Crisis c, MarkerStyle markerStyle, ClientAppSource appSource) throws Exception{
         boolean noLocationFound  = isContainNoLocationInfo( pybossaResult,  parser);
 
         JSONArray array = (JSONArray) parser.parse(pybossaResult) ;
 
         Iterator itr= array.iterator();
         JSONArray locations  =  new JSONArray();
-        String tweetID = null;
 
+        String uniqueIDString = null;
         while(itr.hasNext()){
             JSONObject featureJsonObj = (JSONObject)itr.next();
             if(featureJsonObj.get("info") instanceof String){
@@ -306,7 +317,7 @@ public class MicroMapperPybossaFormatter {
             }
 
             JSONObject info = (JSONObject)featureJsonObj.get("info");
-            tweetID = (String) info.get("url");
+
             String locValue = info.get("loc").toString();
             if(!locValue.equalsIgnoreCase(PybossaConf.TASK_QUEUE_GEO_INFO_NOT_FOUND)){
                 if(DataFormatValidator.isValidateJson(locValue)) {
@@ -316,32 +327,83 @@ public class MicroMapperPybossaFormatter {
                         JSONArray features = (JSONArray)loc.get("features");
 
                         for(int i= 0; i < features.size(); i++  ){
-                            locations.add(features.get(i)) ;
+                            JSONObject aFeature = (JSONObject)features.get(i);
+                            JSONObject properties = (JSONObject)aFeature.get("properties");
+                            System.out.println("info.get(\"category\") :" + info.get("category"));
+                            System.out.println("appSource :" + appSource);
+
+                            if(info.get("category") == null && appSource != null){
+
+                                String[] row =   CVSFileDataSourceSearch.search((String)info.get("tweetid"),appSource.getSourceURL() );
+
+                                System.out.println("row :" + row.length);
+
+                                if(row != null){
+                                    //tweetID,tweet,author,lat,lng,url,created,answer
+                                    info.put("author", row[2] );
+                                    info.put("timestamp", row[6] );
+                                    info.put("category", row[7] );
+                                }
+                            }
+
+                            properties.put("author", info.get("author") )   ;
+                            properties.put("category", info.get("category") ) ;
+                            properties.put("timestamp", info.get("timestamp") ) ;
+                            properties.put("tweet", info.get("tweet") )   ;
+                            properties.put("url", info.get("url") )   ;
+                            properties.put("tweetid", info.get("tweetid") )   ;
+                            properties.put("taskid", info.get("taskid") )   ;
+                            properties.put("crisis_name", c.getDisplayName() )   ;
+                            properties.put("crisis_type", c.getClickerType() )   ;
+
+                            JSONObject geometry = (JSONObject)aFeature.get("geometry");
+
+                            JSONObject mStyle = getMarkerStyleForClientApp(markerStyle,parser,info.get("category")!=null?info.get("category"):"");
+                            if(mStyle != null){
+                                geometry.put("style", mStyle )   ;
+                                locations.add(aFeature) ;
+                            }
+
+
+                            uniqueIDString  = String.valueOf(info.get("tweetid"));
                         }
 
                     }
-                    else{
-                        locations.add(info.get("loc"))   ;
+                    else{ // Image GeoClicker process
+
+                        JSONObject geoLoc = (JSONObject)info.get("loc");
+                        JSONObject properties = (JSONObject)geoLoc.get("properties");
+                        properties.put("tweet", info.get("tweet") )   ;
+                        properties.put("author", info.get("author") )   ;
+                        properties.put("url", info.get("url") )   ;
+                        properties.put("timestamp", info.get("timestamp") )   ;
+                        properties.put("tweetid", info.get("tweetid") )   ;
+                        properties.put("taskid", info.get("taskid") )   ;
+                        properties.put("category", info.get("category")!=null?info.get("category"):"mild") ;
+
+                        properties.put("crisis_name", c.getDisplayName() )   ;
+                        properties.put("crisis_type", c.getClickerType() )   ;
+
+                        JSONObject geometry = (JSONObject)geoLoc.get("geometry");
+
+                        JSONObject mStyle = getMarkerStyleForClientApp(markerStyle,parser,info.get("category")!=null?info.get("category"):"mild");
+                        geometry.put("style", mStyle )   ;
+
+                        uniqueIDString = String.valueOf(info.get("url") );
+
+                        locations.add(geoLoc)   ;
                     }
                 }
             }
 
         }
-
-        JSONObject geoLocations;
-        if(!noLocationFound) {
-            geoLocations =  calculateCentralPoint(locations);
-        }
-        else{
-            geoLocations = new JSONObject();
-        }
-
-        TaskQueueResponse taskQueueResponse = new TaskQueueResponse(taskQueueID, geoLocations.toJSONString(), tweetID);
+        System.out.println("locations : " + locations.toJSONString()) ;
+        TaskQueueResponse taskQueueResponse = new TaskQueueResponse(taskQueueID, locations.toJSONString(), uniqueIDString);
 
         return  taskQueueResponse;
     }
 
-    public TaskQueueResponse getAnswerResponseForAerial(String pybossaResult, JSONParser parser, Long taskQueueID) throws Exception{
+    public TaskQueueResponse getAnswerResponseForAerial(String pybossaResult, JSONParser parser, Long taskQueueID, ClientApp clientApp) throws Exception{
         JSONArray array = (JSONArray) parser.parse(pybossaResult) ;
 
         Iterator itr= array.iterator();
@@ -363,31 +425,6 @@ public class MicroMapperPybossaFormatter {
         TaskQueueResponse taskQueueResponse = new TaskQueueResponse(taskQueueID, locations.toJSONString(), tweetID);
 
         return  taskQueueResponse;
-    }
-
-    private JSONObject calculateCentralPoint(JSONArray locations){
-        JSONObject geoResponse = new JSONObject();
-        // Min 3 votes are required
-        if(locations.size() < PybossaConf.DEFAULT_GEO_N_ANSWERS){
-            return geoResponse;
-        }
-
-        JSONObject loc = (JSONObject)locations.get(0);
-        JSONObject geometry = (JSONObject)loc.get("geometry");
-        JSONArray coordinates =  (JSONArray)geometry.get("coordinates");
-        System.out.println(coordinates.get(0) + "," + coordinates.get(1));
-
-        JSONObject jsonObject = new JSONObject();
-        JSONArray jsonCoordinate = new JSONArray();
-        jsonCoordinate.add(coordinates.get(0));
-        jsonCoordinate.add(coordinates.get(1));
-        jsonObject.put("coordinates", jsonCoordinate);
-        jsonObject.put("type", "Point");
-        jsonObject.put("distance", PybossaConf.ONE_MILE_DISTANCE );
-        geoResponse.put("geometry", jsonObject);
-        geoResponse.put("type","Feature");
-
-        return geoResponse;
     }
 
     private HashMap<Integer, Integer> addToTimeStampList(HashMap<Integer, Integer> timeStampList, String answerValue){
@@ -573,4 +610,29 @@ public class MicroMapperPybossaFormatter {
 
         return cutOffSize;
     }
+
+    private JSONObject getMarkerStyleForClientApp(MarkerStyle markerStyle, JSONParser parser, Object answer){
+
+        JSONObject selectedStyle = null;
+        try {
+            JSONObject mJson = (JSONObject)parser.parse(markerStyle.getStyle());
+            JSONArray mStyles = (JSONArray)mJson.get("style");
+            for(Object a : mStyles) {
+                JSONObject aStyle = (JSONObject)a;
+
+                System.out.println("aStyle.get(\"label_code\") : " + aStyle.get("label_code"));
+                System.out.println("answer : " + answer);
+
+                if(aStyle.get("label_code").equals(answer)){
+                    selectedStyle = aStyle;
+                }
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        return selectedStyle;
+    }
+
+
 }

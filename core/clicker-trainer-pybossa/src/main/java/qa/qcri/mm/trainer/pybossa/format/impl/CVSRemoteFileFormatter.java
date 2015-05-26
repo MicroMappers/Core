@@ -131,7 +131,7 @@ public class CVSRemoteFileFormatter {
            // public MicromapperInput(String tweetID, String tweet, String author, String lat, String lng , String url, String created){
             row = (String[]) object;
             if(row!=null){
-                if(row.length > 7){
+                if(row.length == 8){
 
                     String tweetID = row[7];
                     String tweet=row[1];
@@ -140,9 +140,27 @@ public class CVSRemoteFileFormatter {
                     String lng=row[5];
                     String imgURL = row[6];
                     String created = row[2];
-                    String dataSourceLocation;
+
 
                     MicromapperInput source = new MicromapperInput(tweetID, tweet, author, lat, lng, imgURL, created);
+                    sourceSet.add(source);
+                }
+
+                if(row.length == 10){
+
+                    String tweetID = row[7];
+                    String tweet=row[1];
+                    String author=row[0];
+                    String lat=row[4];
+                    String lng=row[5];
+                    String imgURL = row[6];
+                    String created = row[2];
+                    String answer = row[8];
+                    String documentID = row[9];
+
+
+                    MicromapperInput source = new MicromapperInput(tweetID, tweet, author, lat, lng, imgURL, created, answer, documentID);
+
                     sourceSet.add(source);
                 }
             }
@@ -159,6 +177,9 @@ public class CVSRemoteFileFormatter {
 
         return sourceSet;
     }
+
+
+
 
     public List<MicromapperInput> getGeoClickerInputData(String url) throws Exception{
         //"tweetID","tweet","author","lat","lng","url","created","answer"

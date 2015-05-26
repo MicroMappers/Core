@@ -45,7 +45,7 @@ public class ReportTemplate {
     @Column(name = "url", nullable = false)
     private String url;
 
-    @Column(name = "created", nullable = false)
+    @Column(name = "created", nullable = true)
     private String created;
 
     @Column(name = "answer", nullable = false)

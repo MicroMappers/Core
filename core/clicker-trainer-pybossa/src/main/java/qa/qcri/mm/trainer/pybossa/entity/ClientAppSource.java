@@ -84,7 +84,7 @@ public class ClientAppSource implements Serializable {
     @Column (name = "sourceURL", nullable = false)
     private String sourceURL;
 
-    @Column (name = "created", nullable = false)
+    @Column (name = "created", nullable = true)
     private Date created;
 
 

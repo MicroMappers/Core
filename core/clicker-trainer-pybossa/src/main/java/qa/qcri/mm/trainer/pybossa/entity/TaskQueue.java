@@ -36,10 +36,10 @@ public class TaskQueue implements Serializable {
     @Column (name = "status", nullable = false)
     private Integer status;
 
-    @Column (name = "created", nullable = false)
+    @Column (name = "created", nullable = true)
     private Date created;
 
-    @Column (name = "updated", nullable = false)
+    @Column (name = "updated", nullable = true)
     private Date updated;
 
     public TaskQueue(){}

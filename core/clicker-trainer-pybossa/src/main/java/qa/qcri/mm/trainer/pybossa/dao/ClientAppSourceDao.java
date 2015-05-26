@@ -17,4 +17,5 @@ public interface ClientAppSourceDao extends AbstractDao<ClientAppSource, String>
     List<ClientAppSource> getClientAppSourceWithStatusOnly(int status);
     void updateClientAppSourceStatus(Long clientAppID, int status);
     void insertClientAppSource(ClientAppSource clientAppSource);
+    ClientAppSource getClientAppSourceByID(Long id);
 }

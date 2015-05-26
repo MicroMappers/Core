@@ -52,4 +52,9 @@ public class ClientAppSourceServiceImpl implements ClientAppSourceService {
             throw new RuntimeException(ex.getMessage());
         }
     }
+
+    @Override
+    public ClientAppSource getClientAppSourceByClientAppID(Long clientAppSourceID) {
+        return clientAppSourceDao.getClientAppSourceByID(clientAppSourceID);
+    }
 }

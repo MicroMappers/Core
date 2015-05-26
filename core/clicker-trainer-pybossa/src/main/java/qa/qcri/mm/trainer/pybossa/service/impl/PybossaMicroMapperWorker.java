@@ -1,12 +1,15 @@
 package qa.qcri.mm.trainer.pybossa.service.impl;
 
 import org.apache.log4j.Logger;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import qa.qcri.mm.trainer.pybossa.dao.CrisisDao;
+import qa.qcri.mm.trainer.pybossa.dao.MarkerStyleDao;
 import qa.qcri.mm.trainer.pybossa.entity.*;
 import qa.qcri.mm.trainer.pybossa.format.impl.CVSRemoteFileFormatter;
 import qa.qcri.mm.trainer.pybossa.format.impl.GeoJsonOutputModel;
@@ -32,12 +35,12 @@ import java.util.List;
 @Transactional(readOnly = false)
 public class PybossaMicroMapperWorker implements MicroMapperWorker {
 
-    protected static Logger logger = Logger.getLogger("service");
+    protected static Logger logger = Logger.getLogger(PybossaMicroMapperWorker.class);
 
     private Client client;
     private CVSRemoteFileFormatter cvsRemoteFileFormatter = new CVSRemoteFileFormatter();
     private int MAX_PENDING_QUEUE_SIZE = 50;
-    private int MAX_IMPORT_PROCESS_QUEUE_SIZE = 1000;
+    private int MAX_IMPORT_PROCESS_QUEUE_SIZE = 100;
     private String PYBOSSA_API_TASK_PUBLSIH_URL;
 
     private String PYBOSSA_API_TASK_RUN_BASE_URL;
@@ -58,9 +61,6 @@ public class PybossaMicroMapperWorker implements MicroMapperWorker {
     private TaskQueueService taskQueueService;
 
     @Autowired
-    private TaskLogService taskLogService;
-
-    @Autowired
     private ClientAppSourceService clientAppSourceService;
 
     @Autowired
@@ -75,8 +75,12 @@ public class PybossaMicroMapperWorker implements MicroMapperWorker {
     @Autowired
     private ExternalCustomService externalCustomService;
 
+
     @Autowired
-    private LookupService lookupService;
+    private MarkerStyleDao markerStyleDao;
+
+    @Autowired
+    private CrisisDao crisisDao;
 
 
     public void setClassVariable() throws Exception{
@@ -86,9 +90,7 @@ public class PybossaMicroMapperWorker implements MicroMapperWorker {
             PYBOSSA_API_TASK_BASE_URL  = client.getHostURL() + URLPrefixCode.TASK_INFO;
             PYBOSSA_API_TASK_RUN_BASE_URL =  client.getHostURL() + URLPrefixCode.TASKRUN_INFO;
             MAX_PENDING_QUEUE_SIZE = client.getQueueSize();
-            if(lookupService.getColmnValue(StatusCodeType.TABLE_NAME, StatusCodeType.COLMN_NAME) != null){
-                MAX_IMPORT_PROCESS_QUEUE_SIZE = Integer.parseInt(lookupService.getColmnValue(StatusCodeType.TABLE_NAME, StatusCodeType.COLMN_NAME));
-            }
+            MAX_IMPORT_PROCESS_QUEUE_SIZE = 100;
 
         }
 
@@ -161,7 +163,9 @@ public class PybossaMicroMapperWorker implements MicroMapperWorker {
 
                         }
                     }
+
                     this.searchUpdateNextAvailableAppSource(currentClientApp.getClientAppID());
+
                 }
             }
         }
@@ -289,7 +293,10 @@ public class PybossaMicroMapperWorker implements MicroMapperWorker {
             }
             else if(clientApp.getAppType().equals(StatusCodeType.APP_MAP))
             {
-                taskQueueResponse = pybossaFormatter.getAnswerResponseForGeo(importResult, parser, taskQueue.getTaskQueueID());
+                Crisis c = this.getCrisisDetail(clientApp);
+                MarkerStyle style = this.getMarkerStyleForClientApp(clientApp, c);
+                ClientAppSource clientAppSource = clientAppSourceService.getClientAppSourceByClientAppID(taskQueue.getClientAppSourceID());
+                taskQueueResponse = pybossaFormatter.getAnswerResponseForGeo(importResult, parser, taskQueue.getTaskQueueID(), clientApp, c, style, clientAppSource);
 
             }
             else if(clientApp.getAppType().equals(StatusCodeType.APP_AERIAL))
@@ -307,7 +314,7 @@ public class PybossaMicroMapperWorker implements MicroMapperWorker {
                 }
                 else{
                     // expected standard
-                    taskQueueResponse = pybossaFormatter.getAnswerResponseForAerial(importResult, parser, taskQueue.getTaskQueueID());
+                    taskQueueResponse = pybossaFormatter.getAnswerResponseForAerial(importResult, parser, taskQueue.getTaskQueueID(), clientApp);
                 }
 
                 if(taskQueueResponse != null){
@@ -372,8 +379,7 @@ public class PybossaMicroMapperWorker implements MicroMapperWorker {
             taskQueue.setClientAppSourceID(clientAppSourceID);
 
             taskQueueService.createTaskQueue(taskQueue);
-            TaskLog taskLog = new TaskLog(taskQueue.getTaskQueueID(), taskQueue.getStatus());
-            taskLogService.createTaskLog(taskLog);
+
 
         } catch (ParseException e) {
             e.printStackTrace();
@@ -382,8 +388,7 @@ public class PybossaMicroMapperWorker implements MicroMapperWorker {
 
     private void updateTaskQueue(TaskQueue taskQueue){
         taskQueueService.updateTaskQueue(taskQueue);
-        TaskLog taskLog = new TaskLog(taskQueue.getTaskQueueID(), taskQueue.getStatus());
-        taskLogService.createTaskLog(taskLog);
+
     }
 
     private void searchUpdateNextAvailableAppSource(Long clientAppID){
@@ -395,5 +400,35 @@ public class PybossaMicroMapperWorker implements MicroMapperWorker {
             System.out.println("searchUpdateNextAvailableAppSource2 : " + sourceList.get(0).getClientAppSourceID());
             clientAppSourceService.updateClientAppSourceStatus(sourceList.get(0).getClientAppSourceID(), StatusCodeType.EXTERNAL_DATA_SOURCE_ACTIVE);
         }
+    }
+
+
+    private MarkerStyle getMarkerStyleForClientApp(ClientApp clientApp, Crisis c){
+
+        MarkerStyle selectedStyle = null;
+        try {
+            List<MarkerStyle> styleTemplate = markerStyleDao.findByClientAppID(clientApp.getClientAppID().longValue()) ;
+            if(styleTemplate.isEmpty()){
+                styleTemplate = markerStyleDao.findByAppType(c.getClickerType());
+            }
+
+            if(styleTemplate.size() > 0){
+                return  styleTemplate.get(0);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return selectedStyle;
+    }
+
+    private Crisis getCrisisDetail(ClientApp clientApp){
+        List<Crisis> cList = crisisDao.getClientAppCrisisDetail(clientApp.getClientAppID());
+
+        if(cList.size() > 0) {
+            return cList.get(0);
+        }
+        return null;
     }
 }

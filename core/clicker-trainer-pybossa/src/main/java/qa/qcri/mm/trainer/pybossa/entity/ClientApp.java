@@ -56,7 +56,7 @@ public class ClientApp implements Serializable {
     @Column (name = "status", nullable = false)
     private Integer status;
 
-    @Column (name = "created", nullable = false)
+    @Column (name = "created", nullable = true)
     private Date created;
 
     @Column (name = "appType", nullable = false)
@@ -65,10 +65,13 @@ public class ClientApp implements Serializable {
     @Column (name = "isCustom", nullable = false)
     private boolean isCustom;
 
-
     @ManyToOne
     @JoinColumn(name="clientID" ,nullable = false, insertable = false, updatable = false)
     private Client client;
+
+    @OneToOne
+    @JoinColumn(name="clientAppID" ,nullable = false, insertable = false, updatable = false)
+    private Crisis crisis;
 
 
     public ClientApp(){}
@@ -232,5 +235,13 @@ public class ClientApp implements Serializable {
 
     public void setIsCustom(boolean isCustom) {
         this.isCustom = isCustom;
+    }
+
+    public Crisis getCrisis() {
+        return crisis;
+    }
+
+    public void setCrisis(Crisis crisis) {
+        this.crisis = crisis;
     }
 }

@@ -45,4 +45,9 @@ public class ClientAppSourceDaoImpl extends AbstractDaoImpl<ClientAppSource, Str
     public void insertClientAppSource(ClientAppSource clientAppSource) {
         saveOrUpdate(clientAppSource);
     }
+
+    @Override
+    public ClientAppSource getClientAppSourceByID(Long id) {
+        return findByCriterionID(Restrictions.eq("clientAppSourceID", id));
+    }
 }
