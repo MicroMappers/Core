@@ -2,6 +2,7 @@ package qa.qcri.mm.api.service;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import qa.qcri.mm.api.entity.ClientApp;
 import qa.qcri.mm.api.template.MicroMapsCrisisModel;
 import qa.qcri.mm.api.template.CrisisGISModel;
 import java.util.List;
@@ -19,4 +20,7 @@ public interface MicroMapsService {
     List<CrisisGISModel> getAllCrisis() throws Exception;
     JSONArray getAllCrisisJSONP() throws Exception;
     JSONObject getGeoClickerByClientApp(Long clientAppID) throws Exception;
+    String generateTextClickerKML(Long clientAppID) throws Exception;
+    String generateImageClickerKML(Long clientAppID) throws Exception;
+    String generateAericalClickerKML(Long clientAppID) throws Exception;
 }

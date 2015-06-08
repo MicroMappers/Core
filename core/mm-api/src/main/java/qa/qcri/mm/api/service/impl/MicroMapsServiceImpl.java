@@ -14,8 +14,7 @@ import qa.qcri.mm.api.service.ClientAppService;
 import qa.qcri.mm.api.service.MicroMapsService;
 import qa.qcri.mm.api.service.TaskQueueService;
 import qa.qcri.mm.api.store.StatusCodeType;
-import qa.qcri.mm.api.template.MicroMapsCrisisModel;
-import qa.qcri.mm.api.template.CrisisGISModel;
+import qa.qcri.mm.api.template.*;
 import qa.qcri.mm.api.dao.CrisisDao;
 import qa.qcri.mm.api.dao.MarkerStyleDao;
 
@@ -55,7 +54,6 @@ public class MicroMapsServiceImpl implements MicroMapsService {
 
     private JSONParser parser = new JSONParser();
 
-
     @Override
     public List<MicroMapsCrisisModel> getAllCries() {
         List<MicroMapsCrisisModel> models = new ArrayList<MicroMapsCrisisModel>();
@@ -74,7 +72,6 @@ public class MicroMapsServiceImpl implements MicroMapsService {
 
         return models;
     }
-
     //public CrisisGISModel(Long clientAppID, String name, String type, String activationStarted, String activationEnded, String geoJsonLink, String kmlLink)
     @Override
     public List<CrisisGISModel> getAllCrisis() throws Exception {
@@ -97,19 +94,21 @@ public class MicroMapsServiceImpl implements MicroMapsService {
         return models;
     }
 
-
     @Override
     public JSONArray getAllCrisisJSONP() throws Exception {
 
         List<Crisis> crisises = crisisDao.getAllCrisis();
         JSONArray models = new JSONArray();
 
-        String filePath = "http://aidr-prod.qcri.org/data/trainer/";
+        String filePath = "http://ec2-54-148-39-119.us-west-2.compute.amazonaws.com:8080/MMAPI/rest/micromaps";
+       //http://ec2-54-148-39-119.us-west-2.compute.amazonaws.com:8080/MMAPI/rest/micromaps/JSON/aerial/id/254
 
         for(Crisis c : crisises){
-            String geoJson = filePath + File.separator + c.getClientAppID() + ".json";
-            String kml = filePath + File.separator + c.getClientAppID() + ".kml";
+            String geoJson = filePath + File.separator + "JSON" + File.separator + c.getClickerType().toLowerCase() + File.separator + "id" + File.separator + c.getClientAppID() ;
+            String kml = filePath + File.separator + "kml" + File.separator + c.getClickerType().toLowerCase() + File.separator + "id" + File.separator + c.getClientAppID() ;
+
             MarkerStyle aStyle = this.getClientAppMarkerStyle(c);
+
             JSONObject aObject = new JSONObject();
             aObject.put("clientAppID",c.getClientAppID()) ;
             aObject.put("name",c.getDisplayName()) ;
@@ -125,7 +124,6 @@ public class MicroMapsServiceImpl implements MicroMapsService {
         }
         return models;
     }
-
 
     @Override
     public JSONObject getGeoClickerByClientApp(Long clientAppID) throws Exception{
@@ -156,8 +154,11 @@ public class MicroMapsServiceImpl implements MicroMapsService {
 
             if(responses.size() > 0 ){
                 if(!responses.get(0).getResponse().equalsIgnoreCase("{}") && !responses.get(0).getResponse().equalsIgnoreCase("[]")){
-                    JSONArray eachFeature = (JSONArray)parser.parse(responses.get(0).getResponse());
-                    features.add(eachFeature);
+                    JSONArray eachFeatureArrary = (JSONArray)parser.parse(responses.get(0).getResponse());
+                    for(Object a : eachFeatureArrary){
+                        features.add((JSONObject) a);
+                    }
+
                 }
             }
 
@@ -170,6 +171,55 @@ public class MicroMapsServiceImpl implements MicroMapsService {
 
         return geoClickerOutput;
     }
+
+    @Override
+    public String generateTextClickerKML(Long clientAppID) throws Exception{
+        List<TaskQueue> taskQueueList = taskQueueService.getTaskQueueByClientAppStatus(clientAppID, StatusCodeType.TASK_LIFECYCLE_COMPLETED);
+        TextClickerKMLModel model = new TextClickerKMLModel();
+        model.setParser(parser);
+        model.setKmlText(new StringBuffer());
+        model.buildHeader();
+        for(TaskQueue t: taskQueueList){
+            List<TaskQueueResponse> responses = taskQueueResponseDao.getTaskQueueResponseByTaskQueueID(t.getTaskQueueID());
+            model.buildKMLBody(responses);
+        }
+        model.buildFooter();
+        return model.getKmlText().toString();
+
+    }
+
+    @Override
+    public String generateImageClickerKML(Long clientAppID) throws Exception{
+        List<TaskQueue> taskQueueList = taskQueueService.getTaskQueueByClientAppStatus(clientAppID, StatusCodeType.TASK_LIFECYCLE_COMPLETED);
+        ImageClickerKMLModel model = new ImageClickerKMLModel();
+        model.setParser(parser);
+        model.setKmlText(new StringBuffer());
+        model.buildHeader();
+        for(TaskQueue t: taskQueueList){
+            List<TaskQueueResponse> responses = taskQueueResponseDao.getTaskQueueResponseByTaskQueueID(t.getTaskQueueID());
+            model.buildKMLBody(responses);
+        }
+        model.buildFooter();
+        return model.getKmlText().toString();
+
+    }
+
+    @Override
+    public String generateAericalClickerKML(Long clientAppID) throws Exception{
+        List<TaskQueue> taskQueueList = taskQueueService.getTaskQueueByClientAppStatus(clientAppID, StatusCodeType.TASK_LIFECYCLE_COMPLETED);
+        AerialClickerKMLModel model = new AerialClickerKMLModel();
+        model.setParser(parser);
+        model.setKmlText(new StringBuffer());
+        model.buildHeader();
+        for(TaskQueue t: taskQueueList){
+            List<TaskQueueResponse> responses = taskQueueResponseDao.getTaskQueueResponseByTaskQueueID(t.getTaskQueueID());
+            model.buildKMLBody(responses);
+        }
+        model.buildFooter();
+        return model.getKmlText().toString();
+
+    }
+
 
     private MarkerStyle getClientAppMarkerStyle(Crisis c){
         List<MarkerStyle> styles = markerStyleDao.findByClientAppID(c.getClientAppID().longValue());

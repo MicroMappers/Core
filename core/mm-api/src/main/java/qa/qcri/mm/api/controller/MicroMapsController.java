@@ -36,18 +36,10 @@ public class MicroMapsController {
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.WILDCARD})
-    @Path("/crisis/all")
-    public List<MicroMapsCrisisModel> getMapGeoJSONP() {
-
-        return microMapsService.getAllCries();
-    }
-
-    @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.WILDCARD})
     @Path("/JSON/crisis")
-    public List<CrisisGISModel> getAllCrisis() throws Exception {
+    public String getAllCrisis() throws Exception {
 
-        return microMapsService.getAllCrisis();
+        return microMapsService.getAllCrisisJSONP().toJSONString();
     }
 
     @GET
@@ -60,8 +52,16 @@ public class MicroMapsController {
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.WILDCARD})
-    @Path("/JSONP/image/id/{id}")
-    public String getAllImageJSONP(@PathParam("id") long id) throws Exception {
+    @Path("/JSON/text/id/{id}")
+    public String getAllTextJSON(@PathParam("id") long id) throws Exception {
+
+        return microMapsService.getGeoClickerByClientApp(id).toJSONString();
+    }
+
+    @GET
+    @Produces({MediaType.APPLICATION_JSON, MediaType.WILDCARD})
+    @Path("/JSONP/text/id/{id}")
+    public String getAllTextJSONP(@PathParam("id") long id) throws Exception {
 
         return "jsonp(" + microMapsService.getGeoClickerByClientApp(id).toJSONString() + ");";
     }
@@ -73,5 +73,56 @@ public class MicroMapsController {
 
         return microMapsService.getGeoClickerByClientApp(id).toJSONString();
     }
+
+    @GET
+    @Produces({MediaType.APPLICATION_JSON, MediaType.WILDCARD})
+    @Path("/JSONP/image/id/{id}")
+    public String getAllImageJSONP(@PathParam("id") long id) throws Exception {
+
+        return "jsonp(" + microMapsService.getGeoClickerByClientApp(id).toJSONString() + ");";
+    }
+
+
+    @GET
+    @Produces({MediaType.APPLICATION_JSON, MediaType.WILDCARD})
+    @Path("/JSON/aerial/id/{id}")
+    public String getAllAerialJSON(@PathParam("id") long id) throws Exception {
+
+        return microMapsService.getGeoClickerByClientApp(id).toJSONString();
+    }
+
+    @GET
+    @Produces({MediaType.APPLICATION_JSON, MediaType.WILDCARD})
+    @Path("/JSONP/aerial/id/{id}")
+    public String getAllAerialJSONP(@PathParam("id") long id) throws Exception {
+
+        return "jsonp(" +microMapsService.getGeoClickerByClientApp(id).toJSONString() + ");";
+    }
+
+
+    @GET
+    @Produces({MediaType.APPLICATION_ATOM_XML, MediaType.WILDCARD})
+    @Path("/kml/text/id/{id}")
+    public String getTextClickerKML(@PathParam("id") long id) throws Exception {
+
+        return microMapsService.generateTextClickerKML(id);
+    }
+
+    @GET
+    @Produces({MediaType.APPLICATION_ATOM_XML, MediaType.WILDCARD})
+    @Path("/kml/image/id/{id}")
+    public String getImageClickerKML(@PathParam("id") long id) throws Exception {
+
+        return microMapsService.generateImageClickerKML(id);
+    }
+
+    @GET
+    @Produces({MediaType.APPLICATION_ATOM_XML, MediaType.WILDCARD})
+    @Path("/kml/aerial/id/{id}")
+    public String getAerialClickerKML(@PathParam("id") long id) throws Exception {
+
+        return microMapsService.generateAericalClickerKML(id);
+    }
+
 
 }
