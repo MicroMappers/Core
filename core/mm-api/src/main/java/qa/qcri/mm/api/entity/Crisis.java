@@ -25,6 +25,9 @@ public class Crisis implements Serializable {
     @Column (name = "crisisID", nullable = true)
     private Long crisisID;
 
+    @Column (name = "crisisName", nullable = true)
+    private String crisisName;
+
     @Column (name = "clientAppID", nullable = true)
     private Long clientAppID;
 
@@ -42,6 +45,9 @@ public class Crisis implements Serializable {
 
     @Column (name = "clickerType", nullable = true)
     private String clickerType;
+
+    @Column (name = "refreshInMinute", nullable = true)
+    private Integer refreshInMinute;
 
     @OneToOne
     @JoinColumn(name="clientAppID" ,nullable = false, insertable = false, updatable = false)
@@ -65,6 +71,14 @@ public class Crisis implements Serializable {
 
     public void setCrisisID(Long crisisID) {
         this.crisisID = crisisID;
+    }
+
+    public String getCrisisName() {
+        return crisisName;
+    }
+
+    public void setCrisisName(String crisisName) {
+        this.crisisName = crisisName;
     }
 
     public Long getClientAppID() {
@@ -121,5 +135,13 @@ public class Crisis implements Serializable {
 
     public void setClientApp(ClientApp clientApp) {
         this.clientApp = clientApp;
+    }
+
+    public Integer getRefreshInMinute() {
+        return refreshInMinute;
+    }
+
+    public void setRefreshInMinute(Integer refreshInMinute) {
+        this.refreshInMinute = refreshInMinute;
     }
 }
