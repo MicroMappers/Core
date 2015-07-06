@@ -10,7 +10,7 @@ package qa.qcri.mm.api.service;
 public interface ClientAppSourceService {
 
     void addExternalDataSouceWithClientAppID(String fileURL, Long clientAppID);
-    void addExternalDataSourceWithClassifiedData(String fileURL, Long platformAppID);
+    void addExternalDataSourceWithClassifiedData(String fileURL, Long crisisID);
 
     void addExternalDataSouceWithAppType(String fileURL, Integer appType);
     void addExternalDataSouceWithPlatFormInd(String fileURL, Long micromappersID);

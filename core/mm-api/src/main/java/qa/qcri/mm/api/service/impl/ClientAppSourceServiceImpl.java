@@ -71,9 +71,9 @@ public class ClientAppSourceServiceImpl implements ClientAppSourceService {
 
     @Override
     @Transactional(readOnly = false)
-    public void addExternalDataSourceWithClassifiedData(String fileURL, Long platformAppID) {
+    public void addExternalDataSourceWithClassifiedData(String fileURL, Long crisisID) {
         //To change body of implemented methods use File | Settings | File Templates.
-        ClientApp clientApp = clientAppService.findClientAppByID("platformAppID", platformAppID);
+        ClientApp clientApp = clientAppService.findClientAppByID("crisisID", crisisID);
 
         if(clientApp != null) {
             ClientAppSource ca2 = new ClientAppSource(clientApp.getClientAppID(), StatusCodeType.EXTERNAL_DATA_SOURCE_TO_GEO_READY_REPORT, fileURL);
