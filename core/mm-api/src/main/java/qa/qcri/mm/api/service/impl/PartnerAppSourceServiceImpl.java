@@ -55,41 +55,47 @@ public class PartnerAppSourceServiceImpl implements PartnerAppSourceService {
 			List<String> filesToPush = new ArrayList<String>(); 
 
 			for (Object itemObj : itemsArray) {
-				csvRecord = new String[5];
+
+
 
 				responseObj = (JSONObject) parser.parse(itemObj.toString());
 				JSONArray labelDataArray = (JSONArray) responseObj.get("labelData");
+				if(!isMicroMappersTagged(labelDataArray)) {
 
-				//doc
-				responseObj = (JSONObject) parser.parse(responseObj.get("doc").toString());
-				responseObj = (JSONObject) parser.parse(responseObj.get("data").toString());
-				csvRecord[0] = responseObj.get("id").toString();  //TweetId
-				csvRecord[1] = unicodeEscaper.translate(responseObj.get("text").toString());  //Tweet Text
-				
-				csvRecord[3] = responseObj.get("created_at").toString();   //created At time
-				responseObj = (JSONObject) parser.parse(responseObj.get("user").toString());
-				csvRecord[2] = unicodeEscaper.translate(responseObj.get("name").toString());  //Tweet author
+					csvRecord = new String[5];
 
-				//labelData
-				for (Object object2 : labelDataArray) {
-					responseObj = (JSONObject) parser.parse(object2.toString());
-					responseObj = (JSONObject) parser.parse(responseObj.get("nominalLabelDTO").toString());
-					responseObj = (JSONObject) parser.parse(responseObj.get("nominalAttributeDTO").toString());
-					csvRecord[4] = responseObj.get("code").toString();    //Nominal Label Code
+					//doc
+					responseObj = (JSONObject) parser.parse(responseObj.get("doc").toString());
+					responseObj = (JSONObject) parser.parse(responseObj.get("data").toString());
+					csvRecord[0] = responseObj.get("id").toString();  //TweetId
+					csvRecord[1] = unicodeEscaper.translate(responseObj.get("text").toString());  //Tweet Text
+
+					csvRecord[3] = responseObj.get("created_at").toString();   //created At time
+					responseObj = (JSONObject) parser.parse(responseObj.get("user").toString());
+					csvRecord[2] = unicodeEscaper.translate(responseObj.get("name").toString());  //Tweet author
+
+					//labelData
+					for (Object object2 : labelDataArray) {
+						responseObj = (JSONObject) parser.parse(object2.toString());
+						responseObj = (JSONObject) parser.parse(responseObj.get("nominalLabelDTO").toString());
+						//responseObj = (JSONObject) parser.parse(responseObj.get("nominalAttributeDTO").toString());
+						csvRecord[4] = responseObj.get("nominalLabelCode").toString();    //Nominal Label Code
+					}
+
+					if(count++>=recordsCount){
+						writer.flush();
+						writer.close();
+						filesToPush.add(fileLocation + File.separator + filename);
+						filename = (new Date()).getTime()+"_"+crisisCode+".csv";
+						writer = createNewCsvFile(fileLocation + File.separator + filename);
+						writer.writeNext(csvRecord);
+						count=1L;
+					}
+					else{
+						writer.writeNext(csvRecord);
+					}
 				}
 
-				if(count++>=recordsCount){
-					writer.flush();
-					writer.close();
-					filesToPush.add(fileLocation + File.separator + filename);
-					filename = (new Date()).getTime()+"_"+crisisCode+".csv";
-					writer = createNewCsvFile(fileLocation + File.separator + filename);
-					writer.writeNext(csvRecord);
-					count=1L;
-				}
-				else{
-					writer.writeNext(csvRecord);
-				}
 			}
 			writer.flush();
 			writer.close();
@@ -106,7 +112,22 @@ public class PartnerAppSourceServiceImpl implements PartnerAppSourceService {
 
 	}
 
+	private boolean isMicroMappersTagged(JSONArray labelDataArray){
 
+		if(labelDataArray.size() < 1)
+		{
+			return true;
+		}
+		JSONObject obj = (JSONObject)labelDataArray.get(0);
+		JSONObject idDto = (JSONObject)obj.get("idDTO") ;
+
+		long userId = (long)idDto.get("userId")  ;
+		if(idDto.get("userId")== 6){
+			return true;
+		}
+
+		return false;
+	}
 	private CSVWriter createNewCsvFile(String fileName) throws Exception{
 		CSVWriter writer = null;
 		try {
