@@ -1,5 +1,6 @@
 package qa.qcri.mm.api.service.impl;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
@@ -8,10 +9,6 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang3.text.translate.UnicodeEscaper;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.BasicResponseHandler;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.log4j.Logger;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -22,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import qa.qcri.mm.api.service.ClientAppSourceService;
 import qa.qcri.mm.api.service.PartnerAppSourceService;
+import qa.qcri.mm.api.util.Communicator;
 import au.com.bytecode.opencsv.CSVWriter;
 
 
@@ -39,25 +37,12 @@ public class PartnerAppSourceServiceImpl implements PartnerAppSourceService {
 	protected static Logger logger = Logger.getLogger("PartnerAppSourceService");
 
 	@Override
-	public void pushAppSource(String importURL, Long crisisId, Long userId, Long recordsCount, String crisisCode, String fileLocation) throws Exception{
-
-		HttpClient httpClient = new DefaultHttpClient();
+	public void pushAppSource(String importURL, Long crisisId, Long recordsCount, String crisisCode, String fileLocation) throws Exception{
 		String jsonResponse=null;
 		JSONParser parser = new JSONParser();
-		try {
-
-			HttpGet request = new HttpGet(importURL + "/crisisID/" + crisisId + "/userID/" + userId);
-			request.addHeader("content-type", "application/json");
-			request.addHeader("Accept", "*/*");
-			request.addHeader("Accept-Encoding", "gzip,deflate,sdch");
-			request.addHeader("Accept-Language", "en-US,en;q=0.8");
-			jsonResponse = httpClient.execute(request, new BasicResponseHandler());
-		}catch (Exception ex) {
-			logger.error("Exception while importing the human labelled tweets.",ex);
-			throw new Exception("Exception while importing the human labelled tweets.");
-		} finally {
-			httpClient.getConnectionManager().shutdown();
-		}
+		Communicator comm = new Communicator();
+		String url = importURL + "/crisisCode/" + crisisCode;
+		jsonResponse = comm.sendGet(url);
 
 		try {
 			JSONObject responseObj = (JSONObject) parser.parse(jsonResponse);
@@ -66,7 +51,7 @@ public class PartnerAppSourceServiceImpl implements PartnerAppSourceService {
 			String[] csvRecord;
 			Long count=0L;
 			String filename = (new Date()).getTime()+"_"+crisisCode+".csv";
-			CSVWriter writer = createNewCsvFile(fileLocation + "/" + filename);
+			CSVWriter writer = createNewCsvFile(fileLocation + File.separator + filename);
 			List<String> filesToPush = new ArrayList<String>(); 
 
 			for (Object itemObj : itemsArray) {
@@ -96,9 +81,9 @@ public class PartnerAppSourceServiceImpl implements PartnerAppSourceService {
 				if(count++>=recordsCount){
 					writer.flush();
 					writer.close();
-					filesToPush.add(fileLocation + "/" + filename);
+					filesToPush.add(fileLocation + File.separator + filename);
 					filename = (new Date()).getTime()+"_"+crisisCode+".csv";
-					writer = createNewCsvFile(fileLocation + "/" + filename);
+					writer = createNewCsvFile(fileLocation + File.separator + filename);
 					writer.writeNext(csvRecord);
 					count=1L;
 				}
@@ -108,7 +93,7 @@ public class PartnerAppSourceServiceImpl implements PartnerAppSourceService {
 			}
 			writer.flush();
 			writer.close();
-			filesToPush.add(fileLocation + "/" + filename);
+			filesToPush.add(fileLocation + File.separator + filename);
 
 			for (String fileName : filesToPush) {
 				clientAppSourceService.addExternalDataSourceWithClassifiedData(fileName, crisisId);

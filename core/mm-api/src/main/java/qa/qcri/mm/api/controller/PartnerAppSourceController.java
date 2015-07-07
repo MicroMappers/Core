@@ -54,15 +54,14 @@ public class PartnerAppSourceController {
 
 					String importURL = properties.getProperty("IMPORT_URL");
 					Long crisisId = Long.valueOf(properties.getProperty("CRISIS_ID"));
-					Long userId = Long.valueOf(properties.getProperty("USER_ID"));
 					Long recordsCount = Long.valueOf(properties.getProperty("NUMBER_OF_RECORDS_PER_VOLUME")) != null ? 
 							Long.valueOf(properties.getProperty("NUMBER_OF_RECORDS_PER_VOLUME")) : 1500L;
 					String crisisCode = properties.getProperty("CRISIS_CODE");
 					String fileLocation = properties.getProperty("FILE_LOCATION");
 
-					if(!StringUtils.isEmpty(importURL)  || crisisId!=null || userId!=null  || recordsCount!=null 
+					if(!StringUtils.isEmpty(importURL)  || crisisId!=null || recordsCount!=null 
 							|| !StringUtils.isEmpty(crisisCode) || !StringUtils.isEmpty(fileLocation) ){
-						partnerAppSourceService.pushAppSource(importURL, crisisId, userId, recordsCount, crisisCode, fileLocation);
+						partnerAppSourceService.pushAppSource(importURL, crisisId, recordsCount, crisisCode, fileLocation);
 					}
 					else{
 						returnValue = StatusCodeType.RETURN_FAIL;

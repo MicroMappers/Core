@@ -1,0 +1,10 @@
+# Built Files
+/target/
+
+#################
+## Eclipse
+#################
+
+*.project
+*.classpath
+*.settings

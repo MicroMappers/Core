@@ -7,5 +7,5 @@ package qa.qcri.mm.api.service;
  */
 public interface PartnerAppSourceService {
 
-	void pushAppSource(String importURL, Long crisisId, Long userId, Long recordsCount, String crisisCode, String fileLocation) throws Exception;
+	void pushAppSource(String importURL, Long crisisId, Long recordsCount, String crisisCode, String fileLocation) throws Exception;
 }
