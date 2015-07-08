@@ -22,6 +22,7 @@ import org.springframework.stereotype.Component;
 import qa.qcri.mm.api.service.PartnerAppSourceService;
 import qa.qcri.mm.api.store.CodeLookUp;
 import qa.qcri.mm.api.store.StatusCodeType;
+import qa.qcri.mm.api.util.DataFormatValidator;
 
 
 /**
@@ -41,36 +42,31 @@ public class PartnerAppSourceController {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Path("/pushAppSource")
 	public Response pushAppSource(String data){
+
 		String returnValue = StatusCodeType.RETURN_SUCCESS;
 		try {
-			JSONParser parser = new JSONParser();
-			JSONObject dataObj = (JSONObject) parser.parse(data);
-			String config = dataObj.get("config").toString();
+			if(data!=null && DataFormatValidator.isValidateJson(data)){
+				JSONParser parser = new JSONParser();
+				JSONObject config = (JSONObject) parser.parse(data);
 
-			if(config!=null){
-				try (InputStream input = new FileInputStream(config);){
-					Properties properties = new Properties();
-					properties.load(input);
+				String importURL = (String)config.get("IMPORT_URL");
 
-					String importURL = properties.getProperty("IMPORT_URL");
-					Long crisisId = Long.valueOf(properties.getProperty("CRISIS_ID"));
-					Long recordsCount = Long.valueOf(properties.getProperty("NUMBER_OF_RECORDS_PER_VOLUME")) != null ? 
-							Long.valueOf(properties.getProperty("NUMBER_OF_RECORDS_PER_VOLUME")) : 1500L;
-					String crisisCode = properties.getProperty("CRISIS_CODE");
-					String fileLocation = properties.getProperty("FILE_LOCATION");
+				Long crisisId = (long)config.get("CRISIS_ID");
 
-					if(!StringUtils.isEmpty(importURL)  || crisisId!=null || recordsCount!=null 
-							|| !StringUtils.isEmpty(crisisCode) || !StringUtils.isEmpty(fileLocation) ){
-						partnerAppSourceService.pushAppSource(importURL, crisisId, recordsCount, crisisCode, fileLocation);
-					}
-					else{
-						returnValue = StatusCodeType.RETURN_FAIL;
-						logger.error("Properties are unassigned or not defined properly in configuration file: " + config);
-					}
+				Long recordsCount = config.get("NUMBER_OF_RECORDS_PER_VOLUME") != null ? (long)config.get("NUMBER_OF_RECORDS_PER_VOLUME") : 1500L;
 
-				} catch (IOException e) {
+				String crisisCode = (String)config.get("CRISIS_CODE");
+
+				String fileLocation = (String)config.get("FILE_LOCATION");
+
+				if(!StringUtils.isEmpty(importURL)  || crisisId!=null || recordsCount!=null
+						|| !StringUtils.isEmpty(crisisCode) || !StringUtils.isEmpty(fileLocation) ){
+
+					partnerAppSourceService.pushAppSource(importURL, crisisId, recordsCount, crisisCode, fileLocation);
+				}
+				else{
 					returnValue = StatusCodeType.RETURN_FAIL;
-					logger.error("Error in reading config properties file: " + config, e);
+					logger.error("Properties are unassigned or not defined properly in configuration file: " + config);
 				}
 			}
 		}catch(Exception e){

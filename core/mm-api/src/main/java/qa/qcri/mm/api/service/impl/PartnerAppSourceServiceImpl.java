@@ -17,6 +17,7 @@ import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import org.springframework.transaction.annotation.Transactional;
 import qa.qcri.mm.api.service.ClientAppSourceService;
 import qa.qcri.mm.api.service.PartnerAppSourceService;
 import qa.qcri.mm.api.util.Communicator;
@@ -78,7 +79,6 @@ public class PartnerAppSourceServiceImpl implements PartnerAppSourceService {
 					for (Object object2 : labelDataArray) {
 						responseObj = (JSONObject) parser.parse(object2.toString());
 						responseObj = (JSONObject) parser.parse(responseObj.get("nominalLabelDTO").toString());
-						//responseObj = (JSONObject) parser.parse(responseObj.get("nominalAttributeDTO").toString());
 						csvRecord[4] = responseObj.get("nominalLabelCode").toString();    //Nominal Label Code
 					}
 
