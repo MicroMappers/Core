@@ -30,6 +30,9 @@ public class TaskQueueResponse implements Serializable {
     @Column (name = "created", nullable = false)
     private Date created;
 
+    @Column (name = "exported", nullable = false)
+    private boolean exported;
+
     public TaskQueueResponse(){}
 
     public TaskQueueResponse(Long taskQueueID, String response, String taskInfo){
@@ -70,5 +73,11 @@ public class TaskQueueResponse implements Serializable {
         this.response = response;
     }
 
+    public boolean isExported() {
+        return exported;
+    }
 
+    public void setExported(boolean exported) {
+        this.exported = exported;
+    }
 }

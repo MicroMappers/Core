@@ -9,7 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import qa.qcri.mm.trainer.pybossa.custom.MAPBoxAerialClickerFileFormat;
+import qa.qcri.mm.trainer.pybossa.dao.CrisisDao;
 import qa.qcri.mm.trainer.pybossa.dao.ImageMetaDataDao;
+import qa.qcri.mm.trainer.pybossa.dao.TaskQueueResponseDao;
 import qa.qcri.mm.trainer.pybossa.entity.*;
 import qa.qcri.mm.trainer.pybossa.format.impl.CVSRemoteFileFormatter;
 import qa.qcri.mm.trainer.pybossa.format.impl.GeoJsonOutputModel;
@@ -17,6 +19,7 @@ import qa.qcri.mm.trainer.pybossa.format.impl.MicromapperInput;
 import qa.qcri.mm.trainer.pybossa.service.*;
 import qa.qcri.mm.trainer.pybossa.store.PybossaConf;
 import qa.qcri.mm.trainer.pybossa.store.StatusCodeType;
+import qa.qcri.mm.trainer.pybossa.store.URLPrefixCode;
 import qa.qcri.mm.trainer.pybossa.store.UserAccount;
 import qa.qcri.mm.trainer.pybossa.util.DateTimeConverter;
 
@@ -55,9 +58,17 @@ public class ReportProductServiceImpl implements ReportProductService {
     @Autowired
     private ImageMetaDataDao imageMetaDataDao;
 
+    @Autowired
+    private TaskQueueResponseDao taskQueueResponseDao;
+
+    @Autowired
+    private TaskQueueService taskQueueService;
+
     private CVSRemoteFileFormatter cvsRemoteFileFormatter;
 
     private Client client;
+
+    private JSONParser parser = new JSONParser();
 
     public void setClassVariable() throws Exception{
         client = clientService.findClientByCriteria("name", UserAccount.MIROMAPPER_USER_NAME);
@@ -85,41 +96,46 @@ public class ReportProductServiceImpl implements ReportProductService {
     @Override
     public void generateCVSReportForGeoClicker() throws Exception{
         setClassVariable();
+
         if(client == null){
             return;
         }
+
         List<ClientApp> appList = clientAppService.getAllClientAppByClientID(client.getClientID() );
-       // System.out.println("appList size: " + appList.size() + " - " + client.getClientID());
+
         Iterator itr= appList.iterator();
         while(itr.hasNext()){
             ClientApp clientApp = (ClientApp)itr.next();
-            List<ReportTemplate> templateList =  reportTemplateService.getReportTemplateByClientApp(clientApp.getClientAppID(), StatusCodeType.TEMPLATE_IS_READY_FOR_EXPORT);
+            ClientAppEvent targetClinetApp = clientAppEventService.getNextSequenceClientAppEvent(clientApp.getClientAppID());
 
-            if(templateList.size() > 0){
-                CVSRemoteFileFormatter formatter = new CVSRemoteFileFormatter();
+            if(targetClinetApp != null ){
+                List<ReportTemplate> templateList =  reportTemplateService.getReportTemplateByClientApp(clientApp.getClientAppID(), StatusCodeType.TEMPLATE_IS_READY_FOR_EXPORT);
 
-                String fileName = PybossaConf.DEFAULT_TRAINER_FILE_PATH + DateTimeConverter.reformattedCurrentDateForFileName() + clientApp.getShortName() + "export.csv";
-                CSVWriter writer = formatter.instanceToOutput(fileName);
+                if(templateList.size() > StatusCodeType.MAX_CSV_ROW_QUEUE_SIZE ){
 
-                for(int i=0; i < templateList.size(); i++){
-                    ReportTemplate rpt = templateList.get(i);
-                    String ans = rpt.getAnswer();
+                    CVSRemoteFileFormatter formatter = new CVSRemoteFileFormatter();
 
-                    if(!ans.equalsIgnoreCase("none"))  {
-                        formatter.addToCVSOuputFile(generateOutputData(rpt),writer);
-                        rpt.setStatus(StatusCodeType.TEMPLATE_EXPORTED);
-                        reportTemplateService.updateReportItem(rpt);
+                    String fileName = PybossaConf.DEFAULT_TRAINER_FILE_PATH + DateTimeConverter.reformattedCurrentDateForFileName() + clientApp.getShortName() + "export.csv";
+                    CSVWriter writer = formatter.instanceToOutput(fileName);
+
+                    for(int i=0; i < templateList.size(); i++){
+                        ReportTemplate rpt = templateList.get(i);
+                        String ans = rpt.getAnswer();
+
+                        if(!ans.equalsIgnoreCase("none"))  {
+                            formatter.addToCVSOuputFile(generateOutputData(rpt),writer);
+                            rpt.setStatus(StatusCodeType.TEMPLATE_EXPORTED);
+                            reportTemplateService.updateReportItem(rpt);
+                        }
+
                     }
+                    formatter.finalizeCVSOutputFile(writer);
 
+                    ClientAppSource appSource = new ClientAppSource(targetClinetApp.getClientAppID(), StatusCodeType.EXTERNAL_DATA_SOURCE_ACTIVE, fileName);
+                    clientAppSourceService.insertNewClientAppSource(appSource);
                 }
-                formatter.finalizeCVSOutputFile(writer);
-                ClientAppEvent targetClinetApp = clientAppEventService.getNextSequenceClientAppEvent(clientApp.getClientAppID());
-                ClientAppSource appSource = new ClientAppSource(targetClinetApp.getClientAppID(), StatusCodeType.EXTERNAL_DATA_SOURCE_ACTIVE, fileName);
-                clientAppSourceService.insertNewClientAppSource(appSource);
             }
-            // insert into source for file
         }
-        //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
@@ -209,6 +225,56 @@ public class ReportProductServiceImpl implements ReportProductService {
         }
         //To change body of implemented methods use File | Settings | File Templates.
     }
+
+    @Override
+    public void generateGeoJsonForClientApp(Long clientAppID) throws Exception {
+
+        ClientApp clientApp = clientAppService.findClientAppByID("clientAppID", clientAppID);
+
+        if(clientApp.getAppType().equals(StatusCodeType.APP_MAP)){
+
+            JSONObject geoClickerOutput = new JSONObject();
+            JSONArray features = new JSONArray();
+
+            System.out.println("crisis :" + clientApp.getName());
+
+            List<TaskQueue> taskQueueList = taskQueueService.getTaskQueueByClientAppStatus(clientAppID, StatusCodeType.TASK_LIFECYCLE_COMPLETED);
+
+            System.out.println("taskQueueList :" + taskQueueList.size());
+
+            for(TaskQueue t: taskQueueList){
+
+                List<TaskQueueResponse> responses = taskQueueResponseDao.getTaskQueueResponse(t.getTaskQueueID());
+
+                if(responses.size() > 0 ){
+                    if(!responses.get(0).getResponse().equalsIgnoreCase("{}") && !responses.get(0).getResponse().equalsIgnoreCase("[]")){
+                        JSONArray eachFeatureArrary = (JSONArray)parser.parse(responses.get(0).getResponse());
+                        for(Object a : eachFeatureArrary){
+                            features.add((JSONObject) a);
+                        }
+
+                    }
+                }
+
+            }
+
+            String fileName = PybossaConf.GEOJSON_HOME + clientAppID + ".json";
+            File f = new File(fileName);
+
+            if(f.exists()){
+                f.delete();
+            }
+
+            geoClickerOutput.put("type", "FeatureCollection");
+            geoClickerOutput.put("features", features);
+
+            PrintWriter writer = new PrintWriter(f, "UTF-8");
+            writer.println(geoClickerOutput.toJSONString());
+            writer.close();
+        }
+
+    }
+
 
     private String[] generateOutputData(ReportTemplate rpt){
 

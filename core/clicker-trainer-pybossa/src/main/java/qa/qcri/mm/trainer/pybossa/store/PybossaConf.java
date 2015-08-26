@@ -18,8 +18,8 @@ public class PybossaConf {
     public static String GEOJSON_TYPE_POINT="point";
     public static String GEOJSON_TYPE_FEATURE_COLLECTION="FeatureCollection";
     //for scd1 setting
-    public static String DEFAULT_TRAINER_FILE_PATH = "/var/www/aidr/data/trainer/";
-    public static String DEFAULT_TRAINER_GEO_FILE_PATH = "/var/www/aidr/data/trainer/";
+    public static String DEFAULT_TRAINER_FILE_PATH = "/mnt/data/trainer/";
+    public static String DEFAULT_TRAINER_GEO_FILE_PATH = "/mnt/data/trainer/";
    // for testing
     //public static String DEFAULT_TRAINER_FILE_PATH = "/Users/jlucas/Documents/pybossa/";
     //public static String DEFAULT_TRAINER_GEO_FILE_PATH = "/Users/jlucas/Documents/pybossa/";
@@ -32,5 +32,7 @@ public class PybossaConf {
     public static String TASK_QUEUE_GEO_INFO_NOT_FOUND = "No Location Information";
 
     public static int DEFAULT_GEO_N_ANSWERS = 1;
+
+    public static String GEOJSON_HOME = "/mnt/data/micromaps/";
 
 }

@@ -7,9 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import qa.qcri.mm.trainer.pybossa.custom.NamibiaAerialClickerFileFormat;
-import qa.qcri.mm.trainer.pybossa.dao.ImageMetaDataDao;
-import qa.qcri.mm.trainer.pybossa.dao.NamibiaImageDao;
-import qa.qcri.mm.trainer.pybossa.dao.TaskRunDao;
+import qa.qcri.mm.trainer.pybossa.dao.*;
 import qa.qcri.mm.trainer.pybossa.entity.*;
 import qa.qcri.mm.trainer.pybossa.format.impl.SkyEyeDataOutputProcessor;
 import qa.qcri.mm.trainer.pybossa.format.impl.VanuatuDataOutputProcessor;
@@ -48,6 +46,10 @@ public class ExternalCustomServiceImpl  implements ExternalCustomService {
     @Autowired
     ImageMetaDataDao imageMetaDataDao;
 
+    @Autowired
+    private MarkerStyleDao markerStyleDao;
+
+
     private SkyEyeDataOutputProcessor skyEyeDataOutputProcessor = null;
     private VanuatuDataOutputProcessor vanuatuDataOutputProcessor = null;
 
@@ -68,6 +70,7 @@ public class ExternalCustomServiceImpl  implements ExternalCustomService {
     public TaskQueueResponse getAnswerResponseForSkyEyes(ClientApp clientApp, String datasource, TaskQueue taskQueue) throws Exception {
         if(skyEyeDataOutputProcessor == null || skyEyeDataOutputProcessor.getClientApp().equals(clientApp))  {
             skyEyeDataOutputProcessor = new SkyEyeDataOutputProcessor(clientApp);
+            skyEyeDataOutputProcessor.setMarkerStyleDao(markerStyleDao);
         }
 
         return skyEyeDataOutputProcessor.process(datasource, taskQueue);  //To change body of implemented methods use File | Settings | File Templates.
@@ -165,18 +168,11 @@ public class ExternalCustomServiceImpl  implements ExternalCustomService {
     private TaskQueueResponse getAnswerResponseForPAM(ClientApp clientApp, String datasource, TaskQueue taskQueue) throws Exception {
         if(vanuatuDataOutputProcessor == null || vanuatuDataOutputProcessor.getClientApp().equals(clientApp))  {
             vanuatuDataOutputProcessor = new VanuatuDataOutputProcessor(clientApp);
+            vanuatuDataOutputProcessor.setImageMetaDataDao(imageMetaDataDao);
+            vanuatuDataOutputProcessor.setMarkerStyleDao(markerStyleDao);
         }
+
         TaskQueueResponse response = vanuatuDataOutputProcessor.process(datasource, taskQueue);
-
-        JSONObject jsonObject = (JSONObject)cParser.parse(response.getResponse());
-        List<ImageMetaData> imageMetaDataList = imageMetaDataDao.findImageMetaDataByImageURL((String)jsonObject.get("imgurl"));
-
-        if(imageMetaDataList.size() > 0){
-            ImageMetaData aData = imageMetaDataList.get(0);
-            jsonObject.put("lat", aData.getLat());
-            jsonObject.put("lng", aData.getLng());
-            response.setResponse(jsonObject.toJSONString());
-        }
 
         return response;  //To change body of implemented methods use File | Settings | File Templates.
     }

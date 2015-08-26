@@ -2,9 +2,10 @@ package qa.qcri.mm.trainer.pybossa.format.impl;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import qa.qcri.mm.trainer.pybossa.entity.ClientApp;
-import qa.qcri.mm.trainer.pybossa.entity.TaskQueue;
-import qa.qcri.mm.trainer.pybossa.entity.TaskQueueResponse;
+import org.springframework.beans.factory.annotation.Autowired;
+import qa.qcri.mm.trainer.pybossa.dao.ImageMetaDataDao;
+import qa.qcri.mm.trainer.pybossa.dao.MarkerStyleDao;
+import qa.qcri.mm.trainer.pybossa.entity.*;
 import qa.qcri.mm.trainer.pybossa.service.ClientAppResponseService;
 
 import java.util.ArrayList;
@@ -24,7 +25,6 @@ public class SkyEyeDataOutputProcessor extends DataProcessor {
         super(clientApp);
     }
 
-
     @Override
     public TaskQueueResponse process(String datasource, TaskQueue taskQueue) throws Exception {
         if(this.clientApp == null)
@@ -38,7 +38,7 @@ public class SkyEyeDataOutputProcessor extends DataProcessor {
         try{
 
             JSONArray array = (JSONArray) parser.parse(this.datasource) ;
-
+            JSONArray taskQueueResJsonArray = new JSONArray();
             if(array.size() > 0) {
                 Iterator itr= array.iterator();
 
@@ -46,32 +46,41 @@ public class SkyEyeDataOutputProcessor extends DataProcessor {
 
                 String tweetID = null;
 
+                JSONObject finalProperties = new JSONObject();
+                String imgURL = this.getStringValueFromInfoJson(array, "imgurl");
+                finalProperties.put("imgURL", imgURL);
+
+                JSONArray bounds = (JSONArray)parser.parse(this.getStringValueFromInfoJson(array, "geo"));
+                finalProperties.put("bounds", bounds);
+                finalProperties.put("taskid", this.taskQueue.getTaskID());
+
+                JSONObject features = this.getFeature(bounds);
+
                 while(itr.hasNext()){
                     JSONObject featureJsonObj = (JSONObject)itr.next();
 
-                    //String featureJsonObjString = (String)featureJsonObj.get("info");
 
                     JSONObject info = (JSONObject)featureJsonObj.get("info");
                     JSONArray loc = (JSONArray)info.get("loc");
 
-                    if(!loc.isEmpty() && loc.size() > 0){
-                        JSONObject a = new JSONObject();
-                        a.put("geo",info.get("loc") )  ;
-                        a.put("userID", featureJsonObj.get("user_id"));
-                        locations.add(a) ;
 
-                    }
+                    this.getProperties(loc, info, locations, featureJsonObj) ;
+
                 }
 
-                JSONObject finalAnswer = new JSONObject();
-                finalAnswer.put("geo", locations);
-                finalAnswer.put("taskid", this.taskQueue.getTaskID());
-                finalAnswer.put("imgurl", this.getStringValueFromInfoJson(array, "imgurl"));
-                finalAnswer.put("bounds", this.getStringValueFromInfoJson(array, "geo"));
+                finalProperties.put("features", locations);
 
-                System.out.println("ans: " + finalAnswer.toJSONString() );
+                System.out.println("ans: " + finalProperties.toJSONString() );
 
-                taskQueueResponse = new TaskQueueResponse(this.taskQueue.getTaskQueueID(), finalAnswer.toJSONString(), tweetID);
+                features.put("properties", finalProperties) ;
+
+                System.out.println("ans: " + features.toJSONString() );
+
+                if(locations.size() > 0){
+                    taskQueueResJsonArray.add(features)  ;
+                }
+
+                taskQueueResponse = new TaskQueueResponse(this.taskQueue.getTaskQueueID(), taskQueueResJsonArray.toJSONString(), tweetID);
 
             }
         }
@@ -108,6 +117,87 @@ public class SkyEyeDataOutputProcessor extends DataProcessor {
         JSONObject answer = (JSONObject)response.get("info");
 
         return (String)answer.get(propertyName);
+    }
+
+    private JSONArray getProperties(JSONArray loc, JSONObject info, JSONArray locations, JSONObject parentJsonObject){
+
+        try{
+            if(!loc.isEmpty() && loc.size() > 0){
+                Iterator itr= loc.iterator();
+                while(itr.hasNext()){
+                    JSONObject featureJsonObj = (JSONObject)itr.next();
+                    JSONObject layer = (JSONObject)featureJsonObj.get("layer");
+                    String layerType = (String)featureJsonObj.get("layerType");
+
+
+                    JSONObject properties  =  (JSONObject)layer.get("properties");
+
+                    properties.put("layerType",layerType);
+
+                    if(style.size() > 0){
+                        JSONObject theStyleTemplate = (JSONObject)parser.parse(style.get(0).getStyle()) ;
+
+                        JSONArray styles = (JSONArray)theStyleTemplate.get("style");
+                        for(int i=0; i < styles.size(); i++){
+                            JSONObject aStyle  = (JSONObject)styles.get(i);
+                            String lable_code = (String)aStyle.get("label_code");
+                            if(lable_code.equalsIgnoreCase(layerType)){
+                                properties.put("label",layerType);
+                                properties.put("style", aStyle);
+                            }
+                        }
+
+                    }
+
+                    properties.put("userID", parentJsonObject.get("user_id"));
+
+                    layer.remove("bounds");
+                    layer.remove("taskid");
+                    layer.remove("imgURL");
+
+                    locations.add(layer) ;
+                }
+            }
+
+        }
+        catch (Exception e){
+            System.out.println("exception : getProperties - " + e.getMessage());
+        }
+
+        return locations;
+    }
+
+    private JSONObject getFeature(JSONArray aBounds){
+        JSONObject features = new JSONObject();
+
+        features.put("type", "Feature") ;
+
+        JSONObject geometry = new JSONObject();
+
+        geometry.put("type", "Point") ;
+        JSONArray latlng = new JSONArray();
+
+        double lat1 = Double.parseDouble((String)aBounds.get(3));
+        double lat2 = Double.parseDouble((String)aBounds.get(1));
+
+        double lng1 = Double.parseDouble((String)aBounds.get(2));
+        double lng2 = Double.parseDouble((String)aBounds.get(0));
+
+        double cLat =  (lat1 + lat2) / 2;
+        double cLng =  (lng1 + lng2) / 2;
+
+
+        latlng.add(cLat) ;
+        latlng.add(cLng) ;
+
+        geometry.put("coordinates", latlng) ;
+
+        features.put("geometry", geometry) ;
+
+
+        System.out.println("***** : " + features.toJSONString());
+        return features;
+
     }
 
 }

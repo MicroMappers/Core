@@ -40,7 +40,7 @@ public class PybossaMicroMapperWorker implements MicroMapperWorker {
     private Client client;
     private CVSRemoteFileFormatter cvsRemoteFileFormatter = new CVSRemoteFileFormatter();
     private int MAX_PENDING_QUEUE_SIZE = 50;
-    private int MAX_IMPORT_PROCESS_QUEUE_SIZE = 100;
+    private int MAX_IMPORT_PROCESS_QUEUE_SIZE = 300;
     private String PYBOSSA_API_TASK_PUBLSIH_URL;
 
     private String PYBOSSA_API_TASK_RUN_BASE_URL;
@@ -90,7 +90,6 @@ public class PybossaMicroMapperWorker implements MicroMapperWorker {
             PYBOSSA_API_TASK_BASE_URL  = client.getHostURL() + URLPrefixCode.TASK_INFO;
             PYBOSSA_API_TASK_RUN_BASE_URL =  client.getHostURL() + URLPrefixCode.TASKRUN_INFO;
             MAX_PENDING_QUEUE_SIZE = client.getQueueSize();
-            MAX_IMPORT_PROCESS_QUEUE_SIZE = 100;
 
         }
 
@@ -117,56 +116,52 @@ public class PybossaMicroMapperWorker implements MicroMapperWorker {
             return;
         }
 
-        List<ClientApp> appList = clientAppService.getAllClientAppByClientID(client.getClientID() );
+        List<ClientApp> appList = clientAppService.getAllClientAppByClientIDAndStatus(client.getClientID(), StatusCodeType.MICROMAPPER_ONLY );
 
         if(appList.size() > 0){
             for(int i=0; i < appList.size(); i++){
                 ClientApp currentClientApp =  appList.get(i);
 
-                //System.out.println("clientApp processTaskPublish : " +  currentClientApp.getClientAppID());
+                List<ClientAppSource> datasources = clientAppSourceService.getClientAppSourceByStatus(currentClientApp.getClientAppID(),StatusCodeType.EXTERNAL_DATA_SOURCE_ACTIVE);
+                //System.out.println(   "clientApp processTaskPublish datasources : " +  datasources.size());
+                for(int j=0; j < datasources.size(); j++){
 
-                if(currentClientApp.getStatus().equals(StatusCodeType.MICROMAPPER_ONLY)){
-                    List<ClientAppSource> datasources = clientAppSourceService.getClientAppSourceByStatus(currentClientApp.getClientAppID(),StatusCodeType.EXTERNAL_DATA_SOURCE_ACTIVE);
-                    //System.out.println("clientApp processTaskPublish datasources : " +  datasources.size());
-                    for(int j=0; j < datasources.size(); j++){
+                    List<MicromapperInput> micromapperInputList = null;
+                    String url = datasources.get(j).getSourceURL();
 
-                        List<MicromapperInput> micromapperInputList = null;
-                        String url = datasources.get(j).getSourceURL();
+                    if(!cvsRemoteFileFormatter.doesSourcerExist(url)){
+                        return;
+                    }
 
-                        if(!cvsRemoteFileFormatter.doesSourcerExist(url)){
-                            return;
+                    if(currentClientApp.getAppType() == StatusCodeType.APP_MAP){
+                        micromapperInputList = cvsRemoteFileFormatter.getGeoClickerInputData(url);
+                    }
+                    else{
+                        if(currentClientApp.getAppType() == StatusCodeType.APP_AERIAL){
+                            micromapperInputList = cvsRemoteFileFormatter.getAerialClickerInputData(url);
                         }
-
-                        if(currentClientApp.getAppType() == StatusCodeType.APP_MAP){
-                            micromapperInputList = cvsRemoteFileFormatter.getGeoClickerInputData(url);
+                        else if(currentClientApp.getAppType() == StatusCodeType.APP_3W){
+                            micromapperInputList = cvsRemoteFileFormatter.get3WClickerInputData(url);
                         }
                         else{
-                            if(currentClientApp.getAppType() == StatusCodeType.APP_AERIAL){
-                                micromapperInputList = cvsRemoteFileFormatter.getAerialClickerInputData(url);
-                            }
-                            else if(currentClientApp.getAppType() == StatusCodeType.APP_3W){
-                                micromapperInputList = cvsRemoteFileFormatter.get3WClickerInputData(url);
-                            }
-                            else{
-                                micromapperInputList = cvsRemoteFileFormatter.getClickerInputData(url);
-                            }
-                        }
-
-                        if(micromapperInputList != null){
-                            ClientAppSource source = datasources.get(j);
-
-                            if(micromapperInputList.size() > 0) {
-                                this.publishToPybossa(currentClientApp, micromapperInputList , source.getClientAppSourceID());
-                            }
-
-                            clientAppSourceService.updateClientAppSourceStatus(source.getClientAppSourceID(), StatusCodeType.EXTERNAL_DATA_SOURCE_USED);
-
+                            micromapperInputList = cvsRemoteFileFormatter.getClickerInputData(url);
                         }
                     }
 
-                    this.searchUpdateNextAvailableAppSource(currentClientApp.getClientAppID());
+                    if(micromapperInputList != null){
+                        ClientAppSource source = datasources.get(j);
 
+                        if(micromapperInputList.size() > 0) {
+                            this.publishToPybossa(currentClientApp, micromapperInputList , source.getClientAppSourceID());
+                        }
+
+                        clientAppSourceService.updateClientAppSourceStatus(source.getClientAppSourceID(), StatusCodeType.EXTERNAL_DATA_SOURCE_USED);
+
+                    }
                 }
+
+                this.searchUpdateNextAvailableAppSource(currentClientApp.getClientAppID());
+
             }
         }
 
@@ -174,7 +169,7 @@ public class PybossaMicroMapperWorker implements MicroMapperWorker {
 
     @Override
     public void processTaskImport() throws Exception{
-        System.out.println("processTaskImport is starting");
+        System.out.println("Data import is starting");
         setClassVariable();
 
         if(client == null){
@@ -217,6 +212,9 @@ public class PybossaMicroMapperWorker implements MicroMapperWorker {
                             //To change body of catch statement use File | Settings | File Templates.
                         }
                     }
+                    // Map data export
+                    reportProductService.generateGeoJsonForClientApp(clientApp.getClientAppID());
+
                 }
             }
 
@@ -273,8 +271,7 @@ public class PybossaMicroMapperWorker implements MicroMapperWorker {
     public void processTaskExport() throws Exception {
         reportProductService.generateCVSReportForGeoClicker();
         reportProductService.generateMapBoxTemplateForAerialClicker();
-        // will be activated when AIDR is ready.
-        //reportProductService.generateReportTemplateFromExternalSource();
+
     }
 
     private void processTaskQueueImport(ClientApp clientApp,TaskQueue taskQueue, Long taskID, List<GeoJsonOutputModel> geoJsonOutputModels) throws Exception {
@@ -297,18 +294,11 @@ public class PybossaMicroMapperWorker implements MicroMapperWorker {
                 MarkerStyle style = this.getMarkerStyleForClientApp(clientApp, c);
                 ClientAppSource clientAppSource = clientAppSourceService.getClientAppSourceByClientAppID(taskQueue.getClientAppSourceID());
                 taskQueueResponse = pybossaFormatter.getAnswerResponseForGeo(importResult, parser, taskQueue.getTaskQueueID(), clientApp, c, style, clientAppSource);
-
             }
             else if(clientApp.getAppType().equals(StatusCodeType.APP_AERIAL))
             {
 
                 if(clientApp.getIsCustom()){
-                    // specific for naminia project
-                    //TaskQueueResponse taskQueueResponse = externalCustomService.getAnswerResponseForAerial(importResult,parser,taskQueue.getTaskQueueID(), taskID) ;
-
-                    // specific for skyeyes
-
-                    //taskQueueResponse = externalCustomService.getAnswerResponseForSkyEyes(clientApp,importResult,taskQueue);
                     taskQueueResponse = externalCustomService.getAnswerResponse(clientApp,importResult,taskQueue);
 
                 }
@@ -327,16 +317,13 @@ public class PybossaMicroMapperWorker implements MicroMapperWorker {
             }
 
             if(taskQueueResponse != null){
-                System.out.println(taskQueueResponse.getResponse());
-                System.out.println(taskQueueResponse.getTaskInfo());
-                System.out.println(taskQueueResponse.getTaskQueueID());
 
                 clientAppResponseService.processTaskQueueResponse(taskQueueResponse);
                 taskQueue.setStatus(StatusCodeType.TASK_LIFECYCLE_COMPLETED);
                 updateTaskQueue(taskQueue);
             }
             else{
-                System.out.println("taskQueueResponse is null");
+                System.out.println("taskQueueResponse is null : No action is required or review configuration");
             }
         }
     }

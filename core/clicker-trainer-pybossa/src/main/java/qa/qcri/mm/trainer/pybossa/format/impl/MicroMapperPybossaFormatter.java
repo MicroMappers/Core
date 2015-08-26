@@ -49,7 +49,7 @@ public class MicroMapperPybossaFormatter {
             tasks.put("n_answers", clientApp.getTaskRunsPerTask());
             tasks.put("quorum", clientApp.getQuorum());
             tasks.put("calibration", new Integer(0));
-            tasks.put("app_id", clientApp.getPlatformAppID());
+            tasks.put("project_id", clientApp.getPlatformAppID());
             tasks.put("priority_0", new Integer(0));
 
             outputFormatData.add(tasks.toJSONString());
@@ -356,11 +356,11 @@ public class MicroMapperPybossaFormatter {
                             properties.put("crisis_name", c.getDisplayName() )   ;
                             properties.put("crisis_type", c.getClickerType() )   ;
 
-                            JSONObject geometry = (JSONObject)aFeature.get("geometry");
+                           // JSONObject geometry = (JSONObject)aFeature.get("geometry");
 
                             JSONObject mStyle = getMarkerStyleForClientApp(markerStyle,parser,info.get("category")!=null?info.get("category"):"");
                             if(mStyle != null){
-                                geometry.put("style", mStyle )   ;
+                                properties.put("style", mStyle )   ;
                                 locations.add(aFeature) ;
                             }
 
@@ -384,10 +384,10 @@ public class MicroMapperPybossaFormatter {
                         properties.put("crisis_name", c.getDisplayName() )   ;
                         properties.put("crisis_type", c.getClickerType() )   ;
 
-                        JSONObject geometry = (JSONObject)geoLoc.get("geometry");
+                       // JSONObject geometry = (JSONObject)geoLoc.get("geometry");
 
                         JSONObject mStyle = getMarkerStyleForClientApp(markerStyle,parser,info.get("category")!=null?info.get("category"):"mild");
-                        geometry.put("style", mStyle )   ;
+                        properties.put("style", mStyle )   ;
 
                         uniqueIDString = String.valueOf(info.get("url") );
 

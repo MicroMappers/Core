@@ -2,9 +2,11 @@ package qa.qcri.mm.trainer.pybossa.format.impl;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import qa.qcri.mm.trainer.pybossa.entity.ClientApp;
-import qa.qcri.mm.trainer.pybossa.entity.TaskQueue;
-import qa.qcri.mm.trainer.pybossa.entity.TaskQueueResponse;
+import org.springframework.beans.factory.annotation.Autowired;
+import qa.qcri.mm.trainer.pybossa.dao.CrisisDao;
+import qa.qcri.mm.trainer.pybossa.dao.ImageMetaDataDao;
+import qa.qcri.mm.trainer.pybossa.dao.MarkerStyleDao;
+import qa.qcri.mm.trainer.pybossa.entity.*;
 import qa.qcri.mm.trainer.pybossa.service.ClientAppResponseService;
 
 import java.util.ArrayList;
@@ -20,10 +22,17 @@ import java.util.List;
  */
 public class VanuatuDataOutputProcessor extends DataProcessor {
 
+    @Autowired
+    ImageMetaDataDao imageMetaDataDao;
+
+
     public VanuatuDataOutputProcessor(ClientApp clientApp) {
         super(clientApp);
     }
 
+    public void setImageMetaDataDao(ImageMetaDataDao imageMetaDataDao) {
+        this.imageMetaDataDao = imageMetaDataDao;
+    }
 
     @Override
     public TaskQueueResponse process(String datasource, TaskQueue taskQueue) throws Exception {
@@ -38,40 +47,45 @@ public class VanuatuDataOutputProcessor extends DataProcessor {
         try{
 
             JSONArray array = (JSONArray) parser.parse(this.datasource) ;
-
+            JSONArray taskQueueResJsonArray = new JSONArray();
             if(array.size() > 0) {
                 Iterator itr= array.iterator();
 
-                JSONArray locations  =  new JSONArray();
+
 
                 String tweetID = null;
+                String imgURL = (String)this.getStringValueFromInfoJson(array, "imgurl");
 
+
+                JSONObject finalProperties = new JSONObject();
+                finalProperties.put("imgURL", imgURL);
+                finalProperties.put("bounds", this.getStringValueFromInfoJson(array, "geo"));
+                finalProperties.put("taskid", this.taskQueue.getTaskID());
+
+                JSONObject features = this.getFeature(imgURL);
+
+                JSONArray locations  =  new JSONArray();
                 while(itr.hasNext()){
                     JSONObject featureJsonObj = (JSONObject)itr.next();
 
-                    //String featureJsonObjString = (String)featureJsonObj.get("info");
-
                     JSONObject info = (JSONObject)featureJsonObj.get("info");
                     JSONArray loc = (JSONArray)info.get("loc");
-
-                    if(!loc.isEmpty() && loc.size() > 0){
-                        JSONObject a = new JSONObject();
-                        a.put("geo",info.get("loc") )  ;
-                        a.put("userID", featureJsonObj.get("user_id"));
-                        locations.add(a) ;
-
-                    }
+                    this.getProperties(loc, info, locations) ;
                 }
 
-                JSONObject finalAnswer = new JSONObject();
-                finalAnswer.put("geo", locations);
-                finalAnswer.put("taskid", this.taskQueue.getTaskID());
-                finalAnswer.put("imgurl", this.getStringValueFromInfoJson(array, "imgurl"));
-                finalAnswer.put("bounds", this.getStringValueFromInfoJson(array, "geo"));
+                finalProperties.put("features", locations);
 
-                System.out.println("ans: " + finalAnswer.toJSONString() );
+                System.out.println("ans: " + finalProperties.toJSONString() );
 
-                taskQueueResponse = new TaskQueueResponse(this.taskQueue.getTaskQueueID(), finalAnswer.toJSONString(), tweetID);
+                features.put("properties", finalProperties) ;
+
+                System.out.println("ans: " + features.toJSONString() );
+
+                if(locations.size() > 0){
+                    taskQueueResJsonArray.add(features)  ;
+                }
+
+                taskQueueResponse = new TaskQueueResponse(this.taskQueue.getTaskQueueID(), taskQueueResJsonArray.toJSONString(), tweetID);
 
             }
         }
@@ -103,11 +117,86 @@ public class VanuatuDataOutputProcessor extends DataProcessor {
         return responses;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
-    private String getStringValueFromInfoJson(JSONArray array, String propertyName) throws Exception{
+    private Object getStringValueFromInfoJson(JSONArray array, String propertyName) throws Exception{
         JSONObject response = (JSONObject)array.get(0);
         JSONObject answer = (JSONObject)response.get("info");
 
-        return (String)answer.get(propertyName);
+        return answer.get(propertyName);
     }
 
+    private JSONObject getFeature(String imgURL){
+        List<ImageMetaData> imageMetaDataList = imageMetaDataDao.findImageMetaDataByImageURL(imgURL);
+        JSONObject features = new JSONObject();
+
+
+        if(imageMetaDataList.size() > 0){
+            features.put("type", "Feature") ;
+
+            JSONObject geometry = new JSONObject();
+
+            geometry.put("type", "Point") ;
+            JSONArray latlng = new JSONArray();
+
+            ImageMetaData aData = imageMetaDataList.get(0);
+
+            latlng.add(Double.valueOf(aData.getLat())) ;
+            latlng.add(Double.valueOf(aData.getLng())) ;
+
+            geometry.put("coordinates", latlng) ;
+
+            features.put("geometry", geometry) ;
+
+        }
+        System.out.println("***** : " + features.toJSONString());
+        return features;
+
+    }
+
+    private JSONArray getProperties(JSONArray loc, JSONObject info, JSONArray locations){
+
+        try{
+            if(!loc.isEmpty() && loc.size() > 0){
+                Iterator itr= loc.iterator();
+                while(itr.hasNext()){
+                    JSONObject featureJsonObj = (JSONObject)itr.next();
+                    JSONObject layer = (JSONObject)featureJsonObj.get("layer");
+                    String layerType = (String)featureJsonObj.get("layerType");
+
+
+                    JSONObject properties  =  (JSONObject)layer.get("properties");
+
+                    properties.put("layerType",layerType);
+
+                    if(style.size() > 0){
+                        JSONObject theStyleTemplate = (JSONObject)parser.parse(style.get(0).getStyle()) ;
+
+                        JSONArray styles = (JSONArray)theStyleTemplate.get("style");
+                        for(int i=0; i < styles.size(); i++){
+                            JSONObject aStyle  = (JSONObject)styles.get(i);
+                            String lable_code = (String)aStyle.get("label_code");
+                            if(lable_code.equalsIgnoreCase(layerType)){
+                                properties.put("label",layerType);
+                                properties.put("style", aStyle);
+                            }
+                        }
+
+                    }
+
+                    properties.put("userID", info.get("user_id"));
+
+                    layer.remove("bounds");
+                    layer.remove("taskid");
+                    layer.remove("imgURL");
+
+                    locations.add(layer) ;
+                }
+            }
+
+        }
+        catch (Exception e){
+            System.out.println("exception : getProperties - " + e.getMessage());
+        }
+
+        return locations;
+    }
 }

@@ -57,4 +57,6 @@ public class StatusCodeType {
     public final static Integer MAPBOX_TILE_IMPORTED = 0;
     public final static Integer MAPBOX_TILE_EXPORTED = 1;
 
+    public final static Integer MAX_CSV_ROW_QUEUE_SIZE = 20;
+
 }

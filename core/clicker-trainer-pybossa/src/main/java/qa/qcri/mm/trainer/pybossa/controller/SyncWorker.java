@@ -20,10 +20,9 @@ public class SyncWorker implements Worker {
 
 	public void work() {
 		String threadName = Thread.currentThread().getName();
-		//logger.debug("   " + threadName + " has began working.(SyncWorker - run ClientApps)");
-        System.out.println("Scheduler is starting");
-        try {
+		logger.info("   " + threadName + " has began working.(SyncWorker - run ClientApps)");
 
+        try {
             microMapperWorker.processTaskPublish();
             microMapperWorker.processTaskImport();
             microMapperWorker.processTaskExport();
@@ -34,8 +33,9 @@ public class SyncWorker implements Worker {
             Thread.currentThread().interrupt();
         } catch (Exception e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            logger.info(e.getMessage());
         }
-        //logger.info("Scheduler is going sleep");
+
     }
 	
 }
